@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>ClassIt — Home</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RHLBMVEWF4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RHLBMVEWF4');
+</script>
+
+<script>
+  // This script runs instantly to prevent a flash of the wrong theme.
+  (function() {
+    try {
+      var theme = localStorage.getItem('theme');
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    } catch (e) { /* Ignore errors */ }
+  })();
+</script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+
+  <link rel="stylesheet" href="./assets/css/theme-toggle.css" />
+  <link rel="stylesheet" href="./assets/css/dark-theme.css" />
+    <style>
+        :root { --earth-1: #C6A993; --muted: #EAE4DF; --accent: #714329; --bg: #F7F8F9; --text: #0f1724; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow-x: hidden; }
+        body { font-family: Inter, system-ui, Arial, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+        .hidden { display: none !important; }
+        .topbar { position: fixed; left: 0; right: 0; top: 0; height: 84px; display: flex; align-items: center; justify-content: space-between; background: var(--earth-1); padding: 0 20px; z-index: 30; box-shadow: 0 3px 8px rgba(2,6,23,0.05); }
+        .site-logo { font-size: 1.9rem; font-weight: bold; color: black; text-decoration: none; font-family: "Averia Libre", system-ui; white-space: nowrap; }
+        .main { padding-top: 120px; max-width: 1100px; margin: 0 auto; padding-left: 16px; padding-right: 16px; min-height: 60vh; }
+        .title { text-align: center; font-size: 3.5rem; font-weight: 800; font-family: 'Poppins', sans-serif; color: #0f0e0eff; margin-bottom: 1rem; }
+        #chatbotToggle { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; border-radius: 50%; background: #714329; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; border: none; transition: transform 0.2s; }
+        #chatbotToggle:hover { transform: scale(1.1); }
+        #chatbotWindow { position: fixed; bottom: 85px; right: 20px; width: 340px; max-height: 500px; background: #ffffff; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; font-family: "Segoe UI", Roboto, sans-serif; z-index: 1000; transition: transform 0.3s ease, opacity 0.3s ease; }
+        #chatbotWindow.hidden { transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none; }
+        #chatbotHeader { background: #c9a98d; color: #44281a; padding: 12px 16px; font-weight: 600; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+        #chatbotHeader button { background: none; border: none; font-size: 20px; color: #44281a; cursor: pointer; }
+        #chatbotMessages { flex: 1; padding: 16px; overflow-y: auto; background: #f9fafb; scroll-behavior: smooth; }
+        .msg { display: flex; margin-bottom: 12px; max-width: 85%; line-height: 1.4; font-size: 14px; }
+        .msg.user { margin-left: auto; }
+        .msg.user .content { background: #714329; color: #fff; border-radius: 18px 18px 4px 18px; }
+        .msg.bot { margin-right: auto; }
+        .msg.bot .content { background: #e5e7eb; color: #111; border-radius: 4px 18px 18px 18px; }
+        .msg .content { padding: 10px 14px; }
+        #chatbotInputArea { display: flex; align-items: center; background: #fff; margin: 8px; border-radius: 999px; border: 1px solid #e5e7eb; padding: 4px 6px; }
+        #chatbotInput { flex: 1; border: none; background: none; padding: 8px 10px; font-size: 14px; outline: none; }
+        #chatbotSend { background: #714329; color: #fff; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s; }
+        #chatbotSend:disabled { background: #c6a993; cursor: not-allowed; }
+        .typing-indicator { display: flex; gap: 5px; padding: 10px 14px; }
+        .typing-indicator span { width: 8px; height: 8px; background-color: #9ca3af; border-radius: 50%; animation: pulse 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="site-logo">ClassIt</a>
+</header>
+<main class="main">
+  <h1 class="title">Welcome to ClassIt</h1>
+</main>
+<button id="chatbotToggle" aria-label="Open Chatbot">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+</button>
+<div id="chatbotWindow" class="hidden" role="dialog">
+  <div id="chatbotHeader">
+    <span>🤖 ClassIt Assistant</span>
+    <button id="closeChatbot" aria-label="Close Chatbot">✕</button>
+  </div>
+  <div id="chatbotMessages"></div>
+  <div id="chatbotInputArea">
+    <input id="chatbotInput" type="text" placeholder="Ask about our products..." autocomplete="off"/>
+    <button id="chatbotSend" aria-label="Send Message">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    
+    // --- ELEMENT SELECTORS ---
+    const chatbotToggle = document.getElementById("chatbotToggle");
+    const chatbotWindow = document.getElementById("chatbotWindow");
+    const closeChatbot = document.getElementById("closeChatbot");
+    const chatLog = document.getElementById("chatbotMessages");
+    const userInput = document.getElementById("chatbotInput");
+    const sendBtn = document.getElementById("chatbotSend");
+
+    // =================================================================
+    // --- NO-API CHATBOT KNOWLEDGE BASE ---
+    // =================================================================
+    const knowledgeBase = [
+        {
+            keywords: ["hi", "hello", "hey", "greeting"],
+            response: "Hello! I'm the ClassIt Assistant. I can answer questions about our products, how the site works, or the current time."
+        },
+        {
+            keywords: ["time", "date", "what time is it"],
+            response: () => {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                return `The current time is ${timeString}.`;
+            }
+        },
+        {
+            keywords: ["about", "who are you", "ClassIt", "founder", "syed"],
+            response: "ClassIt was founded by Syed, a tech enthusiast, to share high-quality, personally-vetted products in Livogue, wellfit, and Tech."
+        },
+        {
+            keywords: ["contact", "email", "get in touch", "help", "support"],
+            response: "You can reach out to us through the 'Contact Us' page on our website for any inquiries or support."
+        },
+        {
+            keywords: ["how", "work", "buy", "purchase", "affiliate"],
+            response: "We are an affiliate website. When you click 'Buy Now', you are redirected to a third-party site like Amazon to complete your purchase."
+        },
+        {
+            keywords: ["categories", "products", "sell", "Livogue", "wellfit", "tech"],
+            response: "We feature curated products across three main categories: Livogue, wellfit, and Tech. Which are you most interested in?"
+        },
+        {
+            keywords: ["thanks", "thank you", "ok"],
+            response: "You're welcome! Let me know if there's anything else I can help with."
+        }
+    ];
+
+    const fallbackResponse = "I'm sorry, I can only assist with questions about ClassIt's products, how it works, and our contact information.";
+    let hasGreeted = false;
+
+    // --- CHATBOT FUNCTIONS ---
+    const toggleChatbotWindow = () => chatbotWindow.classList.toggle("hidden");
+    const closeChatbotWindow = () => chatbotWindow.classList.add("hidden");
+
+    function addMessage(role, text) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `msg ${role}`;
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "content";
+        contentDiv.textContent = text;
+        msgDiv.appendChild(contentDiv);
+        chatLog.appendChild(msgDiv);
+        chatLog.scrollTo({ top: chatLog.scrollHeight, behavior: 'smooth' });
+    }
+
+    function showTypingIndicator() {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "msg bot typing";
+        const typingIndicator = document.createElement("div");
+        typingIndicator.className = "typing-indicator";
+        typingIndicator.innerHTML = "<span></span><span></span><span></span>";
+        msgDiv.appendChild(typingIndicator);
+        chatLog.appendChild(msgDiv);
+        chatLog.scrollTo({ top: chatLog.scrollHeight, behavior: 'smooth' });
+        return msgDiv;
+    }
+
+    function setFormState(enabled) {
+        userInput.disabled = !enabled;
+        sendBtn.disabled = !enabled;
+        userInput.placeholder = enabled ? "Ask about our products..." : "Assistant is typing...";
+    }
+
+    function findResponse(userText) {
+        const input = userText.toLowerCase();
+        for (const entry of knowledgeBase) {
+            for (const keyword of entry.keywords) {
+                if (input.includes(keyword)) {
+                    if (typeof entry.response === 'function') {
+                        return entry.response();
+                    }
+                    return entry.response;
+                }
+            }
+        }
+        return fallbackResponse;
+    }
+
+    function handleUserMessage() {
+        const userText = userInput.value.trim();
+        if (!userText) return;
+
+        addMessage("user", userText);
+        userInput.value = "";
+        setFormState(false);
+        const typingIndicator = showTypingIndicator();
+
+        setTimeout(() => {
+            let botResponse;
+            if (!hasGreeted && knowledgeBase[0].keywords.some(kw => userText.toLowerCase().includes(kw))) {
+                 botResponse = knowledgeBase[0].response;
+            } else {
+                 botResponse = findResponse(userText);
+            }
+            hasGreeted = true;
+
+            typingIndicator.remove();
+            addMessage("bot", botResponse);
+            setFormState(true);
+            userInput.focus();
+        }, 1200);
+    }
+    
+    function initializeChat() {
+        setFormState(true);
+    }
+
+    // --- EVENT LISTENERS ---
+    chatbotToggle.addEventListener("click", toggleChatbotWindow);
+    closeChatbot.addEventListener("click", closeChatbotWindow);
+    sendBtn.addEventListener("click", handleUserMessage);
+    userInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleUserMessage(); }
+    });
+    document.addEventListener('click', (event) => {
+        if (!chatbotWindow.classList.contains('hidden') && !chatbotWindow.contains(event.target) && !chatbotToggle.contains(event.target)) {
+            closeChatbotWindow();
+        }
+    });
+
+    initializeChat();
+});
+</script>
+  <script src="./assets/js/theme-switcher.js"></script>
+
+</body>
+</html>

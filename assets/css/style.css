@@ -1,0 +1,865 @@
+:root{
+  --earth-1:#C6A993;
+  --muted:#EAE4DF;
+  --accent:#714329;
+  --bg:#F7F8F9;
+  --text:#0f1724;
+}
+
+/* ===============================================
+   --- 1. BASE & RESET STYLES ---
+   =============================================== */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%; overflow-x: hidden;}
+body{
+  font-family: Inter, system-ui, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+.hidden{ display:none!important; }
+
+/* ===============================================
+   --- 2. OVERLAY & SIDEBAR ---
+   =============================================== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  transition: opacity 0.4s ease;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 900;
+}
+.overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background: #f9f6f2;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.2);
+  padding: 20px;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar.show {
+  transform: translateX(0);
+}
+.sidebar-header {
+  margin-bottom: 1rem;
+}
+.sidebar-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #5a4632;
+}
+.sidebar-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #5a4632;
+  cursor: pointer;
+  margin-left: auto;
+  position: absolute;
+  right: 12px;
+  top: 8px;
+}
+.sidebar-nav {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sidebar-nav a {
+  display: block;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.3rem;
+  color: #555;
+  text-decoration: none;
+  border-radius: 999px; /* This creates the capsule shape */
+  transition: all 0.3s ease; /* Smooth transition for hover/active states */
+}
+.sidebar-nav a:hover {
+  background: #dbcdb0;
+  color: #906954;
+  font-weight: bold;
+}
+.sidebar-nav a.active {
+  background: #7f674d;
+  color: #fff;
+  font-weight: bold;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+.sidebar-nav a.muted {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+/* ===============================================
+   --- 3. TOPBAR & SEARCH ---
+   =============================================== */
+/* --- 3D Light Theme Topbar --- */
+.topbar {
+  /* A gradient based on your original color */
+  background: linear-gradient(to bottom, #D1B49D, #C6A993);
+
+  /* A subtle bottom edge */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+  /* Layered shadow for the light theme */
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.7), /* Top edge highlight */
+    0 3px 6px rgba(0, 0, 0, 0.1),            /* Main shadow */
+    0 10px 20px rgba(0, 0, 0, 0.1);          /* Deeper ambient shadow */
+
+  /* --- No changes needed below this line --- */
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 30;
+}
+.hamburger{ font-size:28px; background:transparent; border:none; color:#111; cursor:pointer; flex-shrink: 0; }
+.search-wrap{ flex: 1; max-width: 640px; margin: 0 15px; display:flex; align-items:center; position:relative; }
+.search-input{
+  width:100%; height:52px; border-radius:28px; border:none; padding:0 50px 0 20px; font-size:15px; outline:none;
+  box-shadow:0 8px 20px rgba(2,6,23,0.06);
+}
+.search-action{
+  position:absolute; right:6px; top: 50%; transform: translateY(-50%); height:40px; width:40px; border-radius:999px; border:none; background:transparent; cursor:pointer;
+  font-size:16px; display: inline-flex; align-items: center; justify-content: center; color: #111; transition: background .2s ease, color .2s ease;
+}
+.search-action:hover { background: rgba(0,0,0,0.06); color: #000; }
+.search-action svg { width: 18px; height: 18px; display: block; }
+.site-logo {
+  font-size: 1.9rem; font-weight: bold; color: black; text-decoration: none; font-family: "Averia Libre", system-ui;
+  white-space: nowrap;
+}
+.search-dropdown{
+  position:absolute; top:62px; left:0; right:0; background:#fff; border-radius:10px; box-shadow:0 12px 30px rgba(2,6,23,0.08);
+  max-height:220px; overflow:auto; padding:6px 0; z-index:50;
+}
+.search-dropdown .row{ display:flex; justify-content:space-between; align-items:center; padding:10px 14px; cursor:pointer; }
+.search-dropdown .row:hover, .search-dropdown .row.hover { background:#faf8ebff; }
+.search-dropdown .remove{ background:transparent; border:none; color:#999; font-size:13px; cursor:pointer; }
+
+/* ===============================================
+   --- 4. MAIN CONTENT & TITLES ---
+   =============================================== */
+.main{ padding-top:120px; max-width:1100px; margin:0 auto; padding-left:16px; padding-right:16px; min-height:60vh; }
+.title{
+  text-align:center; font-size:3.5rem; font-weight:800; font-family: 'Poppins', sans-serif; color: #0f0e0eff; margin-bottom: 1rem; letter-spacing: 0.5px;
+}
+
+/* ===============================================
+   --- 5. GALLERY (TOP PICKS) ---
+   =============================================== */
+.gallery-section{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:20px auto;
+  height: 400px;
+}
+.gallery{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style:preserve-3d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.card{
+  position:absolute;
+  width: 256px;
+  height: 384px;
+  transition: all 0.5s ease;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  padding: 1.5rem;
+  padding-bottom: 72px;
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  backface-visibility: hidden;
+  background: var(--muted);
+  overflow: hidden;
+}
+.card.center {
+  background: #D0B9A7;
+}
+.gallery .card img{
+  width: 100%;
+  height: 128px;
+  object-fit:contain;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  background: #fff;
+}
+.card h3{
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.card p{
+  font-size: 0.875rem;
+  color: #4b5563;
+  text-align: center;
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+.card .buy{
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 1.5rem;
+  background: var(--accent, #714329);
+  color: #fff;
+  border-radius: 9999px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+  text-align: center;
+}
+.card .buy:hover{
+  background: #B08463;
+}
+
+.card.center { 
+  z-index: 10; 
+  transform: scale(1.1); 
+  opacity: 1; 
+  background: #D0B9A7; 
+}
+.card.left, 
+.card.right { 
+  z-index: 5; 
+  transform: translateX(-80px) rotate(-12deg) scale(0.95); 
+  opacity: 1; 
+  background: #E3D3C4; 
+}
+.card.right { 
+  transform: translateX(80px) rotate(12deg) scale(0.95); 
+}
+.card.hidden{ display: none; }
+
+.gallery-arrow{
+  position:absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  padding: 0.75rem;
+  border-radius: 9999px;
+  background: var(--muted, #EAE4DF);
+  color: #374151;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  transition: transform 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+.gallery-arrow:hover {
+  transform: translateY(-50%) scale(1.1);
+  background: #D0B9A7;
+}
+.gallery-arrow.left{ left: 160px; }
+.gallery-arrow.right{ right: 160px; }
+.gallery-arrow svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* ===============================================
+   --- 6. PRODUCT GRID & SEARCH RESULTS ---
+   =============================================== */
+/* ===============================================
+   --- 6. PRODUCT GRID & SEARCH RESULTS (Corrected) ---
+   =============================================== */
+/* This single block replaces all previous .product-grid and #productGrid rules. */
+#productGrid,
+.product-grid,
+#searchResults > * {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* Default: 5 columns on desktop */
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* --- Responsive Grid Adjustments --- */
+@media (max-width: 1100px) {
+  #productGrid, .product-grid, #searchResults > * {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  #productGrid, .product-grid, #searchResults > * {
+    grid-template-columns: repeat(2, 1fr); /* ✅ FIX: Now 2 columns for all tablets/mobile */
+    gap: 15px;
+  }
+}
+.product-card {
+  background: #f6e1c3; border-radius: 12px; padding: 14px;
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.06), 0 0 8px rgba(2, 6, 23, 0.15);
+  border: 1px solid rgba(2, 6, 23, 0.12); display: flex; flex-direction: column;
+  align-items: center; text-align: center; transition: box-shadow .3s ease,border-color .3s ease;
+  opacity: 0; animation: fadeIn .4s ease forwards;
+}
+.product-card:hover {
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.08), 0 0 12px rgba(2, 6, 23, 0.25);
+  border-color: rgba(2, 6, 23, 0.25);
+}
+.product-card img{ width:100%; height:160px; object-fit:contain; border-radius:10px; background:#fff; }
+.product-card h3{ margin:10px 0 6px; font-size:16px; }
+.product-card p{ font-size:13px; color:#475569; }
+
+.product-card .buy,
+.product-card .buy-btn {
+  display: inline-block;
+  background-color: var(--accent, #714329);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+  align-self: center;
+}
+.product-card .buy:hover,
+.product-card .buy-btn:hover {
+  background-color: #5a3b2e;
+}
+
+
+/* ===============================================
+   --- 7. PAGINATION & ANIMATIONS ---
+   =============================================== */
+.pagination {
+  display: flex;
+  flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin: 30px auto 20px;
+  width: fit-content;
+}
+.pagination-btn {
+  background: #e8d3c1; color: #5a3b2e; border: none; padding: 8px 14px;
+  border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s ease-in-out;
+}
+.pagination-btn:hover:not(:disabled) { background: #d8bfae; }
+.pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pagination-btn.active { background: #5a3b2e; color: #fff; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.product-card:nth-child(1) { animation-delay: 0.05s; }
+.product-card:nth-child(2) { animation-delay: 0.1s; }
+.product-card:nth-child(3) { animation-delay: 0.15s; }
+.product-card:nth-child(4) { animation-delay: 0.2s; }
+.product-card:nth-child(5) { animation-delay: 0.25s; }
+.product-card:nth-child(6) { animation-delay: 0.3s; }
+.product-card:nth-child(7) { animation-delay: 0.35s; }
+.product-card:nth-child(8) { animation-delay: 0.4s; }
+.product-card:nth-child(9) { animation-delay: 0.45s; }
+.product-card:nth-child(10) { animation-delay: 0.5s; }
+
+/* ===============================================
+   --- 8. RESPONSIVE STYLES ---
+   =============================================== */
+@media (max-width: 1100px) {
+  .product-grid, #searchResults > * { grid-template-columns: repeat(4, 1fr); }
+  
+}
+@media (max-width: 900px) {
+  .topbar { height: 70px; }
+  .search-input { height: 48px; }
+  .main { padding-top: 100px; }
+  .title { font-size: 2.8rem; }
+  .product-grid, #searchResults > * { grid-template-columns: repeat(2, 1fr); }
+  
+}
+@media (max-width: 768px) {
+  .product-grid, #searchResults > * { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+  .card.left { transform: translateX(-40px) rotate(-12deg) scale(0.95); }
+  .card.right { transform: translateX(40px) rotate(12deg) scale(0.95); }
+  .gallery-arrow.left { left: 5px; }
+  .gallery-arrow.right { right: 5px; }
+  
+}
+@media (max-width: 520px) {
+  .main { padding-left: 10px; padding-right: 10px; padding-top: 90px; }
+  .title { font-size: 1.8rem; }
+  .sidebar { width: 220px; }
+  .gallery-section { height: 420px; }
+  .card { width: 240px; height: 380px; padding-bottom: 80px; }
+  .gallery .card img { height: 120px; }
+  .card.left { transform: translateX(-20px) rotate(-12deg) scale(0.95); }
+  .card.right { transform: translateX(20px) rotate(12deg) scale(0.95); }
+}
+@media (max-width: 420px) {
+  .product-grid, #searchResults > * { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+  .topbar { height: 60px; }
+  .main { padding-top: 80px; }
+  .site-logo { display: none; }
+  .search-wrap { margin: 0 10px; }
+  .gallery-section { height: 440px; }
+  .card { width: 220px; height: 400px; padding-bottom: 90px; }
+  .pagination-btn { padding: 6px 10px; font-size: 13px; }
+}
+
+
+.product-card {
+  background: #fcefdc;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+}
+
+p {
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Style for "No Results" Message (clean text) --- */
+.no-results-wrapper {
+  display: block;         /* no flexbox boxy centering */
+  text-align: center;     /* center the text */
+  margin: 10px 0;         /* minimal spacing above/below */
+  padding: 0;             /* remove extra padding */
+}
+
+.no-results-message {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--accent, #714329);
+  background: none;       /* remove box background */
+  padding: 0;             /* remove extra padding */
+  border: none;           /* no border */
+  border-radius: 0;       /* remove rounded corners */
+  display: inline;        /* inline text instead of block */
+}
+
+/* ==============================================
+   == FINAL, FORCEFUL "No Results" Fix ==
+   ============================================== */
+
+/* This uses a high-specificity selector and !important to force the style. */
+#searchResults .no-results-message {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  white-space: nowrap !important; /* Prevents the line from breaking */
+  gap: 0.5em !important;
+}
+/* --- Skeleton Loader Styles --- */
+.skeleton-card {
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-image {
+  width: 100%;
+  height: 160px;
+  border-radius: 10px;
+  background-color: #c7c7c7;
+  margin-bottom: 10px;
+}
+
+.skeleton-text {
+  height: 16px;
+  width: 90%;
+  background-color: #c7c7c7;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.skeleton-text.short {
+  width: 60%;
+}
+
+/* Shimmer Animation */
+.skeleton-card > div {
+  background-image: linear-gradient(90deg, #c7c7c7 0px, #dcdcdc 40px, #c7c7c7 80px);
+  background-size: 600px;
+  animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+/* --- FINAL REVISED Skeleton Styles for Home Page Gallery --- */
+
+/* This parent container now acts as a positioning anchor */
+#gallery.is-loading {
+  position: relative;
+  width: 100%;
+  height: 400px; /* Ensure container has a height */
+}
+
+/* All skeleton cards are now positioned in the center */
+#gallery.is-loading .skeleton-gallery-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 256px;
+  height: 384px;
+  background-color: #e0e0e0;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s ease;
+  /* Base transform to perfectly center the card */
+  transform: translate(-50%, -50%); 
+}
+
+/* Style the left card (the 1st) and TILT it */
+#gallery.is-loading .skeleton-gallery-card:nth-child(1) {
+  transform: translate(-50%, -50%) translateX(-60px) rotate(-8deg) scale(0.9);
+  opacity: 0.7;
+  z-index: 1;
+}
+
+/* Style the center card (the 2nd) */
+#gallery.is-loading .skeleton-gallery-card:nth-child(2) {
+  transform: translate(-50%, -50%) scale(1.05);
+  opacity: 1;
+  z-index: 2;
+}
+
+/* Style the right card (the 3rd) and TILT it */
+#gallery.is-loading .skeleton-gallery-card:nth-child(3) {
+  transform: translate(-50%, -50%) translateX(60px) rotate(8deg) scale(0.9);
+  opacity: 0.7;
+  z-index: 1;
+}
+
+/* This applies the shimmer animation (already in your file) */
+.skeleton-gallery-card > div {
+  background-image: linear-gradient(90deg, #c7c7c7 0px, #dcdcdc 40px, #c7c7c7 80px);
+  background-size: 600px;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* NOTE: You don't need to add the @keyframes shimmer rule again since it's already in your CSS file. */
+
+/* Hides gallery arrows during skeleton loading */
+/* --- Skeleton Style for Gallery Arrows --- */
+.gallery-section.is-loading .gallery-arrow {
+  /* 1. Set the skeleton background and shimmer animation */
+  background-color: #c7c7c7;
+  background-image: linear-gradient(90deg, #c7c7c7 0px, #dcdcdc 40px, #c7c7c7 80px);
+  background-size: 600px;
+  animation: shimmer 1.5s infinite linear;
+
+  /* 2. Hide the arrow icon ('‹' and '›') inside */
+  color: transparent;
+
+  /* 3. Remove interactivity and shadows */
+  cursor: default;
+  box-shadow: none;
+  pointer-events: none; /* Disables clicking */
+  transform: translateY(-50%); /* Prevents hover effect from applying */
+}
+
+/* --- 404 Page Styles --- */
+.error-page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 40px;
+}
+
+.error-code {
+  font-size: 6rem; /* 96px */
+  font-weight: 800;
+  color: var(--accent, #714329);
+  line-height: 1;
+}
+
+.error-title {
+  font-size: 1.875rem; /* 30px */
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.error-description {
+  margin-top: 10px;
+  margin-bottom: 30px;
+  color: #475569;
+}
+
+.error-page-content .buy {
+  display: inline-block; /* Allows button to be centered */
+}
+
+/* --- Content Loading Error Message Style --- */
+.error-container {
+  text-align: center;
+  padding: 40px 20px;
+  margin-top: 20px;
+  background-color: var(--muted);
+  border-radius: 12px;
+  border: 1px solid #d8bfae;
+}
+.error-container h2 {
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.error-container p {
+  color: #475569;
+}
+
+
+/* --- Mobile Topbar Spacing Fix --- */
+
+@media (max-width: 900px) {
+  .main {
+    padding-top: 110px; /* Increased from 100px */
+  }
+}
+
+@media (max-width: 520px) {
+  .main {
+    padding-top: 100px; /* Increased from 90px */
+  }
+}
+
+@media (max-width: 420px) {
+  .main {
+    padding-top: 90px; /* Increased from 80px */
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* --- Favorites Button Styles --- */
+
+/* 1. Make the product card a positioning container */
+.product-card {
+  position: relative;
+}
+
+/* 2. Style the favorite button itself */
+.favorite-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px); /* Adds a nice frosted glass effect */
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.2s ease;
+  padding: 0; /* Remove default button padding */
+}
+
+/* 3. Style the SVG heart icon inside */
+.favorite-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: #aaa; /* Default color of the heart */
+  stroke: #555; /* Outline of the heart */
+  stroke-width: 1.5;
+  transition: all 0.2s ease;
+}
+
+/* 4. Add a hover effect */
+.favorite-btn:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 1);
+}
+
+/* 5. Style for the 'active' (favorited) state */
+.favorite-btn.active svg {
+  fill: #ff4d4d; /* Red fill when favorited */
+  stroke: #d92121; /* Darker red outline */
+}
+
+/* ---------- Gallery footer + share placement fix (append to your style block) ---------- */
+
+/* Reserve extra space inside gallery cards so footer doesn't overlap content */
+.card.js-card-fix {
+  padding-bottom: 112px; /* increased reserve for footer area */
+  
+}
+
+/* Place the footer absolutely at the bottom of the gallery card */
+.card.js-card-fix .product-card-footer {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  z-index: 6; /* keep footer above card background */
+  background: transparent; /* keep current look */
+}
+
+/* Make the share button sit at the left inside the footer (like category page) */
+.card.js-card-fix .share-btn {
+  position: relative;   /* stays inside footer flow */
+  order: 0;             /* first item in footer */
+  margin-right: auto;   /* pushes Buy to the right */
+  margin-top: 20px; /* ⬅️ increase this number to push it lower */
+  z-index: 11;           /* ensure it sits above the Buy button if transforms overlap */
+  /*background: rgba(255,255,255,0.95); /* subtle background so the icon is readable */
+  /*box-shadow: 0 2px 6px rgba(0,0,0,0.06);*/
+  padding: 8px;
+  border-radius: 999px;
+}
+
+/* Keep Buy button aligned right and visually prominent */
+.card.js-card-fix .buy {
+  order: 1;
+  flex: 0 0 auto;
+  z-index: 6;
+}
+
+/* Safety: if any overlap still occurs, raise share button z-index slightly */
+.card.js-card-fix .share-btn svg { display:block; }
+
+.card.js-card-fix p {
+  margin: 0;
+  padding: 0;
+  flex-grow: 0;
+  flex-shrink: 0;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;   /* WebKit (Chrome, Edge, Safari) */
+  line-clamp: 2;           /* Standard (future-proof) */
+
+  overflow: hidden;
+  line-height: 1.35em;
+  max-height: calc(1.35em * 2);
+}
+
+
+/* Ensure footer has fixed height and remains above content */
+.card.js-card-fix .product-card-footer {
+  position: absolute;
+  bottom: 18px;
+  left: 16px;
+  right: 16px;
+  height: 64px;                    /* fixed height matching reserved space */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  z-index: 10;                     /* keep footer above text */
+  pointer-events: auto;
+}
+
+/* Small visual safety: give buy/share a background so they stand out if they overlap slightly */
+.card.js-card-fix .buy { z-index: 9; }
+.card.js-card-fix .share-btn { z-index: 11; }
+
+/* === Force homepage gallery description to show 4 lines === */
+.js-card-fix > p,
+.card.js-card-fix p {
+  margin-top: 10px !important;
+  margin-bottom: 12px !important;
+  padding: 0 !important;
+
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 4 !important; /* Chrome / Edge / Safari */
+  line-clamp: 4 !important;         /* Standard (future-proof) */
+
+  overflow: hidden !important;
+  line-height: 1.35em !important;
+  max-height: calc(1.35em * 4) !important;
+
+  text-wrap: normal !important;
+  word-break: break-word !important;
+}
+
+/* Make card taller */
+ .product-card {
+  min-height: 470px !important;
+}
+
+/* Increase compact description height */ 
+
+ .product-card p {
+  max-height: 5.2em !important;
+}
+
+/* --- Brand Logo Container --- */
+/* --- Brand Logo Container --- */
+.brand-logo {
+    display: flex;
+    align-items: center;
+    /* Remove any fixed height here if it exists, or increase it */
+    height: auto; 
+    padding: 5px 0; /* Add a little breathing room top/bottom */
+}
+
+/* --- The Actual Image Size --- */
+.brand-logo img {
+    /* Change 40px to your desired size (e.g., 60px, 70px, 80px) */
+    height: 70px; 
+    width: auto;
+    object-fit: contain;
+}
+
+/* --- Default Visibility (Light Mode) --- */
+.logo-light {
+    display: block;  /* Show Gold */
+}
+
+.logo-dark {
+    display: none;   /* Hide Silver */
+}

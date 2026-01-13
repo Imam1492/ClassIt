@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Page Not Found — ClassIt</title>
+
+ 
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png">
+
+ <script>
+  (function() {
+    try {
+      var theme = localStorage.getItem('theme');
+      var favIcon = document.getElementById('dynamic-favicon');
+      
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        // Make sure this points to your SQUARE silver icon
+        if(favIcon) favIcon.href = './assets/images/favicon-silver-sq.png';
+      }
+    } catch (e) { /* Ignore errors */ }
+  })();
+</script>
+
+<link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
+<link id="dynamic-favicon" rel="icon" type="image/png" sizes="96x96" href="./assets/images/favicon-gold-sq.png">
+
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/chatbot.css">
+  <link rel="stylesheet" href="./assets/css/theme-toggle.css">
+  <link rel="stylesheet" href="./assets/css/dark-theme.css">
+  <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div id="overlay" class="overlay hidden"></div>
+
+  <aside id="sidebar" class="sidebar" aria-hidden="true">
+    <button id="closeSidebar" class="sidebar-close" aria-label="Close menu">✕</button>
+    <div class="sidebar-header"><h2 class="sidebar-title">Menu</h2></div>
+    <nav class="sidebar-nav">
+      <a href="index.html">Home</a>
+      <a href="Livogue.html">Livogue</a>
+      <a href="wellfit.html">Wellfit</a>
+      <a href="tech.html">Tech</a>
+      <a href="aboutus.html">About Us</a>
+      <a href="contactus.html">Contact</a>
+    </nav>
+  </aside>
+
+  <header class="topbar">
+    <button id="menuBtn" class="hamburger" aria-label="Open menu">☰</button>
+    <div class="search-wrap">
+      <input id="searchInput" class="search-input" type="text" placeholder="Search products..." autocomplete="off"/>
+      <button id="searchBtn" class="search-action" aria-label="Search" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C8.01 14 6 11.99 6 9.5S8.01 5 10.5 5 15 7.01 15 9.5 12.99 14 10.5 14z"/></svg>
+      </button>
+    </div>
+    <a href="index.html" class="site-logo brand-logo">
+  <img src="./assets/images/logo-gold.png" alt="ClassIt" class="logo-light">
+  
+  <img src="./assets/images/logo-silver.png" alt="ClassIt" class="logo-dark">
+</a>
+  </header>
+
+  <main class="main">
+    <div class="error-page-content">
+      <h1 class="error-code">404</h1>
+      <h2 class="error-title">Page Not Found</h2>
+      <p class="error-description">Sorry, we couldn't find the page you were looking for.</p>
+      <a href="index.html" class="buy">Go to Homepage</a>
+    </div>
+  </main>
+  
+  <div id="chatbotToggle" aria-label="Open Chatbot"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="28" height="28"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h6m-6 8l-4-4V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H7z" /></svg></div>
+  <div id="chatbotWindow" class="hidden">
+    <div id="chatbotHeader"><span>ClassIt’s Smart AI Assistant</span><button id="chatbotClose">&times;</button></div>
+    <div id="chatbotMessages"></div>
+    <div id="chatbotInputArea"><input id="chatbotInput" type="text" placeholder="Type your message..." /><button id="chatbotSend">➤</button></div>
+  </div>
+  <label class="switch"><input id="themeToggleInput" type="checkbox" /><div class="slider round"></div></label>
+
+  <script type="module" src="./assets/js/main.js" defer></script>
+<script src="./assets/js/chatbot.js" defer></script>
+</body>
+</html>

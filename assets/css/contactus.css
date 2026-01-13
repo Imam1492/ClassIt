@@ -1,0 +1,262 @@
+/* ===============================================
+   CONTACT US PAGE STYLES
+   =============================================== */
+
+/* --- Header Adjustments (Corrected Version) --- */
+body[data-page="contact"] .topbar {
+  position: relative; /* Required for the centered title and logo */
+}
+
+body[data-page="contact"] .topbar::after {
+  content: 'Contact & Policies';
+  font-family: 'Averia Libre', cursive;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  text-align: center;
+  width: 100%;
+}
+
+/* UPDATED: This rule fixes the logo position on mobile */
+body[data-page="contact"] .site-logo {
+    position: static; /* Let it fall into the normal document flow */
+    transform: none;
+    margin-left: auto; /* Push to the right */
+}
+
+
+/* --- Main Layout & Typography --- */
+.contact-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  text-align: left;
+}
+
+.contact-section {
+  margin-bottom: 2.5rem;
+}
+
+.contact-section h2 {
+  font-family: 'Averia Libre', cursive;
+  font-size: 1.75rem;
+  color: #333;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #EADBC8;
+}
+
+.contact-section h3 {
+  font-family: 'Averia Libre', cursive;
+  font-size: 1.2rem;
+  color: #6B4F4F;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.contact-container p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+.contact-container a {
+  color: #8C7462;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.contact-container a:hover {
+  color: #6B4F4F;
+  text-decoration: underline;
+}
+
+/* --- Accordion for Policies --- */
+.accordion {
+  border-top: 1px solid #E4D5C2;
+}
+
+.accordion-item {
+  border-bottom: 1px solid #E4D5C2;
+}
+
+.accordion-header {
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  padding: 1rem 0;
+  font-family: 'Averia Libre', cursive;
+  font-size: 1.2rem;
+  color: #6B4F4F;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+  padding-right: 2rem;
+}
+
+.accordion-header:hover {
+  background-color: #f3eaddff;
+  
+}
+
+.accordion-header::after {
+  content: '+';
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: #8C7462;
+  transition: transform 0.3s ease;
+}
+
+.accordion-header.active::after {
+  content: '−';
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background-color: #faf8f5;
+   margin-left: 1.5rem;   /* shifts the text inward */
+  padding-left: 0.35rem; /* small padding so numbers/bullets breathe */
+  line-height: 1.6;
+  
+}
+
+.accordion-content p {
+  padding: 1.5rem;
+}
+
+/* List items inside accordion content */
+.accordion-content li {
+  margin-left: 1.5rem;    /* space from the left */
+  padding-left: 0.25rem;  /* keeps numbering/bullets clean */
+  margin-bottom: 0.75rem; /* adds space below each item */
+  line-height: 1.6;
+}
+
+/* --- Active Sidebar Link --- */
+body[data-page="contact"] .sidebar-nav a[href="contactus.html"] {
+  background-color: #8C7462;
+  color: #fff;
+}
+
+
+/* =======================================================
+   --- BACKGROUND ---
+   ======================================================= */
+body[data-page="contact"] {
+    background-color: #F7F8F9;
+    
+}
+
+.points-list {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+
+
+.hidden {
+  display: none;
+}
+
+
+.toggle-points {
+  display: inline;
+  margin-top: 10px;
+  color: #0a0a0aff;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: normal;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+}
+.toggle-points:hover {
+  color: #02202fff;
+  text-decoration: underline;
+  color: #0000EE;
+}
+
+/* ===== Replace your broken #p.subtitle rule with this ===== */
+
+.page-header {
+  /* keep header centered and stack title + subtitle */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 2rem auto 3rem;
+  max-width: 900px;
+  padding: 0 1rem;
+  position: relative;   /* bring above decorative layers if needed */
+  z-index: 2;
+}
+
+.page-header .title {
+  /* tweak to match your chosen font */
+  font-family: 'Averia Libre', cursive;
+  font-size: 3rem;
+  margin: 0 0 0.5rem;
+  line-height: 1.05;
+  color: #2c2c2c;
+}
+
+.page-header .subtitle {
+  display: block;            /* ensure it's block-level */
+  width: 100%;
+  max-width: 720px;         /* keeps the line-length readable */
+  margin: 0;                /* centered by parent flex + text-align */
+  padding: 0 0.75rem;       /* prevents text from touching edges on small screens */
+  font-size: 1rem;
+  font-weight: 400;
+  color: #555;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+/* small screens */
+@media (max-width: 480px) {
+  .page-header .title { font-size: 1.6rem; }
+  .page-header .subtitle { font-size: 0.95rem; max-width: 100%; padding: 0 0.5rem; }
+}
+
+/* ===============================================
+   --- RESPONSIVE STYLES ---
+   =============================================== */
+@media (max-width: 768px) {
+    body[data-page="contact"] .topbar::after {
+        font-size: 1.5rem;
+    }
+    .contact-container {
+        padding: 1rem 1.5rem;
+    }
+    .contact-section h2 {
+        font-size: 1.5rem;
+    }
+    .accordion-header {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 520px) {
+    body[data-page="contact"] .topbar::after {
+        content: 'Contact'; /* Shorter title */
+        font-size: 1.2rem;
+    }
+    .contact-container {
+        padding: 1rem 1rem;
+    }
+}

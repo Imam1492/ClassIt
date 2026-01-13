@@ -1,0 +1,555 @@
+/* /assets/css/dark-theme.css */
+
+/* --- 1. DARK THEME COLOR VARIABLES --- */
+:root {
+  --dark-bg: #121212;
+  --dark-surface: #1E1E1E;
+  --dark-primary-text: #EAEAEA;
+  --dark-secondary-text: #B3B3B3;
+  --dark-accent: #3399FF;
+  --dark-border: #2D2D2D;
+}
+
+/* --- 2. SMOOTH TRANSITION FOR THEME SWITCH --- */
+body, .sidebar, .product-card, .card, .topbar, #chatbotWindow {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* --- 3. GENERAL DARK THEME STYLES --- */
+[data-theme="dark"] body {
+  background-color: var(--dark-bg);
+  color: var(--dark-secondary-text);
+}
+
+[data-theme="dark"] .title,
+[data-theme="dark"] .site-logo {
+  color: var(--dark-primary-text);
+}
+
+/* --- 4. COMPONENT-SPECIFIC STYLES --- */
+
+/* Topbar & Search */
+/* --- NEW Animated 3D Topbar --- */
+/* --- Extra 3D Dark Theme Topbar --- */
+
+
+[data-theme="dark"] .topbar {
+
+  
+  /* A gradient to simulate lighting */
+  background: linear-gradient(#3a3a3a, #2c2c2c);
+ 
+  /* A crisp bottom edge */
+  border-bottom: 1px solid #1a1a1a;
+
+  /* A layered shadow for a stronger 3D "pop" */
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.1), /* Top edge highlight */
+    0 2px 4px rgba(0, 0, 0, 0.3),            /* Short, dark shadow for depth */
+    0 8px 16px rgba(0, 0, 0, 0.2);           /* Long, soft shadow for floating effect */
+  
+  /* --- No changes needed below this line --- */
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 30;
+}
+@keyframes shimmerBackground {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+[data-theme="dark"] .hamburger,
+[data-theme="dark"] .search-action,
+[data-theme="dark"] .search-action:hover {
+  color: var(--dark-primary-text);
+}
+[data-theme="dark"] .search-input {
+  background-color: var(--dark-bg);
+  color: var(--dark-primary-text);
+  border: 1px solid var(--dark-border);
+}
+[data-theme="dark"] .search-dropdown {
+  background-color: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+}
+/* For keyboard navigation (arrows) - keeps the existing darker color */
+[data-theme="dark"] .search-dropdown .row.hover {
+  background-color: var(--dark-bg);
+}
+
+/* For mouse hover - uses a new, lighter color */
+[data-theme="dark"] .search-dropdown .row:hover {
+  background-color: #333333;
+}
+
+/* Sidebar */
+[data-theme="dark"] .sidebar {
+  background-color: #1A1A1A;
+  color: var(--dark-secondary-text);
+}
+[data-theme="dark"] .sidebar-title,
+[data-theme="dark"] .sidebar-close {
+  color: var(--dark-primary-text);
+}
+[data-theme="dark"] .sidebar-nav a {
+  color: var(--dark-secondary-text);
+}
+[data-theme="dark"] .sidebar-nav a:hover {
+  background-color: var(--dark-surface);
+  color: var(--dark-accent);
+}
+[data-theme="dark"] .sidebar-nav a.active {
+  background-color: var(--dark-accent);
+  color: var(--dark-bg);
+}
+
+/* Product Cards & Gallery */
+[data-theme="dark"] .product-card {
+  background-color: var(--dark-surface);
+  border-color: var(--dark-border);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .product-card:hover {
+    border-color: var(--dark-accent);
+}
+[data-theme="dark"] .product-card h3 {
+  color: var(--dark-primary-text);
+}
+[data-theme="dark"] .product-card img {
+  background-color: #2b2b2b; /* Darker background for images */
+}
+[data-theme="dark"] .card {
+  background-color: #242424;
+}
+[data-theme="dark"] .card.center {
+  background-color: #333;
+}
+[data-theme="dark"] .card h3,
+[data-theme="dark"] .card p {
+    color: var(--dark-primary-text);
+}
+
+/* Gallery Arrows */
+ [data-theme="dark"] .gallery-arrow {
+  background-color: #2D2D2D; /* A slightly lighter grey background */
+  color: #EAEAEA;            /* A light arrow color for contrast */
+}
+
+ [data-theme="dark"] .gallery-arrow:hover {
+  background-color: #444444; /* Brighter background on hover */
+}
+
+/* FIX: Make "Buy Now" buttons blue in Dark Mode */
+[data-theme="dark"] .card .buy,
+[data-theme="dark"] .product-card .buy,
+[data-theme="dark"] .product-card .buy-btn {
+  background-color: #0e1ce1ff; /* Use the vibrant blue accent color */
+  color: #fff;                     /* Ensure text is white and readable */
+}
+
+[data-theme="dark"] .card .buy:hover,
+[data-theme="dark"] .product-card .buy:hover,
+[data-theme="dark"] .product-card .buy-btn:hover {
+  background-color: #3B82F6;      /* A slightly lighter blue for the hover effect */
+}
+
+/* Pagination */
+[data-theme="dark"] .pagination-btn {
+  background-color: var(--dark-surface);
+  /* color: var(--dark-secondary-text); */
+  color: #fff;
+}
+[data-theme="dark"] .pagination-btn:hover:not(:disabled):not(.active) {
+  background-color: #333;
+}
+[data-theme="dark"] .pagination-btn.active {
+  background-color: var(--dark-accent);
+  /* color: var(--dark-bg); */
+  color: #fff;
+}
+
+/* Chatbot */
+/* --- Dark Theme for Chatbot Toggle (Subtle Blue Glow) --- */
+
+[data-theme="dark"] #chatbotToggle {
+  background-color: rgb(29, 78, 216); /* Vibrant, deep blue */
+  color: #e5e7eb;
+  border: 1px solid rgb(30, 64, 175);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15); /* Softer, smaller glow */
+  transition: all 0.2s ease-in-out;
+}
+
+[data-theme="dark"] #chatbotToggle:hover {
+  background-color: rgb(59, 130, 246); /* Brighter blue on hover */
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); /* Less intense hover glow */
+  transform: translateY(-2px);
+}
+[data-theme="dark"] #chatbotWindow {
+  background-color: rgba(30, 30, 30, 0.9);
+  backdrop-filter: blur(6px);
+}
+[data-theme="dark"] #chatbotHeader {
+  /* 1. New animated dark gradient background */
+  background-image: linear-gradient(
+    110deg, 
+    #3a3a3a, 
+    #2c2c2c, 
+    #252525, 
+    #2c2c2c, 
+    #3a3a3a
+  );
+  background-size: 200% 200%;
+  
+  /* The shimmer animation still works, but on the new dark gradient */
+  animation: shimmerBackground 8s linear infinite;
+
+  /* A more subtle shadow for dark mode */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+  
+  /* Light text for readability */
+  color: #d1d5db; 
+  text-shadow: none; /* Text shadow isn't needed on dark backgrounds */
+}
+[data-theme="dark"] #chatbotHeader button {
+  color: var(--dark-primary-text);
+}
+[data-theme="dark"] #chatbotMessages {
+  background-color: transparent; /* Inherits from the main window */
+}
+[data-theme="dark"] .msg.bot {
+  /* A sleek, dark grey gradient for the bot */
+  background-image: linear-gradient(135deg, #3a3a3a, #2f2f2f);
+  color: #e5e7eb; /* Light text */
+  border: 1px solid #4a4a4a;
+}
+[data-theme="dark"] .msg.user {
+  background-image: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: #ffffff; /* Pure white text for maximum contrast */
+  font-weight: 500;
+}
+[data-theme="dark"] #chatbotInputArea {
+  background-color: #333333; /* Lighter grey for the input background */
+  border-color: #444444;    /* Slightly lighter border for contrast */
+}
+[data-theme="dark"] #chatbotInput {
+  color: var(--dark-primary-text);
+}
+[data-theme="dark"] #chatbotSend {
+ /* background: var(--accent); /* Uses your already defined vibrant blue accent */
+ background-color: #333333;
+  color: #fff;
+}
+[data-theme="dark"] #chatbotSend:disabled {
+  color: #004d99; /* A darker shade of blue when disabled */
+  cursor: not-allowed;
+}
+/* Chatbot Dark Theme Styles (Corrected for Better Contrast) */
+html[data-theme="dark"] #chatbotWindow {
+  background-color: #1E1E1E; /* Lifts the whole window from the page background */
+  border: 1px solid #2D2D2D;   /* Adds a subtle border for definition */
+}
+
+html[data-theme="dark"] #chatbotHeader {
+  background-color: #2D2D2D; /* Lighter background for the header */
+  color: #EAEAEA;
+  border-bottom: none; /* The clip-path handles the shape */
+  
+}
+
+[data-theme="dark"] #chatbotHeader button {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] #chatbotHeader button:hover {
+  color: #EAEAEA;
+}
+
+[data-theme="dark"] #chatbotMessages {
+  background-color: #1E1E1E; /* Matches the main window background */
+}
+
+[data-theme="dark"] #chatbotInputArea {
+  background-color: #2D2D2D; /* Matches the header */
+  border-color: #444;
+}
+
+[data-theme="dark"] .msg.bot {
+  background-color: #2D2D2D; /* Lighter background for bot messages */
+  color: #EAEAEA;
+}
+
+/* User message button color is already handled by the --accent variable */
+
+
+
+/* About Us & Contact Us Pages */
+[data-theme="dark"] body[data-page="about"],
+[data-theme="dark"] body[data-page="contact"] {
+  background-image: none; /* Disable light SVG background */
+}
+[data-theme="dark"] .value-card {
+  background-color: var(--dark-surface);
+  border-color: var(--dark-border);
+}
+[data-theme="dark"] .value-card h3,
+[data-theme="dark"] .value-card p,
+[data-theme="dark"] .page-header .subtitle,
+[data-theme="dark"] .contact-section h2,
+[data-theme="dark"] .contact-section h3,
+[data-theme="dark"] .contact-container p,
+[data-theme="dark"] .accordion-header,
+[data-theme="dark"] body[data-page="about"] .topbar::after,
+[data-theme="dark"] body[data-page="contact"] .topbar::after {
+  color: var(--dark-primary-text);
+}
+[data-theme="dark"] .accordion-item {
+  border-color: #fff;
+}
+[data-theme="dark"] .accordion-content {
+  background-color: var(--dark-bg);
+}
+/* FIX: Contact Us Accordion Hover in Dark Mode */
+[data-theme="dark"] .accordion-header:hover {
+  background-color: #2D2D2D; /* A darker background for the hover state */
+  color: #EAEAEA;            /* Ensures the text stays light and readable */
+}
+/* FIX: Contact Us "Terms & Conditions" Link in Dark Mode */
+[data-theme="dark"] .toggle-points {
+  color:  #fff;/* Use the bright blue accent color */
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="dark"] .toggle-points:hover {
+  color: #66B2FF; /* A slightly lighter blue for the hover effect */
+}
+
+[data-theme="dark"] .accordion-header::after {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* --- Dark Theme for Contact Page Lines --- */
+
+html[data-theme="dark"] hr {
+  border-color: #fff; /* Sets the line color to white */
+  opacity: 0.1;      /* Makes the white line very subtle and not too bright */
+}
+
+
+
+/* Contact Page - Glowy Email Link */
+html[data-theme="dark"] .contact-container a  {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+ /* text-decoration: none;*/
+  transition: all 0.2s ease;
+}
+
+html[data-theme="dark"] .contact-container a:hover {
+  color: #66B2FF;/* Your vibrant blue accent color */
+  /* text-shadow: none;     /* Remove the white glow to make the blue text sharp */
+  text-decoration: underline;
+}
+
+/* Contact Page - Fix for Active Sidebar Link */
+html[data-theme="dark"] body[data-page="contact"] .sidebar-nav a[href="contactus.html"] {
+  background-color: #3399FF;
+  color: var(--dark-bg);      /* The very dark background color for high contrast text */
+}
+
+
+/* This targets the inner span for good measure */
+[data-theme="dark"]  .no-results-message .no-results-text {
+    color: #fff;
+}
+
+/* --- Style for "No Results" Message (clean text) --- */
+[data-theme="dark"] .no-results-wrapper {
+  display: block;         /* no flexbox boxy centering */
+  text-align: center;     /* center the text */
+  margin: 10px 0;         /* minimal spacing above/below */
+  padding: 0;             /* remove extra padding */
+}
+
+[data-theme="dark"] .no-results-message {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background: none;       /* remove box background */
+  padding: 0;             /* remove extra padding */
+  border: none;           /* no border */
+  border-radius: 0;       /* remove rounded corners */
+  display: inline;        /* inline text instead of block */
+}
+
+[data-theme="dark"] .no-results-message strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* --- Dark Theme - Mobile Topbar Spacing Fix --- */
+
+@media (max-width: 900px) {
+  html[data-theme="dark"] .main {
+    padding-top: 110px;
+  }
+}
+
+@media (max-width: 520px) {
+  html[data-theme="dark"] .main {
+    padding-top: 100px;
+  }
+}
+
+@media (max-width: 420px) {
+  html[data-theme="dark"] .main {
+    padding-top: 90px;
+  }
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* --- Dark Theme for Favorites Button --- */
+html[data-theme="dark"] .favorite-btn {
+  background: rgba(45, 45, 45, 0.7); /* Dark frosted glass */
+  border-color: #555;
+}
+
+html[data-theme="dark"] .favorite-btn svg {
+  fill: #777;
+  stroke: #aaa;
+}
+
+html[data-theme="dark"] .favorite-btn:hover {
+  background: rgba(60, 60, 60, 1);
+}
+
+html[data-theme="dark"] .favorite-btn.active svg {
+  fill: #ff4d4d;
+  stroke: #d92121;
+}
+
+/* ---------- Dark theme fixes for share button ---------- */
+[data-theme="dark"] button.show-more-btn {
+  background: #242424 !important;            /* slightly deeper grey for contrast */
+  color: #ffffff !important;
+  border: 1px solid #3a3a3a !important;
+  border-radius: 8px;
+  transition: 0.25s ease;
+  margin-top: 8px;                            /* FIX: separate from description text */
+  
+  /* reduced glow */
+  box-shadow: 0 0 6px rgba(160, 160, 160, 0.10); 
+}
+
+[data-theme="dark"] button.show-more-btn:hover {
+  background: #303030 !important;
+  box-shadow: 
+    0 0 8px rgba(180, 180, 180, 0.18);         /* lighter, softer glow */
+  transform: translateY(-1px);
+}
+
+
+/* =====================================
+   DARK MODE DESCRIPTION SCROLLBAR
+   ===================================== */
+
+[data-theme="dark"] .product-description {
+  color: #d1d5db !important;
+  scrollbar-width: thin;
+  scrollbar-color: #5b5b5b #1a1a1a;  /* thumb = grey, track = dark */
+}
+
+/* Chrome/Edge/Safari scrollbar */
+[data-theme="dark"] .product-description::-webkit-scrollbar {
+  width: 6px;
+}
+
+[data-theme="dark"] .product-description::-webkit-scrollbar-track {
+  background: #1a1a1a !important;   /* matches dark card */
+  border-radius: 10px;
+}
+
+[data-theme="dark"] .product-description::-webkit-scrollbar-thumb {
+  background: #5b5b5b !important;   /* medium grey */
+  border-radius: 999px;
+}
+
+[data-theme="dark"] .product-description::-webkit-scrollbar-thumb:hover {
+  background: #7a7a7a !important;   /* lighter grey hover */
+}
+/* DARK MODE FIX FOR ALL PRODUCT CARD DESCRIPTIONS */
+[data-theme="dark"] .product-card p,
+[data-theme="dark"] .product-card.is-expanded p {
+  /* Text color */
+  color: #d1d5db !important;
+
+  /* Firefox scrollbar */
+  scrollbar-width: thin !important;
+  scrollbar-color: #5b5b5b #1a1a1a !important;  
+}
+
+/* Chrome / Edge / Safari */
+[data-theme="dark"] .product-card p::-webkit-scrollbar,
+[data-theme="dark"] .product-card.is-expanded p::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+[data-theme="dark"] .product-card p::-webkit-scrollbar-track,
+[data-theme="dark"] .product-card.is-expanded p::-webkit-scrollbar-track {
+  background: #1a1a1a !important;
+}
+
+[data-theme="dark"] .product-card p::-webkit-scrollbar-thumb,
+[data-theme="dark"] .product-card.is-expanded p::-webkit-scrollbar-thumb {
+  background: #5b5b5b !important;    /* medium grey */
+  border-radius: 999px !important;
+}
+
+[data-theme="dark"] .product-card p::-webkit-scrollbar-thumb:hover,
+[data-theme="dark"] .product-card.is-expanded p::-webkit-scrollbar-thumb:hover {
+  background: #7a7a7a !important;    /* lighter grey on hover */
+}
+/* Make card taller */
+[data-theme="dark"] .product-card {
+  min-height: 470px !important;
+}
+
+/* Increase compact description height */
+[data-theme="dark"] .product-card p {
+  max-height: 5.2em !important;
+}
+[data-theme="dark"] .share-btn svg,
+/* 1. Base Look: Clear Grey in Dark Mode */
+[data-theme="dark"] .share-btn svg path {
+    fill: #b5b4b4ff !important;   /* A lighter, clear grey to stand out */
+    transition: all 0.3s ease;  /* Makes the glow effect smooth */
+}
+
+/* 2. Hover Look: Brighten & Glow */
+[data-theme="dark"] .share-btn:hover svg path {
+    fill: #ffffff !important;   /* Turns white when hovered */
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6)); /* The Glow Effect */
+}
+
+/* --- Dark Mode Logo Override --- */
+
+/* Hide the Gold logo when dark mode is active */
+[data-theme="dark"] .logo-light {
+    display: none;
+}
+
+/* Show the Silver logo when dark mode is active */
+[data-theme="dark"] .logo-dark {
+    display: block;
+}
