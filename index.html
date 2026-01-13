@@ -147,7 +147,98 @@
   
   <script type="module" src="./assets/js/script.js"></script>
   <script type="module" src="./assets/js/main.js"></script>
-  <script type="module" src="./assets/js/chatbot.js"></script>
+  <!-- <script type="module" src="./assets/js/chatbot.js"></script> -->
+   <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // --- SELECTORS ---
+    const chatbotToggle = document.getElementById("chatbotToggle");
+    const chatbotWindow = document.getElementById("chatbotWindow");
+    const closeChatbot = document.getElementById("chatbotClose");
+    const chatLog = document.getElementById("chatbotMessages");
+    const userInput = document.getElementById("chatbotInput");
+    const sendBtn = document.getElementById("chatbotSend");
+
+    // --- STATE ---
+    let hasGreeted = false; 
+    const fallbackResponse = "I can only help with questions about ClassIt's products, how it works, and contact info.";
+
+    // --- KNOWLEDGE BASE ---
+    const knowledgeBase = [
+        { keywords: ["hi", "hello", "hey"], response: "Hi there! 👋" },
+        { keywords: ["how are you"], response: "I am just a bot, but I'm doing great!" },
+        { keywords: ["contact", "help"], response: "You can reach us via the Contact Us page." },
+        { keywords: ["products", "buy"], response: "We curate the best tech and lifestyle products." },
+        { keywords: ["thanks", "thank you"], response: "You're welcome! 😊" }
+    ];
+
+    // --- FUNCTIONS ---
+    const toggleChatbotWindow = () => {
+        chatbotWindow.classList.toggle("hidden");
+        // Auto-greet on first open
+        if (!chatbotWindow.classList.contains("hidden") && !hasGreeted) {
+            hasGreeted = true;
+            setTimeout(() => {
+                addMessage("bot", "Hello! 👋 I am ClassIt's AI. How can I help you?");
+            }, 500);
+        }
+    };
+
+    function addMessage(role, text) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `msg ${role}`;
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "content";
+        contentDiv.textContent = text;
+        msgDiv.appendChild(contentDiv);
+        chatLog.appendChild(msgDiv);
+        // Auto-scroll to bottom
+        chatLog.scrollTop = chatLog.scrollHeight; 
+    }
+
+    function handleUserMessage() {
+        const userText = userInput.value.trim();
+        if (!userText) return;
+
+        addMessage("user", userText);
+        userInput.value = "";
+        
+        // Find Response
+        let botResponse = fallbackResponse;
+        const inputLower = userText.toLowerCase();
+        
+        for (const entry of knowledgeBase) {
+            for (const keyword of entry.keywords) {
+                if (inputLower.includes(keyword)) {
+                    botResponse = entry.response;
+                    break;
+                }
+            }
+        }
+
+        // Fake delay for realism
+        setTimeout(() => {
+            addMessage("bot", botResponse);
+        }, 600);
+    }
+
+    // --- EVENT LISTENERS ---
+    if(sendBtn) sendBtn.addEventListener("click", handleUserMessage);
+    if(chatbotToggle) chatbotToggle.addEventListener("click", toggleChatbotWindow);
+    
+    if(userInput) {
+        userInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") handleUserMessage();
+        });
+    }
+
+    // Close Button
+    if (closeChatbot) {
+        closeChatbot.addEventListener('click', () => {
+            chatbotWindow.classList.add('hidden');
+        });
+    }
+  });
+</script>
   <script type="module" src="./assets/js/theme-switcher.js"></script>
 </body>
 
