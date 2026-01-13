@@ -1,18 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // --- SELECTORS ---
-    const chatbotToggle = document.getElementById("chatbotToggle");
-    const chatbotWindow = document.getElementById("chatbotWindow");
-    const closeChatbot = document.getElementById("chatbotClose");
-    const chatLog = document.getElementById("chatbotMessages");
-    const userInput = document.getElementById("chatbotInput");
-    const sendBtn = document.getElementById("chatbotSend");
+  // --- SELECTORS ---
+  const chatbotToggle = document.getElementById("chatbotToggle");
+  const chatbotWindow = document.getElementById("chatbotWindow");
+  const closeChatbot = document.getElementById("chatbotClose");
+  const chatLog = document.getElementById("chatbotMessages");
+  const userInput = document.getElementById("chatbotInput");
+  const sendBtn = document.getElementById("chatbotSend");
 
-    userInput.addEventListener("keydown", (e) => {
-        if ((e.key === "Enter" || e.code === "Enter" || e.keyCode === 13) && !e.shiftKey) {
-            e.preventDefault();
-            handleUserMessage();
-        }
-    });
+  // ✅ CHECK IF ELEMENTS EXIST BEFORE USING THEM
+  if (!chatbotToggle || !chatbotWindow || !chatLog || !userInput || !sendBtn) {
+    console.error("Chatbot elements not found in DOM");
+    return;
+  }
+
+  userInput.addEventListener("keydown", (e) => {
+    if ((e.key === "Enter" || e.code === "Enter" || e.keyCode === 13) && !e.shiftKey) {
+      e.preventDefault();
+      handleUserMessage();
+    }
+  });
+
 
     // --- KNOWLEDGE BASE ---
     const knowledgeBase = [
