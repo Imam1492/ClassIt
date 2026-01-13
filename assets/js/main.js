@@ -928,48 +928,48 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 // /assets/js/theme-switcher.js
-document.addEventListener('DOMContentLoaded', () => {
-    const themeToggle = document.getElementById('themeToggleInput');
-    const currentTheme = localStorage.getItem('theme');
+// document.addEventListener('DOMContentLoaded', () => {
+//     const themeToggle = document.getElementById('themeToggleInput');
+//     const currentTheme = localStorage.getItem('theme');
 
-    const applyTheme = (theme) => {
-        document.documentElement.setAttribute('data-theme', theme);
-        if (themeToggle) {
-            themeToggle.checked = theme === 'dark';
-        }
-    };
+//     const applyTheme = (theme) => {
+//         document.documentElement.setAttribute('data-theme', theme);
+//         if (themeToggle) {
+//             themeToggle.checked = theme === 'dark';
+//         }
+//     };
 
-    if (currentTheme) {
-        applyTheme(currentTheme);
-    } else {
-        applyTheme('light'); 
-    }
+//     if (currentTheme) {
+//         applyTheme(currentTheme);
+//     } else {
+//         applyTheme('light'); 
+//     }
 
-    if (themeToggle) {
-        themeToggle.addEventListener('change', function() {
-            const theme = this.checked ? 'dark' : 'light';
-            applyTheme(theme);
-            localStorage.setItem('theme', theme);
-        });
-    }
-});
+//     if (themeToggle) {
+//         themeToggle.addEventListener('change', function() {
+//             const theme = this.checked ? 'dark' : 'light';
+//             applyTheme(theme);
+//             localStorage.setItem('theme', theme);
+//         });
+//     }
+// });
 
-// Find your toggle event listener and add the favicon logic inside it:
+// // Find your toggle event listener and add the favicon logic inside it:
 
-themeToggleInput.addEventListener('change', function() {
-    // Define the favicon element
-    const favIcon = document.getElementById('dynamic-favicon');
+// themeToggleInput.addEventListener('change', function() {
+//     // Define the favicon element
+//     const favIcon = document.getElementById('dynamic-favicon');
 
-    if (this.checked) {
-        // ... existing dark mode logic ...
+//     if (this.checked) {
+//         // ... existing dark mode logic ...
         
-        // Add this line to switch favicon to Silver
-        if(favIcon) favIcon.href = './assets/images/logo-silver.png';
+//         // Add this line to switch favicon to Silver
+//         if(favIcon) favIcon.href = './assets/images/logo-silver.png';
         
-    } else {
-        // ... existing light mode logic ...
+//     } else {
+//         // ... existing light mode logic ...
         
-        // Add this line to switch favicon to Gold
-        if(favIcon) favIcon.href = './assets/images/logo-gold.png';
-    }
-});
+//         // Add this line to switch favicon to Gold
+//         if(favIcon) favIcon.href = './assets/images/logo-gold.png';
+//     }
+// });
