@@ -1,3 +1,4 @@
+import './chatbot.js';
 document.addEventListener('DOMContentLoaded', async () => {
 // ---------- 0. STYLE INJECTION (Homepage & Category Split) ----------
     const style = document.createElement('style');
