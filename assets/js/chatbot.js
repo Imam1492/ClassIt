@@ -7,12 +7,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const userInput = document.getElementById("chatbotInput");
     const sendBtn = document.getElementById("chatbotSend");
 
-    userInput.addEventListener("keydown", (e) => {
-        if ((e.key === "Enter" || e.code === "Enter" || e.keyCode === 13) && !e.shiftKey) {
-            e.preventDefault();
-            handleUserMessage();
-        }
-    });
+    // --- STATE ---
+    let hasGreeted = false; // Tracks if the bot has said hello yet
+    const fallbackResponse = "I can only help with questions about ClassIt's products, how it works, and contact info.";
 
     // --- KNOWLEDGE BASE ---
     const knowledgeBase = [
@@ -20,17 +17,16 @@ document.addEventListener("DOMContentLoaded", () => {
             keywords: ["hi", "hello", "hey"],
             response: "Hi there! 👋"
         },
-         {
-            keywords: ["hi how are u", "hello how are you", "hey how r u", "how r u","how are you","how are u"],
+        {
+            keywords: ["hi how are u", "hello how are you", "hey how r u", "how r u", "how are you", "how are u"],
             response: "Hi I am good! , What about you?"
         },
-
-              {
-            keywords: ["I am fine", "I am good","I am great","iam good","iam great","iam fine"],
+        {
+            keywords: ["I am fine", "I am good", "I am great", "iam good", "iam great", "iam fine"],
             response: "Nice, how may i help you today?"
         },
         {
-            keywords: ["how are you", "how r u","how ru"],
+            keywords: ["how are you", "how r u", "how ru"],
             response: "I am an AI chatbot, yet I am good."
         },
         {
@@ -69,36 +65,34 @@ document.addEventListener("DOMContentLoaded", () => {
             keywords: ["about", "ClassIt"],
             response: "ClassIt is a site that shares high-quality, personally-vetted products in Livogue, wellfit, and Tech."
         },
-        
         {
             keywords: ["contact", "email", "get in touch", "help", "support"],
             response: "You can reach us through the 'Contact Us' page for any inquiries."
         },
         {
             keywords: ["how", "work", "buy", "purchase"],
-            response: "We are an intermediate site, that helps you purchase perfect products."
+            response: "We are an intermediate site that helps you purchase perfect products."
         },
         {
             keywords: ["categories", "products", "sell", "Livogue", "wellfit", "tech"],
             response: "We feature curated products in Livogue, wellfit, and Tech. Which are you most interested in?"
         },
         {
-             keywords: ["delivery", "delivary", "delievery", "delevery", "deliverey",
-        "shipping", "shiping", "shippin", "shpping",
-        "shipment", "shippment", "shipmant", "shipmnet" ],
-        
+            keywords: ["delivery", "delivary", "delievery", "delevery", "deliverey",
+                "shipping", "shiping", "shippin", "shpping",
+                "shipment", "shippment", "shipmant", "shipmnet"],
             response: "All deliveries are handled by the platforms like Amazon/Flipkart as per their standards. ClassIt is not involved in shipping."
         },
         {
             keywords: ["defect", "damaged", "wrong order"],
             response: "If you get a damaged or wrong item, contact the support of the site you ordered from with photos. They’ll provide a solution."
         },
-         {
-            keywords: ["Assalamualikum","Asalamalikum","assalamalikum","asalamualikum"],
+        {
+            keywords: ["Assalamualikum", "Asalamalikum", "assalamalikum", "asalamualikum"],
             response: "Wa'alikum Assalam wa rahmatullah hi wa barakatuhu."
         },
         {
-            keywords: ["khairiyat","khayriyat","kairiat","khayriat","khayryat"],
+            keywords: ["khairiyat", "khayriyat", "kairiat", "khayriat", "khayryat"],
             response: "Alhamdulillah."
         },
         {
@@ -119,12 +113,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     ];
 
-    const fallbackResponse = "I can only help with questions about ClassIt's products, how it works, and contact info.";
-    let hasGreeted = false;
-
     // --- FUNCTIONS ---
-    const toggleChatbotWindow = () => chatbotWindow.classList.toggle("hidden");
-    const closeChatbotWindow = () => chatbotWindow.classList.add("hidden");
+
+    // 1. Toggle with Auto-Greeting Logic
+    const toggleChatbotWindow = () => {
+        chatbotWindow.classList.toggle("hidden");
+        
+        // If opening for the first time, say hello
+        if (!chatbotWindow.classList.contains("hidden") && !hasGreeted) {
+            hasGreeted = true; // Mark as greeted
+            setTimeout(() => {
+                showTypingIndicator();
+                setTimeout(() => {
+                    const typingDots = document.querySelector(".typing");
+                    if(typingDots) typingDots.remove();
+                    addMessage("bot", "Hello! 👋 I am ClassIt's AI. Ask me about products, shipping, or returns!");
+                }, 800);
+            }, 300);
+        }
+    };
 
     function addMessage(role, text) {
         const msgDiv = document.createElement("div");
@@ -135,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
         msgDiv.appendChild(contentDiv);
         chatLog.appendChild(msgDiv);
         chatLog.scrollTo({ top: chatLog.scrollHeight, behavior: "smooth" });
-        return msgDiv; 
+        return msgDiv;
     }
 
     function showTypingIndicator() {
@@ -160,119 +167,108 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function findResponse(userText) {
-    const input = userText.toLowerCase();
+        const input = userText.toLowerCase();
 
-    for (const entry of knowledgeBase) {
-        for (const keyword of entry.keywords) {
-            // Create regex with word boundaries (\b) so "hi" doesn't match "shipping"
-            const regex = new RegExp(`\\b${keyword}\\b`, "i");
-            if (regex.test(input)) {
-                if (typeof entry.response === "function") {
-                    return entry.response();
+        for (const entry of knowledgeBase) {
+            for (const keyword of entry.keywords) {
+                // Regex checks for the word as a whole word (\b) so "ship" doesn't match "shipping"
+                const regex = new RegExp(`\\b${keyword}\\b`, "i");
+                if (regex.test(input)) {
+                    if (typeof entry.response === "function") {
+                        return entry.response();
+                    }
+                    return entry.response;
                 }
-                return entry.response;
             }
         }
+        return fallbackResponse;
     }
-    return fallbackResponse;
-}
 
+    function handleUserMessage() {
+        const userText = userInput.value.trim();
+        if (!userText) return;
 
- function handleUserMessage() {
-    const userText = userInput.value.trim();
-    if (!userText) return;
+        // "Clear chat" command logic
+        if (userText.toLowerCase() === 'clear chat') {
+            chatLog.innerHTML = '';
+            userInput.value = '';
+            const confirmationMsg = addMessage('bot', 'Chat history cleared.');
 
-      // Updated "clear chat" command logic
-    if (userText.toLowerCase() === 'clear chat') {
-        chatLog.innerHTML = ''; 
-        userInput.value = '';
-        
-        // Add the confirmation message and capture it in a variable
-        const confirmationMsg = addMessage('bot', 'Chat history cleared.');
+            setTimeout(() => {
+                if (confirmationMsg) {
+                    confirmationMsg.classList.add('fade-out');
+                    setTimeout(() => {
+                        confirmationMsg.remove();
+                    }, 300);
+                }
+            }, 3000);
+            return;
+        }
 
-        // Set a timer to remove the message after 3 seconds
+        // Standard Message Handling
+        addMessage("user", userText);
+        userInput.value = "";
+        setFormState(false);
+
+        const typingIndicator = showTypingIndicator();
+
         setTimeout(() => {
-            if (confirmationMsg) {
-                confirmationMsg.classList.add('fade-out'); // Start fading
-                // Remove the element completely after the fade animation finishes
-                setTimeout(() => {
-                    confirmationMsg.remove();
-                }, 300); // This must match the CSS transition duration
-            }
-        }, 3000); // 3000ms = 3 seconds
-
-        return; // Stop the function here
+            const botResponse = findResponse(userText);
+            typingIndicator.remove();
+            addMessage("bot", botResponse);
+            setFormState(true);
+            userInput.focus();
+        }, 1200);
     }
-
-    addMessage("user", userText);
-    userInput.value = "";
-    setFormState(false); // Disable the form while bot is "thinking"
-
-    const typingIndicator = showTypingIndicator();
-    
-    setTimeout(() => {
-        // Find the response from your knowledge base
-        const botResponse = findResponse(userText);
-
-        // Remove the typing indicator and show the bot's message
-        typingIndicator.remove();
-        addMessage("bot", botResponse);
-
-        // IMPORTANT: Re-enable the form so the user can type again
-        setFormState(true);
-        userInput.focus();
-    }, 1200); // Using a 1.2 second delay
-}
 
     // --- EVENT LISTENERS ---
-    sendBtn.addEventListener("click", handleUserMessage);
-    chatbotToggle.addEventListener("click", toggleChatbotWindow);
-    /* ---------- Close-on-X and Close-on-outside-click (robust) ---------- */
-
-// small helper to detect if chat is open (works for .hidden or display:none)
-function isChatOpen() {
-  if (!chatbotWindow) return false;
-  // If you use a 'hidden' class, check that first:
-  if (!chatbotWindow.classList.contains('hidden')) return true;
-  // Fallback: check computed style (covers display:none or visibility)
-  const cs = getComputedStyle(chatbotWindow);
-  return cs.display !== 'none' && cs.visibility !== 'hidden' && chatbotWindow.offsetParent !== null;
-}
-
-// Close when clicking the ❌ (stopPropagation to prevent hitting document handler)
-if (closeChatbot) {
-  closeChatbot.addEventListener('click', (e) => {
-    e.stopPropagation();
-    chatbotWindow.classList.add('hidden');   // use same hide technique your code uses
-    try { userInput.blur(); } catch(_) {}
     
-  });
-}
+    // Send on click
+    if(sendBtn) sendBtn.addEventListener("click", handleUserMessage);
+    
+    // Toggle window
+    if(chatbotToggle) chatbotToggle.addEventListener("click", toggleChatbotWindow);
 
-// Close when clicking/tapping outside the chat OR pressing Escape
-document.addEventListener('pointerdown', (event) => {
-  // only act when chat is actually open
-  if (!isChatOpen()) return;
+    // Send on Enter
+    if(userInput) {
+        userInput.addEventListener("keydown", (e) => {
+            if ((e.key === "Enter" || e.code === "Enter" || e.keyCode === 13) && !e.shiftKey) {
+                e.preventDefault();
+                handleUserMessage();
+            }
+        });
+    }
 
-  // If click is inside chat or on the toggle button, ignore it
-  const clickedInsideChat = chatbotWindow.contains(event.target);
-  const clickedToggle = chatbotToggle && chatbotToggle.contains(event.target);
+    // --- CLOSING LOGIC (Close on X, Outside Click, Escape) ---
 
-  if (!clickedInsideChat && !clickedToggle) {
-    chatbotWindow.classList.add('hidden'); // hide
-  }
+    function isChatOpen() {
+        if (!chatbotWindow) return false;
+        if (!chatbotWindow.classList.contains('hidden')) return true;
+        const cs = getComputedStyle(chatbotWindow);
+        return cs.display !== 'none' && cs.visibility !== 'hidden' && chatbotWindow.offsetParent !== null;
+    }
+
+    if (closeChatbot) {
+        closeChatbot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            chatbotWindow.classList.add('hidden');
+            try { userInput.blur(); } catch (_) { }
+        });
+    }
+
+    document.addEventListener('pointerdown', (event) => {
+        if (!isChatOpen()) return;
+        const clickedInsideChat = chatbotWindow.contains(event.target);
+        const clickedToggle = chatbotToggle && chatbotToggle.contains(event.target);
+
+        if (!clickedInsideChat && !clickedToggle) {
+            chatbotWindow.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isChatOpen()) {
+            chatbotWindow.classList.add('hidden');
+        }
+    });
 });
-
-// Close on ESC
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && isChatOpen()) {
-    chatbotWindow.classList.add('hidden');
-  }
-});
-
-});
-
-// createBtn('‹', Math.max(1, currentPage - 1), currentPage === 1);
-//     createBtn(String(currentPage), currentPage, false, true);
-//     createBtn('›', Math.min(totalPages, currentPage + 1), currentPage === totalPages);
-//   }
