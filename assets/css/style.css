@@ -863,3 +863,10 @@ p {
 .logo-dark {
     display: none;   /* Hide Silver */
 }
+/* --- FIX FOR LOGO OVERFLOW --- */
+/* This forces the logo to fit inside the header */
+header img, .navbar img, .logo img {
+    max-height: 50px !important;  /* Limits the height */
+    width: auto;                  /* Keeps the shape correct */
+    object-fit: contain;          /* Ensures it doesn't get squished */
+}
