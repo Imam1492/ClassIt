@@ -45,7 +45,125 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="./assets/css/style.css">
-  <link rel="stylesheet" href="./assets/css/chatbot.css">
+  <!-- <link rel="stylesheet" href="./assets/css/chatbot.css"> -->
+   <style>
+  /* --- CHATBOT STYLES --- */
+  #chatbotToggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: #d4af37; /* Gold color */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 10000; /* Super high to sit on top */
+    transition: transform 0.3s;
+  }
+  
+  #chatbotToggle:hover {
+    transform: scale(1.1);
+  }
+
+  #chatbotWindow {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 350px;
+    max-width: 90%;
+    height: 450px;
+    background-color: #fff;
+    border: 2px solid #d4af37;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 10001; /* Higher than button */
+    overflow: hidden;
+    /* This handles the opening/closing */
+    transform: translateY(0);
+    opacity: 1;
+    transition: all 0.3s ease-in-out;
+  }
+
+  /* The class JavaScript uses to hide it */
+  #chatbotWindow.hidden {
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden; 
+  }
+
+  /* Dark Mode Support (Optional) */
+  [data-theme="dark"] #chatbotWindow {
+    background-color: #2a2a2a;
+    color: #fff;
+    border-color: #C0C0C0;
+  }
+  
+  /* Chat Content Styles */
+  #chatbotMessages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .msg {
+    padding: 8px 12px;
+    border-radius: 10px;
+    max-width: 80%;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .msg.user {
+    align-self: flex-end;
+    background-color: #d4af37;
+    color: #000;
+  }
+  
+  .msg.bot {
+    align-self: flex-start;
+    background-color: #f1f1f1;
+    color: #333;
+  }
+
+  [data-theme="dark"] .msg.bot {
+    background-color: #444;
+    color: #fff;
+  }
+  
+  #chatbotInputArea {
+    display: flex;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+  }
+  
+  #chatbotInput {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+  }
+  
+  #chatbotSend {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: 10px;
+    color: #d4af37;
+  }
+</style>
   <link rel="stylesheet" href="./assets/css/theme-toggle.css">
   <link rel="stylesheet" href="./assets/css/dark-theme.css">
   
