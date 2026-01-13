@@ -1,3 +1,8 @@
+// Don't interfere with chatbot
+if (document.getElementById('chatbotToggle')) {
+  console.log('Chatbot will be handled by chatbot.js');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
 // ---------- 0. STYLE INJECTION (Homepage & Category Split) ----------
     const style = document.createElement('style');
