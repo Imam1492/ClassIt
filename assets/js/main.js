@@ -223,6 +223,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
     document.head.appendChild(style);
 
+    
+
     // ---------- 1. ELEMENT SELECTORS (Unified) ----------
     const menuBtn = document.getElementById("menuBtn");
     const sidebar = document.getElementById("sidebar");
@@ -931,17 +933,38 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+const setFavicon = (theme) => {
+  const f96 = document.getElementById('favicon-96');
+  const f32 = document.getElementById('favicon-32');
+  const f16 = document.getElementById('favicon-16');
+
+  if (!f96 || !f32 || !f16) return;
+
+  const icon =
+    theme === 'dark'
+      ? './assets/images/favicon-silver-sq.png'
+      : './assets/images/favicon-gold-sq.png';
+
+  f96.href = icon;
+  f32.href = icon;
+  f16.href = icon;
+};
+
+
+
 // /assets/js/theme-switcher.js
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggleInput');
     const currentTheme = localStorage.getItem('theme');
 
     const applyTheme = (theme) => {
-        document.documentElement.setAttribute('data-theme', theme);
-        if (themeToggle) {
-            themeToggle.checked = theme === 'dark';
-        }
-    };
+    document.documentElement.setAttribute('data-theme', theme);
+    if (themeToggle) {
+        themeToggle.checked = theme === 'dark';
+    }
+    setFavicon(theme); // ✅ ADD THIS LINE
+};
+
 
     if (currentTheme) {
         applyTheme(currentTheme);
@@ -960,20 +983,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Find your toggle event listener and add the favicon logic inside it:
 
-themeToggleInput.addEventListener('change', function() {
-    // Define the favicon element
-    const favIcon = document.getElementById('dynamic-favicon');
+// themeToggleInput.addEventListener('change', function() {
+//     // Define the favicon element
+//     const favIcon = document.getElementById('dynamic-favicon');
 
-    if (this.checked) {
-        // ... existing dark mode logic ...
+//     if (this.checked) {
+//         // ... existing dark mode logic ...
         
-        // Add this line to switch favicon to Silver
-        if(favIcon) favIcon.href = './assets/images/logo-silver.png';
+//         // Add this line to switch favicon to Silver
+//         if(favIcon) favIcon.href = './assets/images/logo-silver.png';
         
-    } else {
-        // ... existing light mode logic ...
+//     } else {
+//         // ... existing light mode logic ...
         
-        // Add this line to switch favicon to Gold
-        if(favIcon) favIcon.href = './assets/images/logo-gold.png';
-    }
-});
+//         // Add this line to switch favicon to Gold
+//         if(favIcon) favIcon.href = './assets/images/logo-gold.png';
+//     }
+// });
