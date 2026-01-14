@@ -311,8 +311,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   favicon.href =
     theme === 'dark'
-      ? './assets/images/favicon-dark-sq.png'
-      : './assets/images/favicon-gold-sq.png';
+      ? './assets/images/favicon-dark-sq-v2.png'
+      : './assets/images/favicon-gold-sq-v2.png';
 };
 
 
