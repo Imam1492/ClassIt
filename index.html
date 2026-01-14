@@ -22,19 +22,18 @@
 <meta property="og:image" content="https://www.ClassIt.com/assets/images/ClassIt-home-preview.jpg" />
 
 <script>
-  // This script runs instantly to prevent a flash of the wrong theme/favicon.
   (function() {
     try {
       var theme = localStorage.getItem('theme');
-      // MATCHING ID: We fixed the ID below so this script can find it
+      // This ID matches the link tag below
       var favIcon = document.getElementById('dynamic-favicon');
       
       if (theme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
-        // FIXED PATH: Pointing to root '/' because file is in public folder
+        // Pointing to the DARK icon in the root folder
         if(favIcon) favIcon.href = '/favicon-dark-sq.png';
       }
-    } catch (e) { /* Ignore errors */ }
+    } catch (e) {}
   })();
 </script>
 
