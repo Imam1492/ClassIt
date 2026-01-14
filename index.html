@@ -21,28 +21,26 @@
 <meta property="og:url" content="https://www.ClassIt.com/index.html" />
 <meta property="og:image" content="https://www.ClassIt.com/assets/images/ClassIt-home-preview.jpg" />
 
- <script>
+<script>
   // This script runs instantly to prevent a flash of the wrong theme/favicon.
   (function() {
     try {
       var theme = localStorage.getItem('theme');
+      // MATCHING ID: We fixed the ID below so this script can find it
       var favIcon = document.getElementById('dynamic-favicon');
       
       if (theme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
-        // If dark mode is saved, set Silver favicon immediately
-        if(favIcon) favIcon.href = './assets/images/logo-silver.png';
+        // FIXED PATH: Pointing to root '/' because file is in public folder
+        if(favIcon) favIcon.href = '/favicon-dark-sq.png';
       }
     } catch (e) { /* Ignore errors */ }
   })();
 </script>
 
-  <!-- Favicons -->
- <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon-gold-sq.png">
 
-<link id="favicon-96" rel="icon" type="image/png" sizes="96x96" href="./assets/images/favicon-gold-sq.png">
-<link id="favicon-32" rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon-gold-sq.png">
-<link id="favicon-16" rel="icon" type="image/png" sizes="16x16" href="./assets/images/favicon-gold-sq.png">
+<link id="dynamic-favicon" rel="icon" type="image/png" sizes="96x96" href="/favicon-gold-sq.png">
 
 
 <link rel="manifest" href="/manifest.json">
