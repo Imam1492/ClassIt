@@ -15,7 +15,7 @@
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   transition: transform 0.2s ease, background 0.3s ease;
-  z-index: 1000;
+  z-index: 9999;
 }
 
 #chatbotToggle:hover {
@@ -39,7 +39,7 @@
   overflow: hidden;
   transition: all 0.3s ease;
   font-family: "Segoe UI", Roboto, sans-serif;
-  z-index: 1000;
+  z-index: 10000;
 }
 
 #chatbotWindow.hidden {
