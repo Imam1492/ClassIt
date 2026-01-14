@@ -12,22 +12,22 @@
 
 
 <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
-<link id="dynamic-favicon" rel="icon" type="image/png" sizes="96x96" href="./assets/images/favicon-gold-sq.png">
+<link id="dynamic-favicon" rel="icon" type="image/png" href="./assets/images/favicon-gold-sq.png">
 
- <script>
-  (function() {
+<script>
+  (function () {
     try {
-      var theme = localStorage.getItem('theme');
-      var favIcon = document.getElementById('dynamic-favicon');
-      
-      if (theme === 'dark') {
+      const theme = localStorage.getItem('theme');
+      const favicon = document.getElementById('dynamic-favicon');
+
+      if (theme === 'dark' && favicon) {
+        favicon.href = './assets/images/favicon-dark-sq.png';
         document.documentElement.setAttribute('data-theme', 'dark');
-        // Make sure this points to your SQUARE silver icon
-        if(favIcon) favIcon.href = './assets/images/favicon-dark-sq.png';
       }
-    } catch (e) { /* Ignore errors */ }
+    } catch (e) {}
   })();
 </script>
+
 
   <link rel="stylesheet" href="./assets/css/style.css">
   <link rel="stylesheet" href="./assets/css/chatbot.css">

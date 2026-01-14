@@ -963,12 +963,12 @@ themeToggleInput.addEventListener('change', function() {
         // ... existing dark mode logic ...
         
         // Add this line to switch favicon to Silver
-        if(favIcon) favIcon.href = './assets/images/logo-silver.png';
+        if(favIcon) favIcon.href = './assets/images/favicon-dark-sq.png';
         
     } else {
         // ... existing light mode logic ...
         
         // Add this line to switch favicon to Gold
-        if(favIcon) favIcon.href = './assets/images/logo-gold.png';
+        if(favIcon) favIcon.href = './assets/images/favicon-gold-sq.png';
     }
 });
