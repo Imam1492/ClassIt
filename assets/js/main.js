@@ -1,3 +1,4 @@
+import './theme-switcher.js'; // <--- ADD THIS LINE
 // Don't interfere with chatbot
 if (document.getElementById('chatbotToggle')) {
   console.log('Chatbot will be handled by chatbot.js');
