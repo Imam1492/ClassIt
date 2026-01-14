@@ -21,26 +21,25 @@
 <meta property="og:url" content="https://www.ClassIt.com/index.html" />
 <meta property="og:image" content="https://www.ClassIt.com/assets/images/ClassIt-home-preview.jpg" />
 
-<script>
+ <script>
+  // This script runs instantly to prevent a flash of the wrong theme/favicon.
   (function() {
     try {
       var theme = localStorage.getItem('theme');
-      // This ID matches the link tag below
       var favIcon = document.getElementById('dynamic-favicon');
       
       if (theme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
-        // Pointing to the DARK icon in the root folder
-        if(favIcon) favIcon.href = '/favicon-dark-sq.png';
+        // If dark mode is saved, set Silver favicon immediately
+        if(favIcon) favIcon.href = './assets/images/logo-silver.png';
       }
-    } catch (e) {}
+    } catch (e) { /* Ignore errors */ }
   })();
 </script>
 
-<link rel="apple-touch-icon" sizes="180x180" href="/favicon-gold-sq.png">
-
-<link id="dynamic-favicon" rel="icon" type="image/png" sizes="96x96" href="/favicon-gold-sq.png">
-
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
+<link id="dynamic-favicon" rel="icon" type="image/png" sizes="96x96" href="./assets/images/favicon-gold-sq.png">
 
 <link rel="manifest" href="/manifest.json">
 
