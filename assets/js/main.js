@@ -1,3 +1,13 @@
+function setFavicon(theme) {
+  const favicon = document.getElementById('dynamic-favicon');
+  if (!favicon) return;
+
+  favicon.href =
+    theme === 'dark'
+      ? '/assets/images/favicon-dark-sq-v2.png'
+      : '/assets/images/favicon-gold-sq-v2.png';
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
 // ---------- 0. STYLE INJECTION (Homepage & Category Split) ----------
     const style = document.createElement('style');
@@ -305,15 +315,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     }
-    const setFavicon = (theme) => {
-  const favicon = document.getElementById('dynamic-favicon');
-  if (!favicon) return;
 
-  favicon.href =
-    theme === 'dark'
-      ? './assets/images/favicon-dark-sq-v2.png'
-      : './assets/images/favicon-gold-sq-v2.png';
-};
 
 
     // ---------- 4. DATA FETCHING (From Sanity) ----------
