@@ -1,11 +1,11 @@
 import './chatbot.js';
 
-function setFavicon(theme) {
-  // Remove existing favicon
-  const oldFavicon = document.getElementById('dynamic-favicon');
-  if (oldFavicon) {
-    oldFavicon.remove();
-  }
+// function setFavicon(theme) {
+//   // Remove existing favicon
+//   const oldFavicon = document.getElementById('dynamic-favicon');
+//   if (oldFavicon) {
+//     oldFavicon.remove();
+//   }
 
   // Create a new favicon element
   const link = document.createElement('link');
@@ -22,7 +22,7 @@ function setFavicon(theme) {
       : `/favicon-gold-sq-v2.png?v=${version}`;
 
   document.head.appendChild(link);
-}
+
 
 
 
@@ -966,7 +966,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (themeToggle) {
             themeToggle.checked = theme === 'dark';
         }
-        setFavicon(theme); // ✅ ADD THIS LINE
+        // setFavicon(theme); // ✅ ADD THIS LINE
     };
 
     if (currentTheme) {
