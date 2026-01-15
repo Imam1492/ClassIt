@@ -874,3 +874,8 @@ header img, .navbar img, .logo img {
 .pagination-btn {
   touch-action: manipulation;
 }
+.pagination-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none; /* EXTRA SAFETY */
+}
