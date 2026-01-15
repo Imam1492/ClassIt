@@ -991,34 +991,36 @@ document.addEventListener('DOMContentLoaded', () => {
    ========================================= */
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggleInput');
-    const currentTheme = localStorage.getItem('theme') || 'light';
+    const faviconLight = document.getElementById('favicon-light');
+    const faviconDark = document.getElementById('favicon-dark');
 
-    // Helper to apply theme
-    const applyTheme = (theme) => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+
+    function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
-        
-        // Update Toggle Switch State
-        if (themeToggle) themeToggle.checked = (theme === 'dark');
-        
-        // Update Favicon (Call the function defined at the top of main.js)
-        // If setFavicon isn't available in this scope, we define it locally:
-        const favicon = document.getElementById('dynamic-favicon');
-        if (favicon) {
-            favicon.href = theme === 'dark' 
-                ? '/favicon-dark-sq-v2.png' 
-                : '/favicon-gold-sq-v2.png';
+
+        if (themeToggle) {
+            themeToggle.checked = theme === 'dark';
         }
-    };
 
-    // 1. Initialize on load
-    applyTheme(currentTheme);
+        // ✅ THIS IS THE IMPORTANT PART
+        if (theme === 'dark') {
+            faviconLight.disabled = true;
+            faviconDark.disabled = false;
+        } else {
+            faviconLight.disabled = false;
+            faviconDark.disabled = true;
+        }
+    }
 
-    // 2. Listen for clicks
+    // Apply on load
+    applyTheme(savedTheme);
+
+    // Toggle
     if (themeToggle) {
-        themeToggle.addEventListener('change', function() {
-            const newTheme = this.checked ? 'dark' : 'light';
-            applyTheme(newTheme);
+        themeToggle.addEventListener('change', () => {
+            applyTheme(themeToggle.checked ? 'dark' : 'light');
         });
     }
 });
