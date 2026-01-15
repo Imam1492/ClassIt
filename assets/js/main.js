@@ -1,4 +1,4 @@
-import './chatbot.js';
+// import './chatbot.js';
 
 // function setFavicon(theme) {
 //   // Remove existing favicon
@@ -23,7 +23,15 @@ import './chatbot.js';
 
 //   document.head.appendChild(link);
 // }
-
+/* REPLACE THE OLD setFavicon FUNCTION WITH THIS CLEAN VERSION */
+function setFavicon(theme) {
+  const favicon = document.getElementById('dynamic-favicon');
+  if (!favicon) return;
+  // Just swap the href. Do not remove/create elements.
+  favicon.href = theme === 'dark' 
+      ? '/favicon-dark-sq-v2.png' 
+      : '/favicon-gold-sq-v2.png';
+}
 
 
 document.addEventListener('DOMContentLoaded', async () => {

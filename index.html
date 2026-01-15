@@ -24,22 +24,19 @@
 <link rel="manifest" href="/manifest.json">
 
 <script>
-(function () {
-  try {
-    const theme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', theme);
+  (function () {
+    try {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
 
-    // Select the single link
-    const favicon = document.getElementById('dynamic-favicon');
-    
-    if (favicon) {
-      // SWAP THE IMAGE SOURCE based on theme
-      favicon.href = theme === 'dark' 
-        ? '/favicon-dark-sq-v2.png' 
-        : '/favicon-gold-sq-v2.png';
-    }
-  } catch (e) {}
-})();
+      const favicon = document.getElementById('dynamic-favicon');
+      if (favicon) {
+        favicon.href = theme === 'dark'
+            ? '/favicon-dark-sq-v2.png'
+            : '/favicon-gold-sq-v2.png';
+      }
+    } catch (e) {}
+  })();
 </script>
 
   <!-- <script>
