@@ -959,40 +959,38 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 /* =========================================
-   THEME SWITCHER LOGIC (Consolidated)
+   THEME SWITCHER LOGIC (Correct HREF Swap)
    ========================================= */
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggleInput');
-    const faviconLight = document.getElementById('favicon-light');
-    const faviconDark = document.getElementById('favicon-dark');
+    const currentTheme = localStorage.getItem('theme') || 'light';
 
-    const savedTheme = localStorage.getItem('theme') || 'light';
-
-    function applyTheme(theme) {
+    // Helper Function to Apply Theme
+    const applyTheme = (theme) => {
+        // 1. Set CSS Variable
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
-
-        if (themeToggle) {
-            themeToggle.checked = theme === 'dark';
+        
+        // 2. Update Toggle Switch Visuals
+        if (themeToggle) themeToggle.checked = (theme === 'dark');
+        
+        // 3. SWAP FAVICON SOURCE (The Fix)
+        const favicon = document.getElementById('dynamic-favicon');
+        if (favicon) {
+            favicon.href = theme === 'dark' 
+                ? '/favicon-dark-sq-v2.png' 
+                : '/favicon-gold-sq-v2.png';
         }
+    };
 
-        // ✅ THIS IS THE IMPORTANT PART
-        if (theme === 'dark') {
-            faviconLight.disabled = true;
-            faviconDark.disabled = false;
-        } else {
-            faviconLight.disabled = false;
-            faviconDark.disabled = true;
-        }
-    }
+    // Apply on initial load
+    applyTheme(currentTheme);
 
-    // Apply on load
-    applyTheme(savedTheme);
-
-    // Toggle
+    // Listen for toggle clicks
     if (themeToggle) {
-        themeToggle.addEventListener('change', () => {
-            applyTheme(themeToggle.checked ? 'dark' : 'light');
+        themeToggle.addEventListener('change', function() {
+            const newTheme = this.checked ? 'dark' : 'light';
+            applyTheme(newTheme);
         });
     }
 });

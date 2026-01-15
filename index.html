@@ -19,31 +19,28 @@
 
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
   
-  <link rel="icon" type="image/png" href="/favicon-gold-sq-v2.png" id="favicon-light">
-<link rel="icon" type="image/png" href="/favicon-dark-sq-v2.png" id="favicon-dark" disabled>
+<link id="dynamic-favicon" rel="icon" type="image/png" href="/favicon-gold-sq-v2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
 
 <script>
 (function () {
   try {
     const theme = localStorage.getItem('theme') || 'light';
-    const light = document.getElementById('favicon-light');
-    const dark = document.getElementById('favicon-dark');
-
-    if (theme === 'dark') {
-      light.disabled = true;
-      dark.disabled = false;
-    } else {
-      light.disabled = false;
-      dark.disabled = true;
-    }
-
     document.documentElement.setAttribute('data-theme', theme);
+
+    // Select the single link
+    const favicon = document.getElementById('dynamic-favicon');
+    
+    if (favicon) {
+      // SWAP THE IMAGE SOURCE based on theme
+      favicon.href = theme === 'dark' 
+        ? '/favicon-dark-sq-v2.png' 
+        : '/favicon-gold-sq-v2.png';
+    }
   } catch (e) {}
 })();
 </script>
-
-
-  <link rel="manifest" href="/manifest.json">
 
   <!-- <script>
   (function () {
