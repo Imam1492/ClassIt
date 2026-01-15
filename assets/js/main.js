@@ -956,7 +956,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-// // /assets/js/theme-switcher.js
+// /assets/js/theme-switcher.js
 // document.addEventListener('DOMContentLoaded', () => {
 //     const themeToggle = document.getElementById('themeToggleInput');
 //     const currentTheme = localStorage.getItem('theme');
@@ -986,41 +986,41 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
-// /* =========================================
-//    THEME SWITCHER LOGIC (Consolidated)
-//    ========================================= */
-// document.addEventListener('DOMContentLoaded', () => {
-//     const themeToggle = document.getElementById('themeToggleInput');
-//     const faviconLight = document.getElementById('favicon-light');
-//     const faviconDark = document.getElementById('favicon-dark');
+/* =========================================
+   THEME SWITCHER LOGIC (Consolidated)
+   ========================================= */
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('themeToggleInput');
+    const faviconLight = document.getElementById('favicon-light');
+    const faviconDark = document.getElementById('favicon-dark');
 
-//     const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = localStorage.getItem('theme') || 'light';
 
-//     function applyTheme(theme) {
-//         document.documentElement.setAttribute('data-theme', theme);
-//         localStorage.setItem('theme', theme);
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
 
-//         if (themeToggle) {
-//             themeToggle.checked = theme === 'dark';
-//         }
+        if (themeToggle) {
+            themeToggle.checked = theme === 'dark';
+        }
 
-//         // ✅ THIS IS THE IMPORTANT PART
-//         if (theme === 'dark') {
-//             faviconLight.disabled = true;
-//             faviconDark.disabled = false;
-//         } else {
-//             faviconLight.disabled = false;
-//             faviconDark.disabled = true;
-//         }
-//     }
+        // ✅ THIS IS THE IMPORTANT PART
+        if (theme === 'dark') {
+            faviconLight.disabled = true;
+            faviconDark.disabled = false;
+        } else {
+            faviconLight.disabled = false;
+            faviconDark.disabled = true;
+        }
+    }
 
-//     // Apply on load
-//     applyTheme(savedTheme);
+    // Apply on load
+    applyTheme(savedTheme);
 
-//     // Toggle
-//     if (themeToggle) {
-//         themeToggle.addEventListener('change', () => {
-//             applyTheme(themeToggle.checked ? 'dark' : 'light');
-//         });
-//     }
-// });
+    // Toggle
+    if (themeToggle) {
+        themeToggle.addEventListener('change', () => {
+            applyTheme(themeToggle.checked ? 'dark' : 'light');
+        });
+    }
+});
