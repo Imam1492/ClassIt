@@ -870,3 +870,7 @@ header img, .navbar img, .logo img {
     width: auto;                  /* Keeps the shape correct */
     object-fit: contain;          /* Ensures it doesn't get squished */
 }
+
+.pagination-btn {
+  touch-action: manipulation;
+}

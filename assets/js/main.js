@@ -554,7 +554,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.className = "pagination-btn";
             if (disabled) btn.disabled = true;
             if (active) btn.classList.add("active");
-            btn.addEventListener("click", () => clickHandler(page));
+           const handlePageChange = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    clickHandler(page);
+};
+
+btn.addEventListener("click", handlePageChange);
+btn.addEventListener("touchstart", handlePageChange, { passive: false });
+
             container.appendChild(btn);
         };
         createBtn("‹", currentPage - 1, currentPage === 1);
