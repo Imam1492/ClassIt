@@ -1,14 +1,29 @@
 import './chatbot.js';
 
 function setFavicon(theme) {
-  const favicon = document.getElementById('dynamic-favicon');
-  if (!favicon) return;
+  // Remove existing favicon
+  const oldFavicon = document.getElementById('dynamic-favicon');
+  if (oldFavicon) {
+    oldFavicon.remove();
+  }
 
-  favicon.href =
+  // Create a new favicon element
+  const link = document.createElement('link');
+  link.id = 'dynamic-favicon';
+  link.rel = 'icon';
+  link.type = 'image/png';
+
+  // Cache-busting query
+  const version = Date.now();
+
+  link.href =
     theme === 'dark'
-      ? '/favicon-dark-sq-v2.png'
-      : '/favicon-gold-sq-v2.png';
+      ? `/favicon-dark-sq-v2.png?v=${version}`
+      : `/favicon-gold-sq-v2.png?v=${version}`;
+
+  document.head.appendChild(link);
 }
+
 
 
 document.addEventListener('DOMContentLoaded', async () => {
