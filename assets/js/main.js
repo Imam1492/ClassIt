@@ -1,4 +1,4 @@
-import './chatbot.js';
+//import './chatbot.js';
 
 function setFavicon(theme) {
   const favicon = document.getElementById('dynamic-favicon');
