@@ -554,14 +554,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.className = "pagination-btn";
             if (disabled) btn.disabled = true;
             if (active) btn.classList.add("active");
-           const handlePageChange = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    clickHandler(page);
-};
+           const createBtn = (label, page, disabled = false, active = false) => {
+    const btn = document.createElement("button");
+    btn.textContent = label;
+    btn.className = "pagination-btn";
 
-btn.addEventListener("click", handlePageChange);
-btn.addEventListener("touchstart", handlePageChange, { passive: false });
+    if (active) btn.classList.add("active");
+
+    if (disabled) {
+        btn.disabled = true;
+        btn.setAttribute('aria-disabled', 'true');
+        btn.classList.add('disabled');
+        return container.appendChild(btn); // ⛔ STOP HERE
+    }
+
+    const handlePageChange = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        clickHandler(page);
+    };
+
+    btn.addEventListener("click", handlePageChange);
+    btn.addEventListener("touchstart", handlePageChange, { passive: false });
+
+    container.appendChild(btn);
+};
 
             container.appendChild(btn);
         };
