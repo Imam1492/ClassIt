@@ -1,11 +1,11 @@
 import './chatbot.js';
 
-// function setFavicon(theme) {
-//   // Remove existing favicon
-//   const oldFavicon = document.getElementById('dynamic-favicon');
-//   if (oldFavicon) {
-//     oldFavicon.remove();
-//   }
+function setFavicon(theme) {
+  // Remove existing favicon
+  const oldFavicon = document.getElementById('dynamic-favicon');
+  if (oldFavicon) {
+    oldFavicon.remove();
+  }
 
   // Create a new favicon element
   const link = document.createElement('link');
@@ -22,7 +22,7 @@ import './chatbot.js';
       : `/favicon-gold-sq-v2.png?v=${version}`;
 
   document.head.appendChild(link);
-
+}
 
 
 
