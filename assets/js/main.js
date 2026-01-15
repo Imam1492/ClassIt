@@ -959,28 +959,30 @@ document.addEventListener("DOMContentLoaded", function() {
 // /assets/js/theme-switcher.js
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggleInput');
-    const currentTheme = localStorage.getItem('theme') || 'light';
+    const currentTheme = localStorage.getItem('theme');
 
     const applyTheme = (theme) => {
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-
         if (themeToggle) {
             themeToggle.checked = theme === 'dark';
         }
+        // setFavicon(theme); // ✅ ADD THIS LINE
     };
 
-    // Apply theme on page load
-    applyTheme(currentTheme);
+    if (currentTheme) {
+        applyTheme(currentTheme);
+    } else {
+        applyTheme('light'); 
+    }
 
-    // Toggle theme
     if (themeToggle) {
-        themeToggle.addEventListener('change', function () {
-            applyTheme(this.checked ? 'dark' : 'light');
+        themeToggle.addEventListener('change', function() {
+            const theme = this.checked ? 'dark' : 'light';
+            applyTheme(theme);
+            localStorage.setItem('theme', theme);
         });
     }
 });
-
 
 
 
