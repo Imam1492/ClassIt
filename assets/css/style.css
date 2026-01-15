@@ -871,11 +871,16 @@ header img, .navbar img, .logo img {
     object-fit: contain;          /* Ensures it doesn't get squished */
 }
 
+/* Mobile Pagination Fixes */
 .pagination-btn {
-  touch-action: manipulation;
+    padding: 10px 15px; /* Larger hit area */
+    margin: 0 5px;
+    font-size: 18px; /* Larger text for the arrows */
+    touch-action: manipulation; /* Disables double-tap to zoom, making clicks faster */
+    cursor: pointer;
 }
-.pagination-btn.disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  pointer-events: none; /* EXTRA SAFETY */
+
+.pagination-btn:disabled {
+    cursor: default;
+    pointer-events: none; /* Prevents clicks entirely on disabled buttons */
 }

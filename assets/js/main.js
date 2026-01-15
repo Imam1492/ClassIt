@@ -544,48 +544,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Generic pagination UI creator
-    function renderPagination(container, totalPages, currentPage, clickHandler) {
-        if (container) container.innerHTML = "";
-        if (!container || totalPages <= 1) return;
+  function renderPagination(container, totalPages, currentPage, clickHandler) {
+    if (container) container.innerHTML = "";
+    if (!container || totalPages <= 1) return;
 
-        const createBtn = (label, page, disabled = false, active = false) => {
-            const btn = document.createElement("button");
-            btn.textContent = label;
-            btn.className = "pagination-btn";
-            if (disabled) btn.disabled = true;
-            if (active) btn.classList.add("active");
-           const createBtn = (label, page, disabled = false, active = false) => {
-    const btn = document.createElement("button");
-    btn.textContent = label;
-    btn.className = "pagination-btn";
+    const createBtn = (label, page, disabled = false, active = false) => {
+        const btn = document.createElement("button");
+        btn.textContent = label;
+        btn.className = "pagination-btn";
+        
+        // 1. Better Mobile Sizing & Touch handling
+        btn.style.minWidth = "40px"; // Ensure easy to tap
+        btn.style.minHeight = "40px"; // Ensure easy to tap
 
-    if (active) btn.classList.add("active");
+        if (disabled) {
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+        }
+        
+        if (active) btn.classList.add("active");
 
-    if (disabled) {
-        btn.disabled = true;
-        btn.setAttribute('aria-disabled', 'true');
-        btn.classList.add('disabled');
-        return container.appendChild(btn); // ⛔ STOP HERE
-    }
+        // 2. IMPROVED EVENT LISTENER
+        btn.addEventListener("click", (e) => {
+            e.preventDefault(); // Stop mobile ghost clicks
+            
+            // Prevent clicking the active page or disabled buttons
+            if (disabled || active) return;
 
-    const handlePageChange = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        clickHandler(page);
+            // 3. SCROLL TO TOP (Crucial for Mobile)
+            // This ensures the user sees the new products, not the footer
+            const productSection = document.getElementById("searchResults") || document.getElementById("gallerySection");
+            if (productSection) {
+                 // Scroll slightly above the products
+                const y = productSection.getBoundingClientRect().top + window.scrollY - 80;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Execute the load
+            clickHandler(page);
+        });
+
+        container.appendChild(btn);
     };
 
-    btn.addEventListener("click", handlePageChange);
-    btn.addEventListener("touchstart", handlePageChange, { passive: false });
-
-    container.appendChild(btn);
-};
-
-            container.appendChild(btn);
-        };
-        createBtn("‹", currentPage - 1, currentPage === 1);
-        createBtn(currentPage, currentPage, false, true);
-        createBtn("›", currentPage + 1, currentPage === totalPages);
-    }
+    // Render: Prev | Current | Next
+    createBtn("‹", currentPage - 1, currentPage === 1);
+    createBtn(currentPage, currentPage, false, true); // Active button is disabled by default logic above
+    createBtn("›", currentPage + 1, currentPage === totalPages);
+}
 
     // ---------- 7. SEARCH LOGIC ----------
     function resetToDefaultGrid() {
