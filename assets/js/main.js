@@ -548,51 +548,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (container) container.innerHTML = "";
     if (!container || totalPages <= 1) return;
 
-    const createBtn = (label, page, disabled = false, active = false) => {
+    const createBtn = (label, targetPage, isDisabled, isActive) => {
         const btn = document.createElement("button");
         btn.textContent = label;
         btn.className = "pagination-btn";
         
-        // 1. Better Mobile Sizing & Touch handling
-        btn.style.minWidth = "40px"; // Ensure easy to tap
-        btn.style.minHeight = "40px"; // Ensure easy to tap
+        // --- 1. MOBILE OPTIMIZATIONS ---
+        // 'manipulation' tells mobile browsers: "Don't wait for double-tap, click instantly."
+        btn.style.touchAction = "manipulation"; 
+        btn.style.minWidth = "45px";  // Minimum touch target size
+        btn.style.minHeight = "45px";
+        btn.style.margin = "0 5px";
 
-        if (disabled) {
+        // Visual State
+        if (isActive) btn.classList.add("active");
+        
+        // --- 2. HARD DISABLE ---
+        // If disabled, use pointer-events: none. This makes the button "ghost" to clicks.
+        if (isDisabled) {
             btn.disabled = true;
             btn.style.opacity = "0.5";
+            btn.style.pointerEvents = "none"; 
         }
-        
-        if (active) btn.classList.add("active");
 
-        // 2. IMPROVED EVENT LISTENER
-        btn.addEventListener("click", (e) => {
-            e.preventDefault(); // Stop mobile ghost clicks
-            
-            // Prevent clicking the active page or disabled buttons
-            if (disabled || active) return;
+        // --- 3. CLICK HANDLER ---
+        btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // Stop the click from bubbling up
 
-            // 3. SCROLL TO TOP (Crucial for Mobile)
-            // This ensures the user sees the new products, not the footer
+            // Double check safety
+            if (isDisabled || isActive) return;
+
+            // *** THE FIX: LOCK THE UI ***
+            // Immediately disable ALL buttons in this container.
+            // This prevents you from tapping "Next" twice rapidly.
+            const allButtons = container.querySelectorAll("button");
+            allButtons.forEach(b => {
+                b.disabled = true;
+                b.style.pointerEvents = "none";
+            });
+
+            // Scroll Logic
             const productSection = document.getElementById("searchResults") || document.getElementById("gallerySection");
             if (productSection) {
-                 // Scroll slightly above the products
                 const y = productSection.getBoundingClientRect().top + window.scrollY - 80;
                 window.scrollTo({ top: y, behavior: 'smooth' });
             } else {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
-            // Execute the load
-            clickHandler(page);
-        });
+            // Fire the actual page change
+            // (The buttons will be re-created enabled when this function finishes)
+            clickHandler(targetPage);
+        };
 
         container.appendChild(btn);
     };
 
-    // Render: Prev | Current | Next
-    createBtn("‹", currentPage - 1, currentPage === 1);
-    createBtn(currentPage, currentPage, false, true); // Active button is disabled by default logic above
-    createBtn("›", currentPage + 1, currentPage === totalPages);
+    // Render logic
+    createBtn("‹", currentPage - 1, currentPage === 1, false);
+    createBtn(currentPage, currentPage, false, true);
+    createBtn("›", currentPage + 1, currentPage === totalPages, false);
 }
 
     // ---------- 7. SEARCH LOGIC ----------
