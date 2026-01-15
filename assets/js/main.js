@@ -966,7 +966,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (themeToggle) {
             themeToggle.checked = theme === 'dark';
         }
-        // setFavicon(theme); // ✅ ADD THIS LINE
+        setFavicon(theme); // ✅ ADD THIS LINE
     };
 
     if (currentTheme) {
