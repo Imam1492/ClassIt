@@ -6,9 +6,10 @@ function setFavicon(theme) {
 
   favicon.href =
     theme === 'dark'
-      ? '/assets/images/favicon-dark-sq-v2.png'
-      : '/assets/images/favicon-gold-sq-v2.png';
+      ? '/favicon-dark-sq-v2.png'
+      : '/favicon-gold-sq-v2.png';
 }
+
 
 document.addEventListener('DOMContentLoaded', async () => {
 // ---------- 0. STYLE INJECTION (Homepage & Category Split) ----------
@@ -968,21 +969,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Find your toggle event listener and add the favicon logic inside it:
 
-// const themeToggle = document.getElementById('themeToggleInput');
-// const favicon = document.getElementById('dynamic-favicon');
-
-// themeToggle.addEventListener('change', function () {
-//   const theme = this.checked ? 'dark' : 'light';
-//   localStorage.setItem('theme', theme);
-//   document.documentElement.setAttribute('data-theme', theme);
-
-//   if (favicon) {
-//     favicon.href =
-//       theme === 'dark'
-//         ? './assets/images/favicon-dark-sq.png'
-//         : './assets/images/favicon-gold-sq.png';
-//   }
-// });
 
