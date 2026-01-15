@@ -1,28 +1,28 @@
 import './chatbot.js';
 
-function setFavicon(theme) {
-  // Remove existing favicon
-  const oldFavicon = document.getElementById('dynamic-favicon');
-  if (oldFavicon) {
-    oldFavicon.remove();
-  }
+// function setFavicon(theme) {
+//   // Remove existing favicon
+//   const oldFavicon = document.getElementById('dynamic-favicon');
+//   if (oldFavicon) {
+//     oldFavicon.remove();
+//   }
 
-  // Create a new favicon element
-  const link = document.createElement('link');
-  link.id = 'dynamic-favicon';
-  link.rel = 'icon';
-  link.type = 'image/png';
+//   // Create a new favicon element
+//   const link = document.createElement('link');
+//   link.id = 'dynamic-favicon';
+//   link.rel = 'icon';
+//   link.type = 'image/png';
 
-  // Cache-busting query
-  const version = Date.now();
+//   // Cache-busting query
+//   const version = Date.now();
 
-  link.href =
-    theme === 'dark'
-      ? `/favicon-dark-sq-v2.png?v=${version}`
-      : `/favicon-gold-sq-v2.png?v=${version}`;
+//   link.href =
+//     theme === 'dark'
+//       ? `/favicon-dark-sq-v2.png?v=${version}`
+//       : `/favicon-gold-sq-v2.png?v=${version}`;
 
-  document.head.appendChild(link);
-}
+//   document.head.appendChild(link);
+// }
 
 
 
@@ -966,7 +966,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (themeToggle) {
             themeToggle.checked = theme === 'dark';
         }
-        setFavicon(theme); // ✅ ADD THIS LINE
+        // setFavicon(theme); // ✅ ADD THIS LINE
     };
 
     if (currentTheme) {
