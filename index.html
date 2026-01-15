@@ -3,33 +3,49 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>ClassIt — Home</title>
 
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RHLBMVEWF4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RHLBMVEWF4');
+  </script>
+
+  <meta property="og:title" content="ClassIt - Vibe-Checked & Quality-Approved Products" />
+  <meta property="og:description" content="Your new favorite corner of the internet. We personally test and curate the best products in Livogue, wellfit, and Tech so you don't have to." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.ClassIt.com/index.html" />
+  <meta property="og:image" content="https://www.ClassIt.com/assets/images/ClassIt-home-preview.jpg" />
+
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
   
   <link id="dynamic-favicon" rel="icon" type="image/png" href="/favicon-gold-sq-v2.png">
-  
+
   <link rel="manifest" href="/manifest.json">
 
   <script>
-    (function() {
-      try {
-        const theme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        
-        // Immediate favicon update
-        const favicon = document.getElementById('dynamic-favicon');
-        if (favicon) {
-           favicon.href = theme === 'dark' 
-             ? '/favicon-dark-sq-v2.png' 
-             : '/favicon-gold-sq-v2.png';
-        }
-      } catch (e) {}
-    })();
+  (function () {
+    try {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+
+      const favicon = document.getElementById('dynamic-favicon');
+      if (favicon) {
+        // UPDATED: Now pointing to root '/' to match your public folder location
+        favicon.href =
+          theme === 'dark'
+            ? '/favicon-dark-sq-v2.png'
+            : '/favicon-gold-sq-v2.png';
+      }
+    } catch (e) {}
+  })();
   </script>
 
   <link rel="stylesheet" href="./assets/css/style.css">
   <link rel="stylesheet" href="./assets/css/chatbot.css">
   <link rel="stylesheet" href="./assets/css/theme-toggle.css">
   <link rel="stylesheet" href="./assets/css/dark-theme.css">
+  
   <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:wght@400;700&display=swap" rel="stylesheet">
 </head>
 
