@@ -1,4 +1,4 @@
-// import './chatbot.js';
+import './chatbot.js';
 
 function setFavicon(theme) {
   // Remove existing favicon
