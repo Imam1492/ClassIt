@@ -106,8 +106,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0; /* CRITICAL */
-            padding-top: 22px;   /* 🔑 CREATES REAL GAP ABOVE BUTTON */
-
         }
 
         /* Category Page Footer (FIXED) */
@@ -183,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             -webkit-line-clamp: 4; /* 4 lines */
             line-height: 1.3em; 
             max-height: 5.2em; /* 1.3 * 4 */
-            margin-bottom: 14px;
+            margin-bottom: 0;
             margin-top: 0.5em; /* Kept 0.5em margin */
         }
 
@@ -253,63 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             background-color: var(--brand-color, #8B4513); /* Scrollbar color */
             border-radius: 4px;
         }
-            /* =========================================
-   DESKTOP-ONLY: HOMEPAGE TOP PICKS CARD TUNING
-   ========================================= */
-@media (min-width: 1024px) {
-
-    /* Make cards taller & wider */
-    .js-card-fix {
-        width: 340px;
-        min-height: 460px;
-        padding: 18px;
-    }
-
-    /* Show more of the product image */
-    .js-card-fix .card-image-container {
-        height: 220px;
-    }
-
-    /* Slightly increase text breathing space */
-    .js-card-fix > h3 {
-        font-size: 1.45rem;
-    }
-
-    .js-card-fix > p {
-        -webkit-line-clamp: 5;
-        max-height: 6.5em;
-    }
-        
-        /* Keep distance between heading and cards */
-    .main > .title {
-        margin-bottom: 140px;
-    }
-
-     /* Push entire carousel downward */
-    .gallery-section {
-        padding-top: 40px;
-        padding-bottom: 120px; /* fills bottom empty space */
-    }
-
-    .main > .title {
-    margin-bottom: 95px;
-}
-
-.gallery-section {
-    padding-bottom: 150px;
-}
-
- .js-card-fix > p {
-        padding-bottom: 6px; /* safety buffer */
-    }
-
-}
-    .js-card-fix .product-card-footer {
-        padding-top: 28px;
-}
-
     `;
-    
     document.head.appendChild(style);
 
     // ---------- 1. ELEMENT SELECTORS (Unified) ----------
