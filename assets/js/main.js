@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0; /* CRITICAL */
-            
+            padding-top: 22px;   /* 🔑 CREATES REAL GAP ABOVE BUTTON */
 
         }
 
