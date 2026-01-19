@@ -251,7 +251,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             background-color: var(--brand-color, #8B4513); /* Scrollbar color */
             border-radius: 4px;
         }
+            /* =========================================
+   DESKTOP-ONLY: HOMEPAGE TOP PICKS CARD TUNING
+   ========================================= */
+@media (min-width: 1024px) {
+
+    /* Make cards taller & wider */
+    .js-card-fix {
+        width: 340px;
+        min-height: 460px;
+        padding: 18px;
+    }
+
+    /* Show more of the product image */
+    .js-card-fix .card-image-container {
+        height: 200px;
+    }
+
+    /* Slightly increase text breathing space */
+    .js-card-fix > h3 {
+        font-size: 1.05rem;
+    }
+
+    .js-card-fix > p {
+        -webkit-line-clamp: 5;
+        max-height: 6.5em;
+    }
+}
+
     `;
+    
     document.head.appendChild(style);
 
     // ---------- 1. ELEMENT SELECTORS (Unified) ----------
