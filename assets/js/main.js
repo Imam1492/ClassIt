@@ -300,9 +300,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 }
 
  .js-card-fix > p {
-        margin-bottom: 8px;
+        padding-bottom: 6px; /* safety buffer */
     }
 
+}
+    .js-card-fix .product-card-footer {
+        padding-top: 28px;
 }
 
     `;
