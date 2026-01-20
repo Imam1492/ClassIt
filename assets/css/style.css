@@ -884,3 +884,40 @@ header img, .navbar img, .logo img {
     cursor: default;
     pointer-events: none; /* Prevents clicks entirely on disabled buttons */
 }
+
+/* ARROW FIX: Move them to the edges and style them like the dark theme */
+.swiper-button-next, 
+.swiper-button-prev {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;               /* Bigger touch area */
+    height: 50px;
+    background-color: #222;    /* Dark background circle */
+    color: #fff;               /* White arrow icon */
+    border-radius: 50%;        /* Perfect circle */
+    z-index: 100;              /* Ensure they sit on top of everything */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3); /* Slight shadow for depth */
+}
+
+/* Force the Left Arrow to the far left */
+.swiper-button-prev {
+    left: 20px !important;     /* Uses !important to override any default centering */
+    right: auto;
+}
+
+/* Force the Right Arrow to the far right */
+.swiper-button-next {
+    right: 20px !important;    /* Uses !important to override any default centering */
+    left: auto;
+}
+
+/* Make the arrow icon inside smaller and cleaner */
+.swiper-button-next::after, 
+.swiper-button-prev::after {
+    font-size: 1.2rem;         /* Size of the actual arrow symbol */
+    font-weight: bold;
+}
