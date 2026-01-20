@@ -66,6 +66,20 @@
 </head>
 
 <body data-home="true">
+
+<script>
+  // Check if user has already accepted
+  if (!localStorage.getItem('cookiesAccepted')) {
+    document.getElementById('cookie-banner').style.display = 'block';
+  }
+
+  // Handle button click
+  document.getElementById('accept-cookies').addEventListener('click', () => {
+    localStorage.setItem('cookiesAccepted', 'true');
+    document.getElementById('cookie-banner').style.display = 'none';
+  });
+</script>
+
   <div id="overlay" class="overlay hidden"></div>
 
   <!-- Sidebar -->
@@ -212,18 +226,7 @@
   </p>
 </footer>
 
-<script>
-  // Check if user has already accepted
-  if (!localStorage.getItem('cookiesAccepted')) {
-    document.getElementById('cookie-banner').style.display = 'block';
-  }
 
-  // Handle button click
-  document.getElementById('accept-cookies').addEventListener('click', () => {
-    localStorage.setItem('cookiesAccepted', 'true');
-    document.getElementById('cookie-banner').style.display = 'none';
-  });
-</script>
 
 </body>
 </html>
