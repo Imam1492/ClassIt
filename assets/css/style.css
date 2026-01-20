@@ -885,40 +885,96 @@ header img, .navbar img, .logo img {
     pointer-events: none; /* Prevents clicks entirely on disabled buttons */
 }
 
-/* FORCE Arrows to Screen Edges (Nuclear Option) */
-body .swiper-button-prev,
-body .swiper-button-next {
-    position: fixed !important;  /* This breaks them out of the container */
-    top: 50% !important;
+/* ---------------------------------------------------- */
+/* VERTICAL PILL ARROWS (Theme Aware) */
+/* ---------------------------------------------------- */
+
+#prevBtn, 
+#nextBtn {
+    position: absolute !important;
+    top: 50%;
     transform: translateY(-50%);
-    width: 45px !important;
-    height: 45px !important;
-    background-color: #222 !important; /* Dark Circle */
-    color: #fff !important;            /* White Arrow */
-    border-radius: 50%;
-    z-index: 9999 !important;          /* Sit on top of everything */
+    
+    /* VERTICAL PILL SHAPE */
+    width: 32px !important;       /* Narrow */
+    height: 48px !important;      /* Tall */
+    border-radius: 30px !important;
+    
+    /* Common Settings */
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    backdrop-filter: none !important;
+    color: transparent !important;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    margin-top: 0 !important;          /* Reset Swiper defaults */
+    cursor: pointer;
+    z-index: 1000;
+    
+    /* Icon Settings */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px; /* Size of thin arrow */
+    transition: all 0.3s ease;
 }
 
-/* Stick to Left Edge */
-body .swiper-button-prev {
-    left: 5px !important;
-    right: auto !important;
+/* ---------------------------------------------------- */
+/* 1. LIGHT THEME (White Pill / Dark Arrow) */
+/* ---------------------------------------------------- */
+
+/* Default or Light Mode */
+:root, :root[data-theme="light"] {
+    & #prevBtn, & #nextBtn {
+        background-color: #ffffff !important; /* White Pill */
+    }
+    
+    /* Dark Thin Left Arrow */
+    & #prevBtn {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23222222' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E") !important;
+    }
+    
+    /* Dark Thin Right Arrow */
+    & #nextBtn {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23222222' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E") !important;
+    }
 }
 
-/* Stick to Right Edge */
-body .swiper-button-next {
-    right: 5px !important;
-    left: auto !important;
+/* ---------------------------------------------------- */
+/* 2. DARK THEME (Dark Pill / White Arrow) */
+/* ---------------------------------------------------- */
+
+/* Detect Dark Mode */
+:root[data-theme="dark"] {
+    & #prevBtn, & #nextBtn {
+        background-color: #222222 !important; /* Dark Pill */
+        border-color: rgba(255,255,255,0.1);
+    }
+
+    /* White Thin Left Arrow */
+    & #prevBtn {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E") !important;
+    }
+
+    /* White Thin Right Arrow */
+    & #nextBtn {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E") !important;
+    }
 }
 
-/* Icon Size */
-body .swiper-button-prev::after,
-body .swiper-button-next::after {
-    font-size: 1.2rem !important;
-    font-weight: bold;
+/* ---------------------------------------------------- */
+/* POSITIONING */
+/* ---------------------------------------------------- */
+
+#prevBtn {
+    left: -155px !important;
+    right: auto;
+}
+
+#nextBtn {
+    right: -155px !important;
+    left: auto;
+}
+
+/* Hover Effect */
+#prevBtn:hover, 
+#nextBtn:hover {
+    transform: translateY(-50%) scale(1.05);
 }
