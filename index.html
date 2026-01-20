@@ -67,18 +67,7 @@
 
 <body data-home="true">
 
-<script>
-  // Check if user has already accepted
-  if (!localStorage.getItem('cookiesAccepted')) {
-    document.getElementById('cookie-banner').style.display = 'block';
-  }
 
-  // Handle button click
-  document.getElementById('accept-cookies').addEventListener('click', () => {
-    localStorage.setItem('cookiesAccepted', 'true');
-    document.getElementById('cookie-banner').style.display = 'none';
-  });
-</script>
 
   <div id="overlay" class="overlay hidden"></div>
 
@@ -116,6 +105,19 @@
   <img src="./assets/images/logo-silver.png" alt="ClassIt" class="logo-dark">
 </a>
   </header>
+
+  <script>
+  // Check if user has already accepted
+  if (!localStorage.getItem('cookiesAccepted')) {
+    document.getElementById('cookie-banner').style.display = 'block';
+  }
+
+  // Handle button click
+  document.getElementById('accept-cookies').addEventListener('click', () => {
+    localStorage.setItem('cookiesAccepted', 'true');
+    document.getElementById('cookie-banner').style.display = 'none';
+  });
+</script>
 
   <!-- Main Content -->
   <main class="main">
