@@ -885,39 +885,40 @@ header img, .navbar img, .logo img {
     pointer-events: none; /* Prevents clicks entirely on disabled buttons */
 }
 
-/* ARROW FIX: Move them to the edges and style them like the dark theme */
-.swiper-button-next, 
-.swiper-button-prev {
-    position: absolute;
-    top: 50%;
+/* FORCE Arrows to Screen Edges (Nuclear Option) */
+body .swiper-button-prev,
+body .swiper-button-next {
+    position: fixed !important;  /* This breaks them out of the container */
+    top: 50% !important;
     transform: translateY(-50%);
-    width: 50px;               /* Bigger touch area */
-    height: 50px;
-    background-color: #222;    /* Dark background circle */
-    color: #fff;               /* White arrow icon */
-    border-radius: 50%;        /* Perfect circle */
-    z-index: 100;              /* Ensure they sit on top of everything */
+    width: 45px !important;
+    height: 45px !important;
+    background-color: #222 !important; /* Dark Circle */
+    color: #fff !important;            /* White Arrow */
+    border-radius: 50%;
+    z-index: 9999 !important;          /* Sit on top of everything */
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3); /* Slight shadow for depth */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    margin-top: 0 !important;          /* Reset Swiper defaults */
 }
 
-/* Force the Left Arrow to the far left */
-.swiper-button-prev {
-    left: 20px !important;     /* Uses !important to override any default centering */
-    right: auto;
+/* Stick to Left Edge */
+body .swiper-button-prev {
+    left: 5px !important;
+    right: auto !important;
 }
 
-/* Force the Right Arrow to the far right */
-.swiper-button-next {
-    right: 20px !important;    /* Uses !important to override any default centering */
-    left: auto;
+/* Stick to Right Edge */
+body .swiper-button-next {
+    right: 5px !important;
+    left: auto !important;
 }
 
-/* Make the arrow icon inside smaller and cleaner */
-.swiper-button-next::after, 
-.swiper-button-prev::after {
-    font-size: 1.2rem;         /* Size of the actual arrow symbol */
+/* Icon Size */
+body .swiper-button-prev::after,
+body .swiper-button-next::after {
+    font-size: 1.2rem !important;
     font-weight: bold;
 }
