@@ -39,6 +39,16 @@
   })();
 </script>
 
+<style>
+  /* Fix to force footer to the bottom on Home Page */
+  body {
+    min-height: 100vh;        /* Forces the page to be full screen height */
+    display: flex;            /* Enables flexible layout */
+    flex-direction: column;   /* Stacks content vertically */
+    margin: 0;
+  }
+</style>
+
   <!-- <script>
   (function () {
     try {
@@ -212,7 +222,7 @@
     text-align: center; 
     font-size: 0.7rem; 
     opacity: 0.7; 
-    margin-top: 40px; 
+    margin-top: auto; 
     border-top: 1px solid rgba(255,255,255,0.1);
 ">
   <p style="margin: 0; line-height: 1.4;">
@@ -237,6 +247,7 @@
       document.getElementById('cookie-banner').style.display = 'none';
     });
   </script>
+
 
 
 </body>
