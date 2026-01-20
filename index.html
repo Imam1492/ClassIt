@@ -52,85 +52,82 @@
           theme === 'dark'
             ? '/favicon-dark-sq-v2.png'
             : '/favicon-gold-sq-v2.png';
-      }
-    } catch (e) {}
-  })();
-  </script> -->
-
-  <link rel="stylesheet" href="./assets/css/style.css">
-  <link rel="stylesheet" href="./assets/css/chatbot.css">
-  <link rel="stylesheet" href="./assets/css/theme-toggle.css">
-  <link rel="stylesheet" href="./assets/css/dark-theme.css">
-  
-  <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:wght@400;700&display=swap" rel="stylesheet">
-</head>
-
-<body data-home="true">
-
-
-
-  <div id="overlay" class="overlay hidden"></div>
-
-  <!-- Sidebar -->
-  <aside id="sidebar" class="sidebar" aria-hidden="true">
-    <button id="closeSidebar" class="sidebar-close" aria-label="Close menu">✕</button>
-    <div class="sidebar-header"><h2 class="sidebar-title">Menu</h2></div>
-    <nav class="sidebar-nav">
-      <a href="index.html">Home</a>
-      <a href="Livogue.html">Livogue</a>
-      <a href="wellfit.html">Wellfit</a>
-      <a href="tech.html">Tech</a>
-      <a href="aboutus.html">About Us</a>
-      <a href="contactus.html">Contact</a>
-
-    </nav>
-  </aside>
-
-  <!-- Topbar -->
-  <header class="topbar">
-    <button id="menuBtn" class="hamburger" aria-label="Open menu">☰</button>
-    <div class="search-wrap">
-      <input id="searchInput" class="search-input" type="text" placeholder="Search products..." autocomplete="off"/>
-      <button id="searchBtn" class="search-action" aria-label="Search" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="7"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-      </button>
-      <div id="searchDropdown" class="search-dropdown hidden" role="listbox"></div>
-    </div>
-    <a href="index.html" class="site-logo brand-logo">
-  <img src="./assets/images/logo-gold.png" alt="ClassIt" class="logo-light">
-  
-  <img src="./assets/images/logo-silver.png" alt="ClassIt" class="logo-dark">
-</a>
-  </header>
-
-  <script>
-  // Check if user has already accepted
-  if (!localStorage.getItem('cookiesAccepted')) {
-    document.getElementById('cookie-banner').style.display = 'block';
-  }
-
-  // Handle button click
-  document.getElementById('accept-cookies').addEventListener('click', () => {
-    localStorage.setItem('cookiesAccepted', 'true');
-    document.getElementById('cookie-banner').style.display = 'none';
-  });
-</script>
-
-  <!-- Main Content -->
-  <main class="main">
+            }
+            } catch (e) {}
+            })();
+          </script> -->
+          
+          <link rel="stylesheet" href="./assets/css/style.css">
+          <link rel="stylesheet" href="./assets/css/chatbot.css">
+          <link rel="stylesheet" href="./assets/css/theme-toggle.css">
+          <link rel="stylesheet" href="./assets/css/dark-theme.css">
+          
+          <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:wght@400;700&display=swap" rel="stylesheet">
+        </head>
+        
+        <body data-home="true">
+          
+          
+          
+          <div id="overlay" class="overlay hidden"></div>
+          
+          <!-- Sidebar -->
+          <aside id="sidebar" class="sidebar" aria-hidden="true">
+            <button id="closeSidebar" class="sidebar-close" aria-label="Close menu">✕</button>
+            <div class="sidebar-header"><h2 class="sidebar-title">Menu</h2></div>
+            <nav class="sidebar-nav">
+              <a href="index.html">Home</a>
+              <a href="Livogue.html">Livogue</a>
+              <a href="wellfit.html">Wellfit</a>
+              <a href="tech.html">Tech</a>
+              <a href="aboutus.html">About Us</a>
+              <a href="contactus.html">Contact</a>
+              
+            </nav>
+          </aside>
+          
+          <!-- Topbar -->
+          <header class="topbar">
+            <button id="menuBtn" class="hamburger" aria-label="Open menu">☰</button>
+            <div class="search-wrap">
+              <input id="searchInput" class="search-input" type="text" placeholder="Search products..." autocomplete="off"/>
+              <button id="searchBtn" class="search-action" aria-label="Search" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+              <div id="searchDropdown" class="search-dropdown hidden" role="listbox"></div>
+            </div>
+            <a href="index.html" class="site-logo brand-logo">
+              <img src="./assets/images/logo-gold.png" alt="ClassIt" class="logo-light">
+              
+              <img src="./assets/images/logo-silver.png" alt="ClassIt" class="logo-dark">
+            </a>
+          </header>
+          
+          
+          <div id="cookie-banner" style="position: fixed; bottom: 0; left: 0; width: 100%; background: #222; color: #fff; padding: 15px; text-align: center; z-index: 1000; display: none;">
+          <p style="margin: 0; display: inline-block; font-size: 0.9rem;">
+            We use cookies to ensure you get the best experience and to support our site via affiliate links.
+          </p>
+          <button id="accept-cookies" style="margin-left: 15px; padding: 5px 15px; background: #FFD700; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+            Got it
+          </button>
+          </div>
+          
+          <!-- Main Content -->
+          <main class="main">
     <h1 id="mainTitle" class="title">Top Picks</h1>
-
+    
     <!-- Gallery -->
     <section id="gallerySection" class="gallery-section is-loading">
       <button id="prevBtn" class="gallery-arrow left" aria-label="Previous">‹</button>
       <div id="gallery" class="gallery is-loading" aria-live="polite"><article class="skeleton-gallery-card">
-  <div class="skeleton-image"></div>
-  <div class="skeleton-text"></div>
-  <div class="skeleton-text short"></div>
-</article>
+        <div class="skeleton-image"></div>
+        <div class="skeleton-text"></div>
+        <div class="skeleton-text short"></div>
+      </article>
 <article class="skeleton-gallery-card">
   <div class="skeleton-image"></div>
   <div class="skeleton-text"></div>
@@ -208,14 +205,6 @@
     </div>
   </label>
 
-  <div id="cookie-banner" style="position: fixed; bottom: 0; left: 0; width: 100%; background: #222; color: #fff; padding: 15px; text-align: center; z-index: 1000; display: none;">
-  <p style="margin: 0; display: inline-block; font-size: 0.9rem;">
-    We use cookies to ensure you get the best experience and to support our site via affiliate links.
-  </p>
-  <button id="accept-cookies" style="margin-left: 15px; padding: 5px 15px; background: #FFD700; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-    Got it
-  </button>
-</div>
 
   <footer style="background: var(--bg-color); padding: 20px; text-align: center; font-size: 0.8rem; opacity: 0.8; margin-top: 50px; border-top: 1px solid #ddd;">
   <p>
@@ -228,6 +217,18 @@
   </p>
 </footer>
 
+    <script>
+    // Check if user has already accepted
+    if (!localStorage.getItem('cookiesAccepted')) {
+      document.getElementById('cookie-banner').style.display = 'block';
+    }
+  
+    // Handle button click
+    document.getElementById('accept-cookies').addEventListener('click', () => {
+      localStorage.setItem('cookiesAccepted', 'true');
+      document.getElementById('cookie-banner').style.display = 'none';
+    });
+  </script>
 
 
 </body>
