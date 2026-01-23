@@ -42,7 +42,7 @@
   </script>
 
   <style>
-    /* 1. Force the page to act like a Flex column */
+    /* --- 1. LAYOUT FIXES (Keeps footer at bottom) --- */
     html, body {
       height: 100%;
       margin: 0;
@@ -53,24 +53,18 @@
       flex-direction: column;
       min-height: 100vh;
     }
-
-    /* 2. Main content grows to push footer down */
     main.main {
       flex: 1 0 auto;
       width: 100%;
       position: relative;
       display: block; 
     }
-
-    /* 3. THE FIX: Only apply layout fix when NOT hidden */
     #searchResults:not(.hidden) {
-      display: flow-root; /* Removed !important so it can be hidden again */
+      display: flow-root; 
       width: 100%;
       overflow: visible; 
       min-height: 200px; 
     }
-
-    /* 4. Footer safety settings */
     footer {
       flex-shrink: 0;
       position: relative !important;
@@ -78,6 +72,9 @@
       clear: both; 
       background: var(--bg-color);
     }
+
+    
+
   </style>
 
   <link rel="stylesheet" href="./assets/css/style.css">

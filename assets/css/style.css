@@ -916,65 +916,80 @@ header img, .navbar img, .logo img {
     transition: all 0.3s ease;
 }
 
-/* ---------------------------------------------------- */
-/* 1. LIGHT THEME (White Pill / Dark Arrow) */
-/* ---------------------------------------------------- */
 
-/* Default or Light Mode */
-:root, :root[data-theme="light"] {
-    & #prevBtn, & #nextBtn {
-        background-color: #ffffff !important; /* White Pill */
-    }
+
+/* =========================================
+   FINAL "MATTE" TILTED PILL ARROWS
+   Paste in style.css
+   ========================================= */
+
+/* 1. Base Pill Style */
+#prevBtn, #nextBtn {
+    position: absolute !important;
+    top: 50% !important;
+    z-index: 1000 !important;
+    margin: 0 !important;
     
-    /* Dark Thin Left Arrow */
-    & #prevBtn {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23222222' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E") !important;
-    }
+    /* --- Dimensions --- */
+    width: 30px !important;            
+    height: 50px !important;           
+    border-radius: 25px !important;    
     
-    /* Dark Thin Right Arrow */
-    & #nextBtn {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23222222' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E") !important;
-    }
+    /* --- MATTE STYLE (Opaque) --- */
+    background: #1a1a1a !important;    /* Solid Matte Black (No transparency) */
+    border: 1px solid #333 !important; /* Subtle dark border (Not shiny) */
+    backdrop-filter: none !important;  /* Removes the glossy blur */
+    box-shadow: none !important;       /* Removes the glow */
+    
+    /* Icon Style */
+    color: #e0e0e0 !important;         /* Off-white arrow (softer than pure white) */
+    font-size: 1.4rem !important;      
+    font-family: sans-serif !important;
+    line-height: 1 !important;
+    
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease !important;
 }
 
-/* ---------------------------------------------------- */
-/* 2. DARK THEME (Dark Pill / White Arrow) */
-/* ---------------------------------------------------- */
-
-/* Detect Dark Mode */
-:root[data-theme="dark"] {
-    & #prevBtn, & #nextBtn {
-        background-color: #222222 !important; /* Dark Pill */
-        border-color: rgba(255,255,255,0.1);
-    }
-
-    /* White Thin Left Arrow */
-    & #prevBtn {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E") !important;
-    }
-
-    /* White Thin Right Arrow */
-    & #nextBtn {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E") !important;
-    }
+/* 2. Hover Effect: Dark Grey */
+#prevBtn:hover, #nextBtn:hover {
+    background: #333 !important;       /* Lighter Charcoal Grey to show interaction */
+    border-color: #444 !important;
+    color: white !important;           
 }
 
-/* ---------------------------------------------------- */
-/* POSITIONING */
-/* ---------------------------------------------------- */
-
+/* 3. LEFT ARROW: Tilts Top-Left */
 #prevBtn {
-    left: -155px !important;
-    right: auto;
+    left: calc(50% - 320px) !important;  
+    right: auto !important;
+    transform: translateY(-50%) rotate(-15deg) !important;
 }
 
+#prevBtn:hover {
+    transform: translateY(-50%) rotate(-15deg) scale(1.1) !important;
+}
+
+/* 4. RIGHT ARROW: Tilts Top-Right */
 #nextBtn {
-    right: -155px !important;
-    left: auto;
+    right: calc(50% - 320px) !important; 
+    left: auto !important;
+    transform: translateY(-50%) rotate(15deg) !important;
 }
 
-/* Hover Effect */
-#prevBtn:hover, 
 #nextBtn:hover {
-    transform: translateY(-50%) scale(1.05);
+    transform: translateY(-50%) rotate(15deg) scale(1.1) !important;
+}
+
+/* 5. MOBILE FIX */
+@media (max-width: 768px) {
+    #prevBtn, #nextBtn {
+        width: 30px !important;
+        height: 50px !important;
+        transform: translateY(-50%) rotate(0deg) !important; 
+    }
+    #prevBtn { left: 5px !important; }
+    #nextBtn { right: 5px !important; }
 }
