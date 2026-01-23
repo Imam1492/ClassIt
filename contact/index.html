@@ -15,12 +15,12 @@
   gtag('config', 'G-RHLBMVEWF4');
 </script>
 
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="../manifest.json">
 
 <meta property="og:title" content="Contact Us — ClassIt" />
 <meta property="og:description" content="Have a question, comment, or concern? We'd love to hear from you. Get in touch with the ClassIt team." />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://www.ClassIt.com/contactus.html" />
+<meta property="og:url" content="https://www.ClassIt.com/contactus/" />
 <meta property="og:image" content="https://www.ClassIt.com/assets/images/ClassIt-contact-preview.jpg" />
 
   <script>
@@ -32,22 +32,22 @@
       if (theme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
         // Make sure this points to your SQUARE silver icon
-        if(favIcon) favIcon.href = './assets/images/favicon-dark-sq.png';
+        if(favIcon) favIcon.href = '../assets/images/favicon-dark-sq.png';
       }
     } catch (e) { /* Ignore errors */ }
   })();
 </script>
 
-<link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
-<link id="dynamic-favicon" rel="icon" type="image/png" sizes="96x96" href="./assets/images/favicon-gold-sq.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
+<link id="dynamic-favicon" rel="icon" type="image/png" sizes="96x96" href="../assets/images/favicon-gold-sq.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
   
-  <link rel="stylesheet" href="./assets/css/style.css" />
-  <link rel="stylesheet" href="./assets/css/chatbot.css" />
-  <link rel="stylesheet" href="./assets/css/contactus.css" />
-    <link rel="stylesheet" href="./assets/css/theme-toggle.css" />
-  <link rel="stylesheet" href="./assets/css/dark-theme.css" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/chatbot.css" />
+  <link rel="stylesheet" href="../assets/css/contactus.css" />
+    <link rel="stylesheet" href="../assets/css/theme-toggle.css" />
+  <link rel="stylesheet" href="../assets/css/dark-theme.css" />
 
   <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
 </head>
@@ -68,21 +68,21 @@
       <h2 class="sidebar-title">Menu</h2>
     </div>
     <nav class="sidebar-nav">
-      <a href="index.html">Home</a>
-      <a href="Livogue.html">Livogue</a>
-      <a href="wellfit.html">Wellfit</a>
-      <a href="tech.html">Tech</a>
-      <a href="aboutus.html">About Us</a>
-      <a href="contactus.html" class="active">Contact</a>
-    </nav>
+  <a href="/">Home</a>
+  <a href="/Livogue/">Livogue</a>
+  <a href="/wellfit/">Wellfit</a> 
+  <a href="/tech/">Tech</a>
+  <a href="/about/">About Us</a>
+  <a href="/contact/">Contact</a>
+</nav>
   </aside>
 
   <header class="topbar">
     <button id="menuBtn" class="hamburger" aria-label="Open menu">☰</button>
-    <a href="index.html" class="site-logo brand-logo">
-  <img src="./assets/images/logo-gold.png" alt="ClassIt" class="logo-light">
+    <a href="/" class="site-logo brand-logo">
+  <img src="../assets/images/logo-gold.png" alt="ClassIt" class="logo-light">
   
-  <img src="./assets/images/logo-silver.png" alt="ClassIt" class="logo-dark">
+  <img src="../assets/images/logo-silver.png" alt="ClassIt" class="logo-dark">
 </a>
   </header>
 
@@ -212,9 +212,26 @@
     
   </main>
 
-  <!-- <script src="./assets/js/script.js"></script> -->
-  <script type="module" src="./assets/js/main.js" defer></script>
-<!-- <script src="./assets/js/chatbot.js" defer></script> -->
+  <div id="chatbotToggle" aria-label="Open Chatbot">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="28" height="28">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h6m-6 8l-4-4V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H7z" />
+    </svg>
+  </div>
+  <div id="chatbotWindow" class="hidden">
+    <div id="chatbotHeader">
+      <span>ClassIt’s Smart AI Assistant</span>
+      <button id="chatbotClose">&times;</button>
+    </div>
+    <div id="chatbotMessages"></div>
+    <div id="chatbotInputArea">
+      <input id="chatbotInput" type="text" placeholder="Type your message..." />
+      <button id="chatbotSend">➤</button>
+    </div>
+  </div>
+
+  <!-- <script src="../assets/js/script.js"></script> -->
+  <script type="module" src="../assets/js/main.js" defer></script>
+<!-- <script src="../assets/js/chatbot.js" defer></script> -->
 
   <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -267,7 +284,7 @@
     });
   });
   </script>
-    <script src="./assets/js/theme-switcher.js"></script>
+    <!-- <script src="../assets/js/theme-switcher.js"></script> -->
 
 <label class="switch">
     <input id="themeToggleInput" type="checkbox" />
@@ -310,7 +327,7 @@
     <span style="margin: 0 8px;">|</span> 
     &copy; 2026 ClassIt 
     <span style="margin: 0 8px;">|</span>
-    <a href="contactus.html" style="color: inherit; text-decoration: underline;">Legal Info</a>
+    <a href="/contact/" style="color: inherit; text-decoration: underline;">Legal Info</a>
   </p>
 </footer>
 

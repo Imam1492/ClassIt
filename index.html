@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
@@ -14,157 +16,129 @@
   <meta property="og:title" content="ClassIt - Vibe-Checked & Quality-Approved Products" />
   <meta property="og:description" content="Your new favorite corner of the internet. We personally test and curate the best products in Livogue, wellfit, and Tech so you don't have to." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.ClassIt.com/index.html" />
+  <meta property="og:url" content="https://www.ClassIt.com/" />
   <meta property="og:image" content="https://www.ClassIt.com/assets/images/ClassIt-home-preview.jpg" />
 
-  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
+  <link id="dynamic-favicon" rel="icon" type="image/png" href="./assets/images/favicon-gold-sq.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png">
+  <link rel="manifest" href="./manifest.json">
+
+  <script>
+    (function () {
+      try {
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+
+        const favicon = document.getElementById('dynamic-favicon');
+        if (favicon) {
+          favicon.href = theme === 'dark'
+            ? './assets/images/favicon-dark-sq.png'
+            : './assets/images/favicon-gold-sq.png';
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    /* Fix to force footer to the bottom on Home Page */
+    body {
+      min-height: 100vh;        /* Forces the page to be full screen height */
+      display: flex;            /* Enables flexible layout */
+      flex-direction: column;   /* Stacks content vertically */
+      margin: 0;
+    }
+  </style>
+
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/chatbot.css">
+  <link rel="stylesheet" href="./assets/css/theme-toggle.css">
+  <link rel="stylesheet" href="./assets/css/dark-theme.css">
   
-<link id="dynamic-favicon" rel="icon" type="image/png" href="/favicon-gold-sq-v2.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-<link rel="manifest" href="/manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:wght@400;700&display=swap" rel="stylesheet">
+</head>
 
-<script>
-  (function () {
-    try {
-      const theme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', theme);
+<body data-home="true">
+  
+  <div id="overlay" class="overlay hidden"></div>
+  
+  <aside id="sidebar" class="sidebar" aria-hidden="true">
+    <button id="closeSidebar" class="sidebar-close" aria-label="Close menu">✕</button>
+    <div class="sidebar-header"><h2 class="sidebar-title">Menu</h2></div>
+    <nav class="sidebar-nav">
+      <a href="/">Home</a>
+      <a href="/Livogue/">Livogue</a>
+      <a href="/wellfit/">Wellfit</a>
+      <a href="/tech/">Tech</a>
+      <a href="/about/">About Us</a>
+      <a href="/contact/">Contact</a>
+    </nav>
+  </aside>
+  
+  <header class="topbar">
+    <button id="menuBtn" class="hamburger" aria-label="Open menu">☰</button>
+    <div class="search-wrap">
+      <input id="searchInput" class="search-input" type="text" placeholder="Search products..." autocomplete="off"/>
+      <button id="searchBtn" class="search-action" aria-label="Search" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+      <div id="searchDropdown" class="search-dropdown hidden" role="listbox"></div>
+    </div>
+    <a href="/" class="site-logo brand-logo">
+      <img src="./assets/images/logo-gold.png" alt="ClassIt" class="logo-light">
+      <img src="./assets/images/logo-silver.png" alt="ClassIt" class="logo-dark">
+    </a>
+  </header>
+  
+  
+  <div id="cookie-banner" style="position: fixed; bottom: 0; left: 0; width: 100%; background: #222; color: #fff; padding: 15px; text-align: center; z-index: 1000; display: none;">
+  <p style="margin: 0; display: inline-block; font-size: 0.9rem;">
+    We use cookies to ensure you get the best experience and to support our site via affiliate links.
+  </p>
+  <button id="accept-cookies" style="margin-left: 15px; padding: 5px 15px; background: #FFD700; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+    Got it
+  </button>
+  </div>
 
-      const favicon = document.getElementById('dynamic-favicon');
-      if (favicon) {
-        favicon.href = theme === 'dark'
-            ? '/favicon-dark-sq-v2.png'
-            : '/favicon-gold-sq-v2.png';
-      }
-    } catch (e) {}
-  })();
-</script>
-
-<style>
-  /* Fix to force footer to the bottom on Home Page */
-  body {
-    min-height: 100vh;        /* Forces the page to be full screen height */
-    display: flex;            /* Enables flexible layout */
-    flex-direction: column;   /* Stacks content vertically */
-    margin: 0;
-  }
-</style>
-
-  <!-- <script>
-  (function () {
-    try {
-      const theme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', theme);
-
-      const favicon = document.getElementById('dynamic-favicon');
-      if (favicon) {
-        // UPDATED: Now pointing to root '/' to match your public folder location
-        favicon.href =
-          theme === 'dark'
-            ? '/favicon-dark-sq-v2.png'
-            : '/favicon-gold-sq-v2.png';
-            }
-            } catch (e) {}
-            })();
-          </script> -->
-          
-          <link rel="stylesheet" href="./assets/css/style.css">
-          <link rel="stylesheet" href="./assets/css/chatbot.css">
-          <link rel="stylesheet" href="./assets/css/theme-toggle.css">
-          <link rel="stylesheet" href="./assets/css/dark-theme.css">
-          
-          <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:wght@400;700&display=swap" rel="stylesheet">
-        </head>
-        
-        <body data-home="true">
-          
-          
-          
-          <div id="overlay" class="overlay hidden"></div>
-          
-          <!-- Sidebar -->
-          <aside id="sidebar" class="sidebar" aria-hidden="true">
-            <button id="closeSidebar" class="sidebar-close" aria-label="Close menu">✕</button>
-            <div class="sidebar-header"><h2 class="sidebar-title">Menu</h2></div>
-            <nav class="sidebar-nav">
-              <a href="index.html">Home</a>
-              <a href="Livogue.html">Livogue</a>
-              <a href="wellfit.html">Wellfit</a>
-              <a href="tech.html">Tech</a>
-              <a href="aboutus.html">About Us</a>
-              <a href="contactus.html">Contact</a>
-              
-            </nav>
-          </aside>
-          
-          <!-- Topbar -->
-          <header class="topbar">
-            <button id="menuBtn" class="hamburger" aria-label="Open menu">☰</button>
-            <div class="search-wrap">
-              <input id="searchInput" class="search-input" type="text" placeholder="Search products..." autocomplete="off"/>
-              <button id="searchBtn" class="search-action" aria-label="Search" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="7"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-              </button>
-              <div id="searchDropdown" class="search-dropdown hidden" role="listbox"></div>
-            </div>
-            <a href="index.html" class="site-logo brand-logo">
-              <img src="./assets/images/logo-gold.png" alt="ClassIt" class="logo-light">
-              
-              <img src="./assets/images/logo-silver.png" alt="ClassIt" class="logo-dark">
-            </a>
-          </header>
-          
-          
-          <div id="cookie-banner" style="position: fixed; bottom: 0; left: 0; width: 100%; background: #222; color: #fff; padding: 15px; text-align: center; z-index: 1000; display: none;">
-          <p style="margin: 0; display: inline-block; font-size: 0.9rem;">
-            We use cookies to ensure you get the best experience and to support our site via affiliate links.
-          </p>
-          <button id="accept-cookies" style="margin-left: 15px; padding: 5px 15px; background: #FFD700; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-            Got it
-          </button>
-          </div>
-
-          <!-- Main Content -->
-          <main class="main">
+  <main class="main">
     <h1 id="mainTitle" class="title">Top Picks</h1>
     
-    <!-- Gallery -->
     <section id="gallerySection" class="gallery-section is-loading">
       <button id="prevBtn" class="gallery-arrow left" aria-label="Previous">‹</button>
-      <div id="gallery" class="gallery is-loading" aria-live="polite"><article class="skeleton-gallery-card">
-        <div class="skeleton-image"></div>
-        <div class="skeleton-text"></div>
-        <div class="skeleton-text short"></div>
-      </article>
-<article class="skeleton-gallery-card">
-  <div class="skeleton-image"></div>
-  <div class="skeleton-text"></div>
-  <div class="skeleton-text short"></div>
-</article>
-<article class="skeleton-gallery-card">
-  <div class="skeleton-image"></div>
-  <div class="skeleton-text"></div>
-  <div class="skeleton-text short"></div>
-</article></div>
+      <div id="gallery" class="gallery is-loading" aria-live="polite">
+        <article class="skeleton-gallery-card">
+          <div class="skeleton-image"></div>
+          <div class="skeleton-text"></div>
+          <div class="skeleton-text short"></div>
+        </article>
+        <article class="skeleton-gallery-card">
+          <div class="skeleton-image"></div>
+          <div class="skeleton-text"></div>
+          <div class="skeleton-text short"></div>
+        </article>
+        <article class="skeleton-gallery-card">
+          <div class="skeleton-image"></div>
+          <div class="skeleton-text"></div>
+          <div class="skeleton-text short"></div>
+        </article>
+      </div>
       <button id="nextBtn" class="gallery-arrow right" aria-label="Next">›</button>
     </section>
 
-    <!-- Search Results -->
     <section id="searchResults" class="search-results hidden"></section>
     <div id="searchPagination" class="pagination hidden"></div>
   </main>
   
 
-  <!-- Chatbot -->
-  <button id="chatbotToggle" aria-label="Open Chatbot" type="button">
-
+  <div id="chatbotToggle" aria-label="Open Chatbot">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="28" height="28">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h6m-6 8l-4-4V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H7z" />
     </svg>
-  </button>
-
+  </div>
   <div id="chatbotWindow" class="hidden">
     <div id="chatbotHeader">
       <span>ClassIt’s Smart AI Assistant</span>
@@ -177,19 +151,14 @@
     </div>
   </div>
 
-  <!-- Scripts -->
   <script>
     // Enable Sanity fallback
     window.SANITY_PROJECT_ID = "fwafbt19"; 
     window.SANITY_DATASET = "production";
   </script>
  
- <!-- <script src="./assets/js/script.js"></script> -->
   <script type="module" src="./assets/js/main.js" defer></script>
-<!-- <script src="./assets/js/chatbot.js" defer></script> -->
-  <!-- <script src="./assets/js/theme-switcher.js"></script> -->
-
- <label class="switch">
+  <label class="switch">
     <input id="themeToggleInput" type="checkbox" />
     <div class="slider round">
       <div class="sun-moon">
@@ -231,11 +200,11 @@
     <span style="margin: 0 8px;">|</span> 
     &copy; 2026 ClassIt 
     <span style="margin: 0 8px;">|</span>
-    <a href="contactus.html" style="color: inherit; text-decoration: underline;">Legal Info</a>
+    <a href="/contact/" style="color: inherit; text-decoration: underline;">Legal Info</a>
   </p>
 </footer>
 
-    <script>
+  <script>
     // Check if user has already accepted
     if (!localStorage.getItem('cookiesAccepted')) {
       document.getElementById('cookie-banner').style.display = 'block';
@@ -247,8 +216,6 @@
       document.getElementById('cookie-banner').style.display = 'none';
     });
   </script>
-
-
 
 </body>
 </html>
