@@ -1,10 +1,11 @@
 /* ===============================================
-   CONTACT US PAGE STYLES
+   CONTACT US PAGE STYLES (Dark Mode Ready)
    =============================================== */
 
-/* --- Header Adjustments (Corrected Version) --- */
+/* --- Header Adjustments --- */
 body[data-page="contact"] .topbar {
-  position: relative; /* Required for the centered title and logo */
+  position: relative;
+  background-color: var(--topbar-bg); /* CHANGED */
 }
 
 body[data-page="contact"] .topbar::after {
@@ -12,7 +13,7 @@ body[data-page="contact"] .topbar::after {
   font-family: 'Averia Libre', cursive;
   font-size: 1.8rem;
   font-weight: 700;
-  color: #2c2c2c;
+  color: var(--text-color); /* CHANGED */
   position: absolute;
   left: 50%;
   top: 50%;
@@ -22,15 +23,18 @@ body[data-page="contact"] .topbar::after {
   width: 100%;
 }
 
-/* UPDATED: This rule fixes the logo position on mobile */
 body[data-page="contact"] .site-logo {
-    position: static; /* Let it fall into the normal document flow */
+    position: static;
     transform: none;
-    margin-left: auto; /* Push to the right */
+    margin-left: auto;
 }
 
-
 /* --- Main Layout & Typography --- */
+body[data-page="contact"] {
+    background-color: var(--bg-color); /* CHANGED */
+    color: var(--text-color); /* CHANGED */
+}
+
 .contact-container {
   max-width: 900px;
   margin: 0 auto;
@@ -45,16 +49,16 @@ body[data-page="contact"] .site-logo {
 .contact-section h2 {
   font-family: 'Averia Libre', cursive;
   font-size: 1.75rem;
-  color: #333;
+  color: var(--text-color); /* CHANGED */
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #EADBC8;
+  border-bottom: 2px solid var(--border-color, #EADBC8); /* CHANGED */
 }
 
 .contact-section h3 {
   font-family: 'Averia Libre', cursive;
   font-size: 1.2rem;
-  color: #6B4F4F;
+  color: var(--brand-color, #6B4F4F); /* CHANGED */
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
 }
@@ -62,27 +66,27 @@ body[data-page="contact"] .site-logo {
 .contact-container p {
   font-size: 1rem;
   line-height: 1.6;
-  color: #555;
+  color: var(--text-secondary, #555); /* CHANGED */
 }
 
 .contact-container a {
-  color: #8C7462;
+  color: var(--brand-color, #8C7462); /* CHANGED */
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .contact-container a:hover {
-  color: #6B4F4F;
+  color: var(--text-color); /* CHANGED */
   text-decoration: underline;
 }
 
 /* --- Accordion for Policies --- */
 .accordion {
-  border-top: 1px solid #E4D5C2;
+  border-top: 1px solid var(--border-color, #E4D5C2); /* CHANGED */
 }
 
 .accordion-item {
-  border-bottom: 1px solid #E4D5C2;
+  border-bottom: 1px solid var(--border-color, #E4D5C2); /* CHANGED */
 }
 
 .accordion-header {
@@ -93,7 +97,7 @@ body[data-page="contact"] .site-logo {
   padding: 1rem 0;
   font-family: 'Averia Libre', cursive;
   font-size: 1.2rem;
-  color: #6B4F4F;
+  color: var(--brand-color, #6B4F4F); /* CHANGED */
   cursor: pointer;
   transition: background-color 0.2s ease;
   position: relative;
@@ -101,8 +105,7 @@ body[data-page="contact"] .site-logo {
 }
 
 .accordion-header:hover {
-  background-color: #f3eaddff;
-  
+  background-color: var(--hover-bg, #f3eadd); /* CHANGED */
 }
 
 .accordion-header::after {
@@ -112,7 +115,7 @@ body[data-page="contact"] .site-logo {
   top: 50%;
   transform: translateY(-50%);
   font-size: 1.5rem;
-  color: #8C7462;
+  color: var(--brand-color, #8C7462); /* CHANGED */
   transition: transform 0.3s ease;
 }
 
@@ -125,59 +128,31 @@ body[data-page="contact"] .site-logo {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-out;
-  background-color: #faf8f5;
-   margin-left: 1.5rem;   /* shifts the text inward */
-  padding-left: 0.35rem; /* small padding so numbers/bullets breathe */
+  background-color: var(--card-bg, #faf8f5); /* CHANGED */
+  margin-left: 1.5rem;
+  padding-left: 0.35rem;
   line-height: 1.6;
-  
+  color: var(--text-color); /* CHANGED */
 }
 
 .accordion-content p {
   padding: 1.5rem;
 }
 
-/* List items inside accordion content */
 .accordion-content li {
-  margin-left: 1.5rem;    /* space from the left */
-  padding-left: 0.25rem;  /* keeps numbering/bullets clean */
-  margin-bottom: 0.75rem; /* adds space below each item */
+  margin-left: 1.5rem;
+  padding-left: 0.25rem;
+  margin-bottom: 0.75rem;
   line-height: 1.6;
 }
 
-/* --- Active Sidebar Link --- */
-body[data-page="contact"] .sidebar-nav a[href="contactus.html"] {
-  background-color: #8C7462;
-  color: #fff;
-}
-
-
-/* =======================================================
-   --- BACKGROUND ---
-   ======================================================= */
-body[data-page="contact"] {
-    background-color: #F7F8F9;
-    
-}
-
-.points-list {
-  margin-top: 10px;
-  padding-left: 20px;
-}
-
-
-
-.hidden {
-  display: none;
-}
-
-
+/* --- Toggle Points --- */
 .toggle-points {
   display: inline;
   margin-top: 10px;
-  color: #0a0a0aff;
+  color: var(--text-color); /* CHANGED */
   cursor: pointer;
   text-decoration: underline;
-  font-weight: normal;
   background: none;
   border: none;
   padding: 0;
@@ -185,15 +160,11 @@ body[data-page="contact"] {
   font-family: inherit;
 }
 .toggle-points:hover {
-  color: #02202fff;
-  text-decoration: underline;
-  color: #0000EE;
+  color: var(--brand-color, #0000EE);
 }
 
-/* ===== Replace your broken #p.subtitle rule with this ===== */
-
+/* --- Page Header --- */
 .page-header {
-  /* keep header centered and stack title + subtitle */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -201,41 +172,37 @@ body[data-page="contact"] {
   margin: 2rem auto 3rem;
   max-width: 900px;
   padding: 0 1rem;
-  position: relative;   /* bring above decorative layers if needed */
+  position: relative;
   z-index: 2;
 }
 
 .page-header .title {
-  /* tweak to match your chosen font */
   font-family: 'Averia Libre', cursive;
   font-size: 3rem;
   margin: 0 0 0.5rem;
   line-height: 1.05;
-  color: #2c2c2c;
+  color: var(--text-color); /* CHANGED */
 }
 
 .page-header .subtitle {
-  display: block;            /* ensure it's block-level */
+  display: block;
   width: 100%;
-  max-width: 720px;         /* keeps the line-length readable */
-  margin: 0;                /* centered by parent flex + text-align */
-  padding: 0 0.75rem;       /* prevents text from touching edges on small screens */
+  max-width: 720px;
+  margin: 0;
+  padding: 0 0.75rem;
   font-size: 1rem;
   font-weight: 400;
-  color: #555;
+  color: var(--text-secondary, #555); /* CHANGED */
   line-height: 1.6;
   box-sizing: border-box;
 }
 
-/* small screens */
+/* --- Responsive --- */
 @media (max-width: 480px) {
   .page-header .title { font-size: 1.6rem; }
   .page-header .subtitle { font-size: 0.95rem; max-width: 100%; padding: 0 0.5rem; }
 }
 
-/* ===============================================
-   --- RESPONSIVE STYLES ---
-   =============================================== */
 @media (max-width: 768px) {
     body[data-page="contact"] .topbar::after {
         font-size: 1.5rem;
@@ -253,10 +220,92 @@ body[data-page="contact"] {
 
 @media (max-width: 520px) {
     body[data-page="contact"] .topbar::after {
-        content: 'Contact'; /* Shorter title */
+        content: 'Contact';
         font-size: 1.2rem;
     }
     .contact-container {
         padding: 1rem 1rem;
     }
+}
+
+/* ===============================================
+   HARDCODED DARK MODE OVERRIDES (CONTACT US) - FIXED
+   =============================================== */
+html[data-theme='dark'] body[data-page="contact"] {
+    background-color: #121212 !important; /* Deep Black */
+    color: #e0e0e0 !important;
+}
+
+/* Header Text */
+html[data-theme='dark'] body[data-page="contact"] .topbar::after {
+    color: #ffffff !important;
+}
+
+/* Page Titles */
+html[data-theme='dark'] .page-header .title {
+    color: #ffffff !important;
+}
+html[data-theme='dark'] .page-header .subtitle {
+    color: #aaaaaa !important;
+}
+
+/* Section Headings (Global) */
+html[data-theme='dark'] .contact-section h2 {
+    color: #ffffff !important;
+    border-bottom: 2px solid #444444 !important;
+}
+
+/* --- THE FIX: MAKE SUB-HEADERS WHITE (NOT YELLOW) --- */
+html[data-theme='dark'] .contact-section h3 {
+    color: #ffffff !important; /* Changed from Gold to White */
+}
+
+/* --- THE FIX: MAKE LINKS BLUE (LIKE TERMS & CONDITIONS) --- */
+/* --- THE FIX: LINKS WHITE BY DEFAULT, BLUE ON HOVER --- */
+html[data-theme='dark'] .contact-container a {
+    color: #ffffff !important; /* White by default */
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+html[data-theme='dark'] .contact-container a:hover {
+    color: #8ab4f8 !important; /* Blue ONLY on hover */
+    text-decoration: underline;
+}
+
+/* Accordion (FAQ) Box */
+html[data-theme='dark'] .accordion {
+    border-top: 1px solid #333 !important;
+}
+html[data-theme='dark'] .accordion-item {
+    border-bottom: 1px solid #333 !important;
+}
+
+/* Accordion Header */
+html[data-theme='dark'] .accordion-header {
+    color: #e0e0e0 !important;
+}
+html[data-theme='dark'] .accordion-header:hover {
+    background-color: #1e1e1e !important;
+}
+
+/* Accordion Expanded Content */
+html[data-theme='dark'] .accordion-content {
+    background-color: #1e1e1e !important;
+    color: #cccccc !important;
+}
+html[data-theme='dark'] .accordion-content li,
+html[data-theme='dark'] .accordion-content p {
+    color: #cccccc !important;
+}
+
+/* "Terms & Conditions" Toggle Link - Default White, Blue on Hover */
+html[data-theme='dark'] .toggle-points {
+    color: #e0e0e0 !important; /* Normal Text Color by default */
+    text-decoration: underline;
+}
+
+html[data-theme='dark'] .toggle-points:hover {
+    color: #8ab4f8 !important; /* Blue ONLY on hover */
+    cursor: pointer;
 }

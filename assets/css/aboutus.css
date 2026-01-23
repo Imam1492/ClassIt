@@ -1,5 +1,5 @@
 /* ===============================================
-   FINAL ABOUT US PAGE STYLES (v8)
+   FINAL ABOUT US PAGE STYLES (Dark Mode Ready)
    =============================================== */
 
 /* --- 1. Header Adjustments --- */
@@ -12,17 +12,17 @@ body[data-page="about"] .topbar::after {
   font-family: 'Averia Libre', cursive;
   font-size: 1.8rem;
   font-weight: 700;
-  color: #2c2c2c;
+  color: var(--text-color); /* CHANGED to variable */
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
- 
 }
 
-body[data-page="about"] .topbar{
+body[data-page="about"] .topbar {
   height: 84px;
+  background-color: var(--topbar-bg); /* CHANGED */
 }
 
 body[data-page="about"] .site-logo {
@@ -41,22 +41,18 @@ body[data-page="about"] .site-logo {
   z-index: 1000;
 }
 
-/* =======================================================
-   --- 3. BACKGROUND: THEMED TOPOGRAPHIC CONTOUR MAP ---
-   ======================================================= */
+/* --- 3. BACKGROUND --- */
 body[data-page="about"] {
-    background-color: #F7F8F9;
+    background-color: var(--bg-color); /* CHANGED */
+    color: var(--text-color); /* CHANGED */
 }
-/* ===============================================
-   --- END OF BACKGROUND SECTION ---
-   =============================================== */
-
 
 /* --- 4. Page Content Styles --- */
 body[data-page="about"] h1.title {
     font-size: 2.5rem;
     padding: 0 1rem;
     font-family: 'Averia Libre', cursive;
+    color: var(--text-color); /* CHANGED */
 }
 
 .about-content {
@@ -70,7 +66,7 @@ body[data-page="about"] h1.title {
 .about-content .outro {
   font-size: 1.1rem;
   line-height: 1.6;
-  color: #555;
+  color: var(--text-secondary, #555); /* CHANGED */
   margin-bottom: 3rem;
 }
 
@@ -82,9 +78,10 @@ body[data-page="about"] h1.title {
   text-align: left;
 }
 
+/* --- CARD STYLES (Key Dark Mode Fix) --- */
 .value-card {
-  background-color: #F5EFE6;
-  border: 1px solid #E4D5C2;
+  background-color: var(--card-bg, #F5EFE6); /* CHANGED */
+  border: 1px solid var(--border-color, #E4D5C2); /* CHANGED */
   border-radius: 15px;
   padding: 1.5rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -105,19 +102,17 @@ body[data-page="about"] h1.title {
 .value-card h3 {
   font-family: 'Averia Libre', cursive;
   font-size: 1.25rem;
-  color: #6B4F4F;
+  color: var(--brand-color, #6B4F4F); /* CHANGED */
   margin-bottom: 0.5rem;
 }
 
 .value-card p {
   font-size: 0.95rem;
-  color: #333;
+  color: var(--text-color); /* CHANGED */
   line-height: 1.5;
 }
 
-/* ===============================================
-   --- RESPONSIVE STYLES ---
-   =============================================== */
+/* --- RESPONSIVE STYLES --- */
 @media (max-width: 768px) {
     body[data-page="about"] .topbar::after {
         font-size: 1.5rem;
@@ -144,9 +139,46 @@ body[data-page="about"] h1.title {
     body[data-page="about"] h1.title {
         font-size: 1.8rem;
     }
-    /* UPDATED: Forces the grid to a single column on mobile */
     .our-values {
         grid-template-columns: 1fr;
     }
 }
 
+/* ===============================================
+   HARDCODED DARK MODE OVERRIDES (ABOUT US)
+   =============================================== */
+html[data-theme='dark'] body[data-page="about"] {
+    background-color: #121212 !important; /* Deep Black Background */
+    color: #e0e0e0 !important; /* Light Text */
+}
+
+/* Header Text */
+html[data-theme='dark'] body[data-page="about"] .topbar::after {
+    color: #ffffff !important;
+}
+
+/* Main Titles */
+html[data-theme='dark'] .title {
+    color: #ffffff !important;
+}
+
+/* The Cards */
+html[data-theme='dark'] .value-card {
+    background-color: #1e1e1e !important; /* Dark Gray Card */
+    border: 1px solid #333333 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+}
+
+/* Card Text */
+html[data-theme='dark'] .value-card h3 {
+    color: #e0e0e0 !important; /*  for Headings */
+}
+
+html[data-theme='dark'] .value-card p {
+    color: #cccccc !important; /* Light Gray for text */
+}
+
+html[data-theme='dark'] .intro, 
+html[data-theme='dark'] .outro {
+    color: #bbbbbb !important;
+}
