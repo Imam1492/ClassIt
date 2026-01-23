@@ -985,9 +985,42 @@ if (searchDropdown) {
         try {
             allProducts = await fetchProducts();
 
-            if (isCategoryPage) {
+           if (isCategoryPage) {
                 const allItems = allProducts.filter((p) => (p.category || '').toLowerCase() === (currentCategory || '').toLowerCase());
                 categoryItems = shuffleArray(allItems);
+
+                // --- START: DEEP LINK "VIP" LOGIC ---
+                // If the URL has a #hash (like #wipro-bulb), find that product!
+                const hash = window.location.hash.substring(1); 
+                
+                if (hash) {
+                    // 1. Find where the product ended up after shuffling
+                    const vipIndex = categoryItems.findIndex(p => createId(p.title) === hash);
+                    
+                    if (vipIndex > -1) {
+                        // 2. Remove it from its random spot
+                        const [vipProduct] = categoryItems.splice(vipIndex, 1);
+                        
+                        // 3. Force it to be the VERY FIRST item (Index 0)
+                        categoryItems.unshift(vipProduct);
+                        
+                        // 4. Add a visual highlight and smooth scroll after rendering
+                        setTimeout(() => {
+                            const targetCard = document.getElementById(hash);
+                            if (targetCard) {
+                                // Scroll it to the CENTER of the screen (fixes the header issue)
+                                targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                
+                                // Optional: Flash a border so they know which one it is
+                                targetCard.style.transition = "box-shadow 0.5s";
+                                targetCard.style.boxShadow = "0 0 0 4px #eab308"; // Yellow highlight
+                                setTimeout(() => { targetCard.style.boxShadow = "none"; }, 2000);
+                            }
+                        }, 500); // Wait 0.5s for the DOM to be ready
+                    }
+                }
+                // --- END: DEEP LINK LOGIC ---
+
                 renderCategoryGrid(1);
             }
             if (isHomePage) {
