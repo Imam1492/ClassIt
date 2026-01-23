@@ -1,5 +1,14 @@
 import './chatbot.js';
 
+// Helper: Turns "Wipro Smart Bulb" into "wipro-smart-bulb"
+function createId(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // Replace weird chars with hyphens
+    .replace(/(^-|-$)/g, '');    // Remove leading/trailing hyphens
+}
+
+
 // function setFavicon(theme) {
 //   // Remove existing favicon
 //   const oldFavicon = document.getElementById('dynamic-favicon');
@@ -395,7 +404,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // --- End of New Logic ---
 
             return `
-            <article class="product-card">
+                
+                <article class="product-card" id="${createId(p.title)}">
                 <div class="card-image-container"><img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/></div>
                 <h3>${escapeHtml(p.title)}</h3>
                 
@@ -456,7 +466,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // --- End of New Logic ---
 
                     return `
-                    <article class="product-card">
+                    <article class="product-card" id="${createId(p.title)}">
                         <div class="card-image-container"><img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/></div>
                         <h3>${escapeHtml(p.title)}</h3>
                         
@@ -715,7 +725,7 @@ const categories = [...new Set(
     let active = 0;
     gallery.innerHTML = ""; // 🔥 HARD RESET — prevents duplicate cards
     gallery.innerHTML = topPicks.map(p => `
-    <article class="card js-card-fix">
+    <article class="card js-card-fix" id="${createId(p.title)}">
             <div class="card-image-container">
     <img src="${escapeHtml(p.imageUrl || "https://placehold.co/300x220?text=Image")}" 
             alt="${escapeHtml(p.title)}"
@@ -932,13 +942,20 @@ if (searchDropdown) {
             const showMoreButton = e.target.closest('.show-more-btn');
 
             if (shareButton) {
-                e.preventDefault(); // Prevent any default button behavior
-                // Grab the data from the button's data attributes
-                const { title, description, link, image } = shareButton.dataset;
-                // Call the share handler
-                handleShareClick(title, description, link, image);
+    e.preventDefault(); 
 
-            } else if (showMoreButton) {
+    // 1. Get data, BUT ignore the 'link' from dataset (which is Amazon)
+    const { title, description, image } = shareButton.dataset;
+
+    // 2. Generate the "Deep Link" to your site
+    // This creates: https://classit.co.in/tech.html#wipro-smart-bulb
+    const productId = createId(title);
+    const deepLink = `${window.location.origin}${window.location.pathname}#${productId}`;
+
+    // 3. Call the share handler with YOUR site link
+    handleShareClick(title, description, deepLink, image);
+
+                } else if (showMoreButton) {
                 e.preventDefault();
                 const card = showMoreButton.closest('.product-card');
                 if (!card) return; // Make sure we are on a category card
