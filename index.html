@@ -42,12 +42,41 @@
   </script>
 
   <style>
-    /* Fix to force footer to the bottom on Home Page */
-    body {
-      min-height: 100vh;        /* Forces the page to be full screen height */
-      display: flex;            /* Enables flexible layout */
-      flex-direction: column;   /* Stacks content vertically */
+    /* 1. Force the page to act like a Flex column */
+    html, body {
+      height: 100%;
       margin: 0;
+      padding: 0;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* 2. Main content grows to push footer down */
+    main.main {
+      flex: 1 0 auto;
+      width: 100%;
+      position: relative;
+      display: block; /* Ensure it's a block */
+    }
+
+    /* 3. FORCE Search Results to have height (The Fix) */
+    #searchResults {
+      display: flow-root !important; /* Forces container to wrap around floated cards */
+      width: 100%;
+      overflow: visible; 
+      min-height: 200px; /* Gives it presence even if empty */
+    }
+
+    /* 4. Footer safety settings */
+    footer {
+      flex-shrink: 0;
+      position: relative !important; /* Never let it be fixed */
+      z-index: 10;
+      clear: both; /* Drop below everything */
+      background: var(--bg-color); /* Ensure opaque background */
     }
   </style>
 
@@ -130,6 +159,7 @@
     </section>
 
     <section id="searchResults" class="search-results hidden"></section>
+    
     <div id="searchPagination" class="pagination hidden"></div>
   </main>
   
@@ -185,38 +215,30 @@
   </label>
 
 
-<footer style="
+  <footer style="
     background: var(--bg-color); 
     padding: 10px 15px; 
     text-align: center; 
     font-size: 0.7rem; 
     opacity: 0.7; 
-    margin-top: 50px; /* Increased margin to ensure gap */
+    width: 100%;
+    margin-top: 50px;
     border-top: 1px solid rgba(255,255,255,0.1);
-    
-    /* --- THE FIX --- */
-    clear: both;        /* Pushes footer below floating cards */
-    width: 100%;        /* Ensures it spans full width */
-    position: relative; /* stops it from overlapping absolute elements */
-    display: block;
-">
-  <p style="margin: 0; line-height: 1.4;">
-    <strong>Affiliate Disclosure:</strong> ClassIt participates in the Amazon Associates Program and other affiliate partnerships (like Flipkart). 
-    We earn from qualifying purchases.
-    <span style="margin: 0 8px;">|</span> 
-    &copy; 2026 ClassIt 
-    <span style="margin: 0 8px;">|</span>
-    <a href="/contact/" style="color: inherit; text-decoration: underline;">Legal Info</a>
-  </p>
-</footer>
+  ">
+    <p style="margin: 0; line-height: 1.4;">
+      <strong>Affiliate Disclosure:</strong> ClassIt participates in the Amazon Associates Program and other affiliate partnerships (like Flipkart). 
+      We earn from qualifying purchases.
+      <span style="margin: 0 8px;">|</span> 
+      &copy; 2026 ClassIt 
+      <span style="margin: 0 8px;">|</span>
+      <a href="/contact/" style="color: inherit; text-decoration: underline;">Legal Info</a>
+    </p>
+  </footer>
 
   <script>
-    // Check if user has already accepted
     if (!localStorage.getItem('cookiesAccepted')) {
       document.getElementById('cookie-banner').style.display = 'block';
     }
-  
-    // Handle button click
     document.getElementById('accept-cookies').addEventListener('click', () => {
       localStorage.setItem('cookiesAccepted', 'true');
       document.getElementById('cookie-banner').style.display = 'none';
