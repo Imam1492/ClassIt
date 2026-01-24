@@ -445,6 +445,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const paginated = results.slice(start, start + ITEMS_PER_PAGE_SEARCH);
 
         if (!paginated.length) {
+
+        /* --- STEP 4: ADD TRACKING HERE --- */
+// This triggers only when the search comes up empty
+gtag('event', 'search_no_results', { 'keyword': query });
+
                 searchResults.innerHTML = `<div class="no-results-wrapper"><p class="no-results-message"><span>No results found for </span><strong>"${escapeHtml(query)}"</strong></p></div>`;
             
             if (isHomePage && gallerySection) {
@@ -1072,7 +1077,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggleInput');
     const currentTheme = localStorage.getItem('theme') || 'light';
 
-    // Helper Function to Apply Theme
+   // Helper Function to Apply Theme
     const applyTheme = (theme) => {
         // 1. Set CSS Variable
         document.documentElement.setAttribute('data-theme', theme);
@@ -1081,13 +1086,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Update Toggle Switch Visuals
         if (themeToggle) themeToggle.checked = (theme === 'dark');
         
-        // 3. SWAP FAVICON SOURCE (The Fix)
+        // 3. SWAP FAVICON SOURCE
         const favicon = document.getElementById('dynamic-favicon');
         if (favicon) {
             favicon.href = theme === 'dark' 
                 ? '/favicon-dark-sq-v2.png' 
                 : '/favicon-gold-sq-v2.png';
         }
+
+        /* --- CORRECTED TRACKING LINE --- */
+        // We use 'theme' directly because it was passed into the function
+        gtag('event', 'theme_toggle', { 'theme_selected': theme });
     };
 
     // Apply on initial load
@@ -1100,4 +1109,25 @@ document.addEventListener('DOMContentLoaded', () => {
             applyTheme(newTheme);
         });
     }
+});
+// Listen for any click on a "Buy Now" button
+document.addEventListener('click', function(e) {
+  if (e.target && (e.target.innerText === 'Buy Now' || e.target.closest('.buy-now-btn'))) {
+    const productCard = e.target.closest('article');
+    const productName = productCard ? productCard.querySelector('h2, h3').innerText : 'Unknown Product';
+    
+    gtag('event', 'affiliate_click', {
+      'event_category': 'Outbound',
+      'product_name': productName
+    });
+  }
+});
+// Track Left Arrow clicks
+document.getElementById('prevBtn')?.addEventListener('click', () => {
+  gtag('event', 'gallery_navigation', { 'direction': 'left' });
+});
+
+// Track Right Arrow clicks
+document.getElementById('nextBtn')?.addEventListener('click', () => {
+  gtag('event', 'gallery_navigation', { 'direction': 'right' });
 });
