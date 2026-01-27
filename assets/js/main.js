@@ -626,7 +626,57 @@ gtag('event', 'search_no_results', { 'keyword': query });
     createBtn("›", currentPage + 1, currentPage === totalPages, false);
 }
 
-    // ---------- 7. SEARCH LOGIC ----------
+   // ---------- 7. SEARCH LOGIC (SMART & FUZZY) ----------
+
+    // --- 7a. NEW: Smart Search Helpers ---
+    
+    // 1. Normalize String: Removes special chars & spaces (e.g., "Power Bank" -> "powerbank")
+    const normalize = (str) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    // 2. Levenshtein Distance: Calculates how many "typos" away two words are
+    const levenshtein = (a, b) => {
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+        for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) == a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1, // deletion
+                        matrix[i][j - 1] + 1,     // insertion
+                        matrix[i - 1][j] + 1      // substitution
+                    );
+                }
+            }
+        }
+        return matrix[b.length][a.length];
+    };
+
+    // 3. The "Brain": Decides if a product matches the query
+    const isMatch = (query, text) => {
+        if (!query || !text) return false;
+        const q = normalize(query);
+        const t = normalize(text);
+        
+        // Strict check: if the user typed "bank", matches "powerbank"
+        if (t.includes(q)) return true;
+        
+        // Fuzzy check: Only runs if query is > 2 chars to prevent lag
+        if (q.length > 2) {
+            // Allow 1 typo for every 4 letters (e.g. "ipone" -> "iphone")
+            const allowedErrors = Math.floor(q.length / 4) || 1; 
+            // Optimization: Only check math if lengths are somewhat close
+            if (Math.abs(q.length - t.length) < 4) { 
+                 return levenshtein(q, t) <= allowedErrors;
+            }
+        }
+        return false;
+    };
+
+    // --- 7b. Main Search Functions ---
+
     function resetToDefaultGrid() {
         if (searchResults) searchResults.classList.add('hidden');
         if (searchPagination) searchPagination.innerHTML = '';
@@ -642,48 +692,100 @@ gtag('event', 'search_no_results', { 'keyword': query });
             return;
         }
 
+        // Save to history (Standard Logic)
         const recents = loadRecent();
-        if (!recents.map(x => x.toLowerCase()).includes(query.toLowerCase())) {
+        // Only save if it's NOT already there (case insensitive)
+        if (!recents.some(x => x.toLowerCase() === query.toLowerCase())) {
             recents.unshift(query);
             saveRecent(recents);
         }
         hideDropdown();
 
         let pool = isCategoryPage ? categoryItems : [...allProducts];
-        const results = pool.filter(p =>
-            (p.title || '').toLowerCase().includes(query.toLowerCase()) ||
-            (p.description || '').toLowerCase().includes(query.toLowerCase())
+        
+        // --- SMART FILTERING ---
+        // Checks Title OR Description using the smart 'isMatch' logic
+        const results = pool.filter(p => 
+            isMatch(query, p.title) || 
+            (p.description && isMatch(query, p.description))
         );
+        
         renderSearchResults(results, page, query);
     }
 
     function hideDropdown() { if (searchDropdown) searchDropdown.classList.add('hidden'); searchSelectedIndex = -1; }
     
     function renderDropdown(filter = '') {
-    if (!searchDropdown) return;
+        if (!searchDropdown) return;
+        
+        // Always reset selection on new type
+        searchSelectedIndex = -1;
 
-    // ✅ ALWAYS reset selection when dropdown is rebuilt
-    searchSelectedIndex = -1;
+        const query = filter.trim();
+        let displayItems = [];
 
-    const list = loadRecent()
-        .filter(s => s.toLowerCase().includes(filter.toLowerCase()))
-        .slice(0, 6);
+        // 1. Get History Matches (Always check these)
+        // We use standard 'includes' for history to keep it snappy
+        const historyMatches = loadRecent().filter(s => 
+            s.toLowerCase().includes(query.toLowerCase())
+        );
 
-    if (!list.length) {
-        hideDropdown();
-        return;
+        // 2. Get Product Matches (Only if typing >= 3 letters)
+        let productMatches = [];
+        if (query.length >= 3) {
+            productMatches = allProducts
+                .filter(p => isMatch(query, p.title)) // Use smart match
+                .map(p => p.title);
+        }
+
+        // 3. Merge: History First, Then Products
+        // Use a Set to prevent duplicates (e.g. if "Wipro" is in history AND is a product)
+        const seen = new Set();
+        
+        // Add History items
+        historyMatches.forEach(item => {
+            const key = item.toLowerCase();
+            if(!seen.has(key)) {
+                seen.add(key);
+                displayItems.push({ text: item, type: 'history' });
+            }
+        });
+
+        // Add Product items (only if not seen)
+        productMatches.forEach(item => {
+             const key = item.toLowerCase();
+             if(!seen.has(key)) {
+                seen.add(key);
+                displayItems.push({ text: item, type: 'product' });
+            }
+        });
+
+        // Limit to 6 suggestions total
+        displayItems = displayItems.slice(0, 6);
+
+        if (!displayItems.length) {
+            hideDropdown();
+            return;
+        }
+
+        // Render with smart icons
+        searchDropdown.innerHTML = displayItems.map(item => `
+            <div class="row" data-value="${escapeHtml(item.text)}">
+                <span class="value" style="display: flex; justify-content: space-between; width: 100%;">
+                    <span>${escapeHtml(item.text)}</span>
+                    ${item.type === 'product' 
+                        ? '<span style="font-size: 0.75em; opacity: 0.5; font-style: italic;">Product</span>' 
+                        : ''}
+                </span>
+                
+                ${item.type === 'history' 
+                    ? `<button class="remove" data-remove="${escapeHtml(item.text)}" aria-label="Remove">✕</button>` 
+                    : ''}
+            </div>
+        `).join('');
+
+        searchDropdown.classList.remove('hidden');
     }
-
-    searchDropdown.innerHTML = list.map(s => `
-        <div class="row" data-value="${escapeHtml(s)}">
-            <span class="value">${escapeHtml(s)}</span>
-            <button class="remove" data-remove="${escapeHtml(s)}" aria-label="Remove ${escapeHtml(s)}">✕</button>
-        </div>
-    `).join('');
-
-    searchDropdown.classList.remove('hidden');
-}
-
 
     // ---------- 8. HOME PAGE LOGIC (Gallery & Placeholder) ----------
     
