@@ -1023,3 +1023,34 @@ header img, .navbar img, .logo img {
     border-color: #d2a97c !important;
     color: white !important;
 }
+
+/* --- HOMEPAGE CARD HEIGHT --- */
+        /* --- HOMEPAGE CARD HEIGHT --- */
+        .js-card-fix {
+             height: 430px; 
+             display: flex;
+             flex-direction: column;
+             justify-content: space-between;
+             
+             /* FIXED: Increased margin to push cards down away from "Top Picks" */
+             margin-top: 100px !important; 
+        }
+
+        /* 3. --- IMAGE STYLE FOR HOMEPAGE GALLERY --- */
+        .js-card-fix .card-image-container {
+            width: 100%;
+            height: 230px; /* FIXED: Increased from 150px to 220px */
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            border-radius: 8px;
+            background-color: transparent; 
+        }
+        .js-card-fix .card-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            display: block;
+        }
