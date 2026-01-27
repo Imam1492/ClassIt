@@ -269,6 +269,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             background-color: var(--brand-color, #8B4513); /* Scrollbar color */
             border-radius: 4px;
         }
+
+        /* --- LOGO SIZING FIX --- */
+        .site-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .site-logo img {
+            /* DESKTOP: Make it nice and big */
+            height: 63px !important; 
+            width: auto;
+            
+            /* SAFETY: Never let it be taller than the navigation bar itself */
+            max-height: 80%; 
+            object-fit: contain;
+        }
+
+            /* MOBILE: Slightly smaller to fit the tighter top bar */
+        @media (max-width: 768px) {
+            .site-logo img {
+                height: 35px !important; /* Increase this if you have space */
+            }
+        }
     `;
     document.head.appendChild(style);
 
