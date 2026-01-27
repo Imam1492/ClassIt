@@ -1024,15 +1024,36 @@ header img, .navbar img, .logo img {
     color: white !important;
 }
 
-/* 2. Laptop/Desktop ONLY: Tall & pushed down */
-        @media (min-width: 768px) {
-            .js-card-fix {
-                 height: 430px !important; 
-                 margin-top: 100px !important; /* Push down from "Top Picks" */
-            }
-            
-            /* Make image bigger ONLY on laptop */
-            .js-card-fix .card-image-container {
-                height: 230px !important;
-            }
-        }
+/* --- HOMEPAGE CARD HEIGHT --- */
+/* 2. Laptop/Desktop ONLY: Make it tall & push it down */
+@media (min-width: 768px) {
+    .js-card-fix {
+        height: 430px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        /* Push cards down away from "Top Picks" */
+        margin-top: 100px !important;
+    }
+
+    /* 3. --- IMAGE STYLE FOR HOMEPAGE GALLERY --- */
+    .js-card-fix .card-image-container {
+        width: 100%;
+        height: 230px; /* Increased from 150px */
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+        border-radius: 8px;
+        background-color: transparent;
+    }
+
+    .js-card-fix .card-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+}
