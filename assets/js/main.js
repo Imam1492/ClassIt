@@ -292,6 +292,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 height: 75px !important; /* Increase this if you have space */
             }
         }
+
+        /* --- MOBILE DARK MODE TOP BAR FIX --- */
+        @media (max-width: 768px) {
+            [data-theme="dark"] .topbar {
+                height: 60px !important;     /* Force it smaller (Standard is usually 60px) */
+                min-height: 50px !important; /* Override any minimums */
+                padding-top: 0 !important;   /* Remove extra padding */
+                padding-bottom: 0 !important;
+            }
+            
+            /* Optional: Adjust logo slightly if the bar gets too tight */
+            [data-theme="dark"] .site-logo img {
+                height: 75px !important; 
+            }
+        }
     `;
     document.head.appendChild(style);
 
