@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             /* MOBILE: Slightly smaller to fit the tighter top bar */
         @media (max-width: 768px) {
             .site-logo img {
-                height: 35px !important; /* Increase this if you have space */
+                height: 75px !important; /* Increase this if you have space */
             }
         }
     `;
