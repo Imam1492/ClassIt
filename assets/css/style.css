@@ -1024,26 +1024,15 @@ header img, .navbar img, .logo img {
     color: white !important;
 }
 
-/* --- HOMEPAGE CARD HEIGHT (RESPONSIVE) --- */
-        
-        /* 1. Default (Mobile): Keep it compact like before */
-        .js-card-fix {
-             /* Mobile height stays automatic or smaller */
-             margin-top: 40px; 
-             display: flex;
-             flex-direction: column;
-             justify-content: space-between;
-        }
-        
-        /* 2. Laptop/Desktop ONLY: Make it tall & push it down */
+/* 2. Laptop/Desktop ONLY: Tall & pushed down */
         @media (min-width: 768px) {
             .js-card-fix {
-                 height: 420px !important; 
-                 margin-top: 100px !important; /* Push down from title */
+                 height: 430px !important; 
+                 margin-top: 100px !important; /* Push down from "Top Picks" */
             }
             
             /* Make image bigger ONLY on laptop */
             .js-card-fix .card-image-container {
-                height: 220px !important;
+                height: 230px !important;
             }
         }
