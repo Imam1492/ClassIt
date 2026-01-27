@@ -169,19 +169,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         /* 6. Description Truncation (MODIFIED) */
         
-        /* Category page description (NOW SCROLLABLE) */
+       /* Category page description (FIXED VISUALS) */
         .product-card > p {
-            flex-grow: 0; /* FIXED: No grow/shrink */
+            flex-grow: 0; 
             flex-shrink: 0; 
-            overflow: hidden; /* This hides scrollbar by default */
+            overflow: hidden; 
             line-height: 1.4em;
-            max-height: 4.2em; /* FIXED: 1.4em * 3 lines */
+            
+            /* CHANGE 1: Increase height slightly so letters aren't cut */
+            max-height: 4.5em; 
+            
+            /* CHANGE 2: Add these 3 lines to force "..." at the end */
+            display: -webkit-box;
+            -webkit-line-clamp: 3; 
+            -webkit-box-orient: vertical;
+
             margin-bottom: 0; 
             margin-top: 10px;
             transition: max-height 0.3s ease-out;
             scrollbar-width: none;
             scrollbar-color: #8B4513 var(--card-bg, #f0e6dd);
         }
+
         /* Homepage description (Unchanged) */
         .js-card-fix > p {
             flex-grow: 0; flex-shrink: 0; 
@@ -388,23 +397,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ---------- 6. RENDERING LOGIC (MODIFIED) ----------
 
-    // Renders the main category grid and its pagination
     function renderCategoryGrid(page = 1) {
         if (!isCategoryPage) return;
         const start = (page - 1) * ITEMS_PER_PAGE_CATEGORY;
         const paginated = categoryItems.slice(start, start + ITEMS_PER_PAGE_CATEGORY);
 
         grid.innerHTML = paginated.map(p => {
-            // --- NEW: Logic for "Show More" ---
+            // --- FIX START: Changed limit from 100 to 60 ---
             const fullDesc = escapeHtml(p.description || "");
-            // FIXED: Changed slice to 100 chars (approx 3 lines)
-            const shortDesc = `${escapeHtml((p.description || "").slice(0, 100))}`;
-            const needsToggle = fullDesc.length > 100; // FIXED: Check vs 100
+            const limit = 60; // <--- THIS IS THE KEY CHANGE
+            
+            const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
+            const needsToggle = fullDesc.length > limit; 
             const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-            // --- End of New Logic ---
+            // --- FIX END ---
 
             return `
-                
                 <article class="product-card" id="${createId(p.title)}">
                 <div class="card-image-container"><img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/></div>
                 <h3>${escapeHtml(p.title)}</h3>
@@ -445,12 +453,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const paginated = results.slice(start, start + ITEMS_PER_PAGE_SEARCH);
 
         if (!paginated.length) {
+            /* --- STEP 4: TRACKING --- */
+            gtag('event', 'search_no_results', { 'keyword': query });
 
-        /* --- STEP 4: ADD TRACKING HERE --- */
-// This triggers only when the search comes up empty
-gtag('event', 'search_no_results', { 'keyword': query });
-
-                searchResults.innerHTML = `<div class="no-results-wrapper"><p class="no-results-message"><span>No results found for </span><strong>"${escapeHtml(query)}"</strong></p></div>`;
+            searchResults.innerHTML = `<div class="no-results-wrapper"><p class="no-results-message"><span>No results found for </span><strong>"${escapeHtml(query)}"</strong></p></div>`;
             
             if (isHomePage && gallerySection) {
                 const galleryClone = gallerySection.cloneNode(true);
@@ -463,40 +469,29 @@ gtag('event', 'search_no_results', { 'keyword': query });
             if (isCategoryPage) {
                 const defaultItems = categoryItems.slice(0, ITEMS_PER_PAGE_CATEGORY);
                 const defaultGridHTML = defaultItems.map(p => {
-                    // --- NEW: Logic for "Show More" ---
+                    // --- FIX START: Changed limit to 60 ---
                     const fullDesc = escapeHtml(p.description || "");
-                    const shortDesc = `${escapeHtml((p.description || "").slice(0, 100))}`; // FIXED: 100
-                    const needsToggle = fullDesc.length > 100; // FIXED: 100
+                    const limit = 60; 
+                    const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
+                    const needsToggle = fullDesc.length > limit; 
                     const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-                    // --- End of New Logic ---
+                    // --- FIX END ---
 
                     return `
                     <article class="product-card" id="${createId(p.title)}">
                         <div class="card-image-container"><img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/></div>
                         <h3>${escapeHtml(p.title)}</h3>
-                        
                         <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
                             ${shortDescWithEllipsis}
                         </p>
-                        ${needsToggle ? `
-                        <button class="show-more-btn" data-more-text="...more" data-less-text="less">
-                            ...more
-                        </button>
-                        ` : ''}
+                        ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
                         <div class="product-card-footer">
-                            <button class="share-btn" 
-                                    aria-label="Share ${escapeHtml(p.title)}"
-                                    data-title="${escapeHtml(p.title)}"
-                                    data-description="${escapeHtml(p.description)}"
-                                    data-link="${escapeHtml(p.link || '')}"
-                                    data-image="${escapeHtml(p.imageUrl || '')}"
-                                >
+                            <button class="share-btn" aria-label="Share" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
                             </button>
-                           
                             <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
                         </div>
-                        </article>
+                    </article>
                     `;
                 }).join('');
                 
@@ -511,39 +506,29 @@ gtag('event', 'search_no_results', { 'keyword': query });
             const gridDiv = document.createElement('div');
             gridDiv.className = 'product-grid';
             gridDiv.innerHTML = paginated.map(p => {
-                // --- NEW: Logic for "Show More" ---
+                // --- FIX START: Changed limit to 60 ---
                 const fullDesc = escapeHtml(p.description || "");
-                const shortDesc = `${escapeHtml((p.description || "").slice(0, 100))}`; // FIXED: 100
-                const needsToggle = fullDesc.length > 100; // FIXED: 100
+                const limit = 60; 
+                const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
+                const needsToggle = fullDesc.length > limit; 
                 const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-                // --- End of New Logic ---
+                // --- FIX END ---
 
                 return `
                 <article class="product-card">
                     <div class="card-image-container"><img src="${escapeHtml(p.imageUrl || p.image)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/></div>
                     <h3>${escapeHtml(p.title)}</h3>
-                    
                     <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
                         ${shortDescWithEllipsis}
                     </p>
-                    ${needsToggle ? `
-                    <button class="show-more-btn" data-more-text="...more" data-less-text="less">
-                        ...more
-                    </button>
-                    ` : ''}
+                    ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
                     <div class="product-card-footer">
-                        <button class="share-btn" 
-                                aria-label="Share ${escapeHtml(p.title)}"
-                                data-title="${escapeHtml(p.title)}"
-                                data-description="${escapeHtml(p.description)}"
-                                data-link="${escapeHtml(p.link || '')}"
-                                data-image="${escapeHtml(p.imageUrl || p.image || '')}"
-                            >
+                        <button class="share-btn" aria-label="Share" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || p.image || '')}">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
                         </button>
                         <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
                     </div>
-                    </article>
+                </article>
                 `;
             }).join('');
             searchResults.innerHTML = '';
@@ -557,7 +542,6 @@ gtag('event', 'search_no_results', { 'keyword': query });
 
         renderPagination(searchPagination, totalPages, page, (newPage) => doSearch(query, newPage));
     }
-
     // Generic pagination UI creator
   function renderPagination(container, totalPages, currentPage, clickHandler) {
     if (container) container.innerHTML = "";
