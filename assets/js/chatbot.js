@@ -14,6 +14,41 @@ document.addEventListener("DOMContentLoaded", () => {
     const STOP_WORDS = ["is", "the", "a", "an", "for", "to", "in", "at", "on", "my", "your", "please", "can", "you", "i", "do", "does", "want", "need", "find", "show", "me", "buy", "get"];
 
     // --- 2. HELPERS ---
+
+    // --- CONCEPT MAPPING (The Bridge) ---
+    const conceptMap = [
+        // ---------------------------------------------------------
+        // COPY START: Copy from this line down to the next comment
+        // ---------------------------------------------------------
+        {
+            // 1. What the User types (The "X")
+            triggers: ["laptop setup", "desk upgrade", "work from home"], 
+            
+            // 2. What the Bot searches for (The "Things of X")
+            // The bot will randomly pick ONE of these to show a product.
+            searchFor: ["mouse", "keyboard", "stand", "desk mat"] 
+        },
+        // ---------------------------------------------------------
+        // COPY END: Paste as many copies as you want below this line
+        // ---------------------------------------------------------
+
+        {
+            triggers: ["gym", "protein", "muscle", "workout"],
+            searchFor: ["whey", "creatine", "shaker"]
+        },
+        {
+             triggers: ["trip", "travel", "vacation"],
+             searchFor: ["bag", "backpack", "lock"]
+        },
+          {
+             triggers: ["something for muscle growth"],
+             searchFor: ["whey", "creatine", "shaker"]
+        },
+        {
+             triggers: ["going on a trip", "traveling soon"],
+             searchFor: ["bag", "backpack", "lock"]
+        },
+    ];
     
     // Copy of createId from main.js to ensure IDs match perfectly
     const createId = (name) => {
@@ -275,6 +310,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 return pickRandom(entry.responses);
             }
         }
+
+        // --- PASTE THIS INSIDE findSmartResponse() ---
+
+        // Check Concept Map (The Bridge)
+        for (const concept of conceptMap) {
+            // If the user's text matches one of the triggers...
+            if (concept.triggers.some(t => isCloseMatch(lowerInput, t))) {
+                
+                // ...Pick a random product keyword from the list...
+                const termToSearch = pickRandom(concept.searchFor);
+                
+                // ...And search for it!
+                const result = searchRealProducts(termToSearch);
+                if (result) return result;
+            }
+        }
+        
+        // --- END PASTE ---
 
         // 3. PRODUCT SEARCH (Using CLEAN Input)
         const cleanText = cleanInput(rawInput);
