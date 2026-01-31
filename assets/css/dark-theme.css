@@ -553,3 +553,19 @@ html[data-theme="dark"] .favorite-btn.active svg {
 [data-theme="dark"] .logo-dark {
     display: block;
 }
+
+/* 2. Dark Mode Override */
+[data-theme="dark"] .chat-link {
+    /* Option A: Light Blue (High Contrast) */
+    color: #4da3ff; 
+    
+    /* Option B: Brand Gold (Matches your Dark Mode Logo) */
+    /* color: #eab308; */ 
+}
+
+[data-theme="dark"] .chat-link:hover {
+    color: #80c1ff; /* Even lighter blue on hover */
+    
+    /* If using Gold: */
+    /* color: #facc15; */
+}

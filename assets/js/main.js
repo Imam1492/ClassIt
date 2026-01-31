@@ -967,6 +967,47 @@ const categories = [...new Set(
 
     // ---------- 9. EVENT LISTENERS & INITIALIZATION (MODIFIED) ----------
     async function init() {
+
+        // --- NEW: Handle "View Product" Clicks from Chatbot ---
+    // This listens for any click on a link with a hash (e.g., #wooden-watch)
+    document.addEventListener('click', (e) => {
+        // Check if the clicked element is a chatbot link with a hash
+        const link = e.target.closest('a');
+        if (link && link.classList.contains('chat-link') && link.getAttribute('href').includes('#')) {
+            
+            const href = link.getAttribute('href');
+            // Extract the ID (part after #)
+            const targetId = href.split('#')[1]; 
+            const targetCard = document.getElementById(targetId);
+
+            // If the card exists on THIS page...
+            if (targetCard) {
+                e.preventDefault(); // Stop the page from reloading
+                
+                // 1. Scroll nicely to center
+                targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // 2. Apply the "Vibrant Flash" effect
+                targetCard.style.transition = "box-shadow 0.5s ease, transform 0.5s ease";
+                
+                // Flash Gold Shadow + Scale Up slightly
+                targetCard.style.boxShadow = "0 0 20px 5px rgba(234, 179, 8, 0.6)"; // Gold glow
+                targetCard.style.transform = "scale(1.02)";
+                targetCard.style.zIndex = "10"; // Bring to front
+                
+                // Remove effect after 2 seconds
+                setTimeout(() => {
+                    targetCard.style.boxShadow = "none";
+                    targetCard.style.transform = "scale(1)";
+                    targetCard.style.zIndex = "1";
+                }, 2000);
+            }
+            // If card is NOT on this page, the default link behavior takes over 
+            // and navigates to the correct page (e.g. /Livogue/#id), 
+            // where your existing "Deep Link" logic will handle the highlight.
+        }
+    });
+    
         // --- Global Event Listeners ---
         menuBtn?.addEventListener('click', openSidebar);
         closeSidebar?.addEventListener('click', hideSidebar);
@@ -1113,6 +1154,7 @@ if (searchDropdown) {
         // --- Data-dependent Initialization ---
         try {
             allProducts = await fetchProducts();
+            window.CLASSIT_PRODUCTS = allProducts; // <--- TELLS CHATBOT: "HERE ARE THE REAL PRODUCTS"
 
            if (isCategoryPage) {
                 const allItems = allProducts.filter((p) => (p.category || '').toLowerCase() === (currentCategory || '').toLowerCase());

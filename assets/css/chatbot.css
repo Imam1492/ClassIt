@@ -262,3 +262,15 @@
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
   40% { opacity: 1; transform: scale(1); }
 }
+
+/* Add this to your CSS for the new clickable links */
+.chat-link {
+    color: #007bff; /* Or your brand gold color */
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+}
+.chat-link:hover {
+    color: #0056b3;
+    text-decoration: none;
+}

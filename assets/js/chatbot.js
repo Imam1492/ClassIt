@@ -1,55 +1,141 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // --- SELECTORS ---
-  const chatbotToggle = document.getElementById("chatbotToggle");
-  const chatbotWindow = document.getElementById("chatbotWindow");
-  const closeChatbot = document.getElementById("chatbotClose");
-  const chatLog = document.getElementById("chatbotMessages");
-  const userInput = document.getElementById("chatbotInput");
-  const sendBtn = document.getElementById("chatbotSend");
+    // --- SELECTORS ---
+    const chatbotToggle = document.getElementById("chatbotToggle");
+    const chatbotWindow = document.getElementById("chatbotWindow");
+    const closeChatbot = document.getElementById("chatbotClose");
+    const chatLog = document.getElementById("chatbotMessages");
+    const userInput = document.getElementById("chatbotInput");
+    const sendBtn = document.getElementById("chatbotSend");
 
-  // ✅ CHECK IF ELEMENTS EXIST BEFORE USING THEM
-  if (!chatbotToggle || !chatbotWindow || !chatLog || !userInput || !sendBtn) {
-    console.error("Chatbot elements not found in DOM");
-    return;
-  }
+    // ✅ CHECK IF ELEMENTS EXIST
+    if (!chatbotToggle || !chatbotWindow || !chatLog || !userInput || !sendBtn) return;
 
-  userInput.addEventListener("keydown", (e) => {
-    if ((e.key === "Enter" || e.code === "Enter" || e.keyCode === 13) && !e.shiftKey) {
-      e.preventDefault();
-      handleUserMessage();
-    }
-  });
+    // --- 1. CONFIG ---
+    const STOP_WORDS = ["is", "the", "a", "an", "for", "to", "in", "at", "on", "my", "your", "please", "can", "you", "i", "do", "does", "want", "need", "find", "show", "me", "buy", "get"];
 
+    // --- 2. HELPERS ---
+    
+    // Copy of createId from main.js to ensure IDs match perfectly
+    const createId = (name) => {
+        return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    };
 
-    // --- KNOWLEDGE BASE ---
+    const getInternalLink = (product) => {
+        const cat = (product.category || '').toLowerCase();
+        let folder = '';
+        
+        // Match exact folder names from your sidebar
+        if (cat.includes('tech')) folder = 'tech';
+        else if (cat.includes('livogue')) folder = 'Livogue';
+        else if (cat.includes('fit')) folder = 'wellfit';
+        
+        const id = createId(product.title);
+        return folder ? `/${folder}/#${id}` : `/#${id}`;
+    };
+
+    const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    const cleanInput = (text) => {
+        return text.toLowerCase()
+            .replace(/[^\w\s]/gi, '')
+            .split(' ')
+            .filter(word => !STOP_WORDS.includes(word))
+            .join(' ');
+    };
+
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return "Good morning! ☀️";
+        if (hour < 18) return "Good afternoon! 🌤️";
+        return "Good evening! 🌙";
+    };
+
+    // Levenshtein Distance (Typos)
+    const getDistance = (a, b) => {
+        if (a.length === 0) return b.length;
+        if (b.length === 0) return a.length;
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+        for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) == a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1,
+                        matrix[i][j - 1] + 1,
+                        matrix[i - 1][j] + 1
+                    );
+                }
+            }
+        }
+        return matrix[b.length][a.length];
+    };
+
+    const isCloseMatch = (text, keyword) => {
+        // STRICTER RULE: Short words (like "hi") must match exactly
+        if (keyword.length < 3) {
+            const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+            return regex.test(text);
+        }
+        
+        if (text.includes(keyword)) return true;
+        
+        const words = text.split(" ");
+        for (let word of words) {
+            if (Math.abs(word.length - keyword.length) > 2) continue;
+            const dist = getDistance(word, keyword);
+            const allowedErrors = keyword.length > 5 ? 2 : 1; 
+            if (dist <= allowedErrors) return true;
+        }
+        return false;
+    };
+
+    // --- 3. KNOWLEDGE BASE ---
     const knowledgeBase = [
+        // --- Greetings ---
         {
-            keywords: ["hi", "hello", "hey"],
-            response: "Hi there! 👋"
-        },
-         {
-            keywords: ["hi how are u", "hello how are you", "hey how r u", "how r u","how are you","how are u"],
-            response: "Hi I am good! , What about you?"
-        },
-
-              {
-            keywords: ["I am fine", "I am good","I am great","iam good","iam great","iam fine"],
-            response: "Nice, how may i help you today?"
+            triggers: ["hi", "hello", "hey", "start", "greetings"],
+            response: () => `${getGreeting()} Welcome to ClassIt! I can help you find products, check hours, or answer support questions.`
         },
         {
-            keywords: ["how are you", "how r u","how ru"],
-            response: "I am an AI chatbot, yet I am good."
+            triggers: ["how are you", "how r u", "how are u"],
+            responses: ["I am an AI chatbot, but I'm feeling great! How about you?", "I'm doing well, thanks for asking!"]
         },
         {
-            keywords: ["time"],
+            triggers: ["i am fine", "i am good", "i am great", "iam good"],
+            responses: ["Nice! How may I help you today?", "That's great to hear!"]
+        },
+        // --- Identity ---
+        {
+            triggers: ["who are you", "what are you", "who it is","who r u","who are you"],
+            response: () => "I am ClassIt's Smart AI assistant."
+        },
+        {
+            triggers: ["founder", "owner", "who made", "created by"],
+            response: () => "ClassIt was founded by A.I.M."
+        },
+        // --- Ordering & Status ---
+        {
+            triggers: ["when will i get my order", "where is my order", "order status"],
+            response: () => "Order timelines depend on the platform (Amazon, Flipkart, etc.). Please check their website or support for exact updates."
+        },
+        {
+            triggers: ["how do i order", "order product", "place order", "how to buy"],
+            response: () => "You can order your favourite product by clicking on the 'Buy Now' button. It will redirect you to the safe purchase page."
+        },
+        // --- Time & Date ---
+        {
+            triggers: ["time", "current time"],
             response: () => {
                 const now = new Date();
-                const timeString = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+                const timeString = now.toLocaleTimeString('en-US', { hour: "numeric", minute: "2-digit", hour12: true });
                 return `The current time is ${timeString}.`;
             }
         },
         {
-            keywords: ["date"],
+            triggers: ["date", "today date"],
             response: () => {
                 const now = new Date();
                 const dateString = now.toLocaleDateString([], { year: "numeric", month: "long", day: "numeric" });
@@ -57,229 +143,237 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         },
         {
-            keywords: ["day"],
+            triggers: ["day", "what day"],
             response: () => {
                 const now = new Date();
                 const dayString = now.toLocaleDateString([], { weekday: "long" });
                 return `Today is ${dayString}.`;
             }
         },
+        // --- Islamic / Cultural Greetings ---
         {
-            keywords: ["founder", "owner"],
-            response: "ClassIt was founded by A.I.M."
+            triggers: ["assalamualikum", "asalamalikum", "salam"],
+            response: () => "Wa'alikum Assalam wa rahmatullah hi wa barakatuhu."
         },
         {
-            keywords: ["who are you"],
-            response: "I am ClassIt's Smart AI assistant."
+            triggers: ["khairiyat", "kairiat", "kaise ho"],
+            response: () => "Alhamdulillah."
         },
         {
-            keywords: ["about", "ClassIt"],
-            response: "ClassIt is a site that shares high-quality, personally-vetted products in Livogue, wellfit, and Tech."
+            triggers: ["jazakallah", "jazakallah khair", "jazak allah"],
+            response: () => "Waiyyakum."
         },
-        
+        // --- Info & Support ---
         {
-            keywords: ["contact", "email", "get in touch", "help", "support"],
-            response: "You can reach us through the 'Contact Us' page for any inquiries."
-        },
-        {
-            keywords: ["how", "work", "buy", "purchase"],
-            response: "We are an intermediate site, that helps you purchase perfect products."
+            triggers: ["about", "what is classit"],
+            response: () => "ClassIt is a site that shares high-quality, personally-vetted products in Livogue, Wellfit, and Tech."
         },
         {
-            keywords: ["categories", "products", "sell", "Livogue", "wellfit", "tech"],
-            response: "We feature curated products in Livogue, wellfit, and Tech. Which are you most interested in?"
+            triggers: ["location", "where", "address", "office", "located"],
+            response: () => "We are located at:<br><b>ClassIt</b><br>Bahadurpura, Old City<br>Hyderabad, Telangana 500064<br>India 🇮🇳"
         },
         {
-             keywords: ["delivery", "delivary", "delievery", "delevery", "deliverey",
-        "shipping", "shiping", "shippin", "shpping",
-        "shipment", "shippment", "shipmant", "shipmnet" ],
-        
-            response: "All deliveries are handled by the platforms like Amazon/Flipkart as per their standards. ClassIt is not involved in shipping."
+            triggers: ["contact", "email", "get in touch", "help", "support"],
+            response: () => "You can reach us through the 'Contact Us' page or email <a href='mailto:contact@classit.co.in' class='chat-link'>contact@classit.co.in</a>."
         },
         {
-            keywords: ["defect", "damaged", "wrong order"],
-            response: "If you get a damaged or wrong item, contact the support of the site you ordered from with photos. They’ll provide a solution."
-        },
-         {
-            keywords: ["Assalamualikum","Asalamalikum","assalamalikum","asalamualikum"],
-            response: "Wa'alikum Assalam wa rahmatullah hi wa barakatuhu."
+            triggers: ["shipping", "delivery", "track", "arrive", "ship"],
+            response: () => "All deliveries are handled by the platforms like Amazon/Flipkart as per their standards. ClassIt is not involved in shipping."
         },
         {
-            keywords: ["khairiyat","khayriyat","kairiat","khayriat","khayryat"],
-            response: "Alhamdulillah."
+            triggers: ["defect", "damaged", "wrong order", "return"],
+            response: () => "If you get a damaged or wrong item, contact the support of the site you ordered from with photos. They’ll provide a solution."
+        },
+        // --- Specific Support Emails ---
+        { triggers: ["flipkart"], response: () => "Flipkart Support: <a href='mailto:cs@flipkart.com' class='chat-link'>cs@flipkart.com</a>" },
+        { triggers: ["meesho"], response: () => "Meesho Support: <a href='mailto:help@meesho.com' class='chat-link'>help@meesho.com</a>" },
+        { triggers: ["muscleblaze", "mb"], response: () => "MuscleBlaze: <a href='mailto:info@muscleblaze.com' class='chat-link'>info@muscleblaze.com</a>" },
+        {
+            triggers: ["thank", "thx", "cool", "ok"],
+            responses: ["You're welcome! 😊", "Happy to help!", "Let me know if you need anything else."]
         },
         {
-            keywords: ["Jazakallah khair"],
-            response: "Waiyyakum."
+             triggers: ["bye", "goodbye"],
+             responses: ["Goodbye! Come back soon! 👋"]
+        },
+        // Broad Category matching
+        {
+            triggers: ["categories", "products", "sell", "livogue", "wellfit", "tech"],
+            response: "We feature curated products in Livogue, Wellfit, and Tech. Which are you most interested in?"
+        },
+          // --- Business Info ---
+        {
+            triggers: ["location", "where", "address", "office", "located"],
+            response: () => "We are located at:<br><b>ClassIt</b><br>Bahadurpura, Old City<br>Hyderabad, Telangana 500064<br>India 🇮🇳"
         },
         {
-            keywords: ["when will i get my order", "where is my order", "order status"],
-            response: "Order timelines depend on the platform (Amazon, Flipkart, etc.). Please check their website or support for exact updates."
+            triggers: ["time", "business hours", "open", "close", "working"],
+            response: () => "<b>Business Hours:</b><br>Sat – Thu: 1:00 PM – 9:00 PM IST<br>Sun & Fri: Closed"
         },
-        {
-            keywords: ["how do i order", "order product", "place order"],
-            response: "You can order your favourite product by clicking on the 'Buy Now' button."
-        },
-        {
-            keywords: ["thanks", "thank you", "ok"],
-            response: "You're welcome! 😊"
-        }
     ];
 
-    const fallbackResponse = "I can only help with questions about ClassIt's products, how it works, and contact info.";
-    let hasGreeted = false;
+    // --- 4. DYNAMIC PRODUCT SEARCH (PERFORMANCE OPTIMIZED) ---
+    function searchRealProducts(cleanQuery) {
+        const products = window.CLASSIT_PRODUCTS || [];
+        if (products.length === 0 || !cleanQuery) return null;
 
-    // --- FUNCTIONS ---
-    const toggleChatbotWindow = () => chatbotWindow.classList.toggle("hidden");
-    const closeChatbotWindow = () => chatbotWindow.classList.add("hidden");
+        const queryWords = cleanQuery.split(' ');
 
+        // 1. Exact Title Matches (Fastest)
+        const exactMatch = products.find(p => p.title.toLowerCase().includes(cleanQuery));
+        if (exactMatch) {
+            const link = getInternalLink(exactMatch);
+            return `I found exactly what you're looking for! The <b>${exactMatch.title}</b>.<br><br>${exactMatch.description.substring(0, 60)}...<br><a href="${link}" class="chat-link view-product-btn">View Product</a>`;
+        }
+
+        // 2. Optimized Smart Search
+        // We only use heavy fuzzy matching on TITLE and CATEGORY.
+        // For Description, we use strict matching. This prevents the "stuck" feeling.
+        const matches = products.filter(p => {
+            const titleCat = (p.title + " " + p.category).toLowerCase();
+            const desc = (p.description || "").toLowerCase();
+
+            return queryWords.some(word => {
+                // Allow typos in Title/Category (Levenshtein)
+                if (isCloseMatch(titleCat, word)) return true;
+                
+                // STRICT match for Description (Faster than calculating distance for 500+ words)
+                if (word.length > 3 && desc.includes(word)) return true; 
+                
+                return false;
+            });
+        });
+
+        if (matches.length > 0) {
+            const p = matches[0]; 
+            const link = getInternalLink(p);
+            return `We have something like that! Check out the <b>${p.title}</b>.<br><br><a href="${link}" class="chat-link view-product-btn">Check it out</a>`;
+        }
+
+        return null;
+    }
+
+    // --- 5. CORE LOGIC ---
+    function findSmartResponse(rawInput) {
+        // Safety: Limit input length to prevent lag attacks
+        if (rawInput.length > 200) return "I can't understand, please rephrase.";
+
+        const lowerInput = rawInput.toLowerCase();
+        
+        // 1. Check Smart Negation
+        if (lowerInput.includes("clear") && lowerInput.includes("chat")) {
+            if (lowerInput.includes("don't") || lowerInput.includes("not") || lowerInput.includes("never")) {
+                return "Okay, I will keep the chat history safe! 🛡️";
+            }
+            return "CLEAR_COMMAND";
+        }
+
+        // 2. CHECK KNOWLEDGE BASE (Using RAW Input)
+        for (const entry of knowledgeBase) {
+            if (entry.triggers.some(t => isCloseMatch(lowerInput, t))) {
+                if (typeof entry.response === "function") return entry.response();
+                return pickRandom(entry.responses);
+            }
+        }
+
+        // 3. PRODUCT SEARCH (Using CLEAN Input)
+        const cleanText = cleanInput(rawInput);
+        const productResult = searchRealProducts(cleanText);
+        if (productResult) return productResult;
+
+        // 4. FINAL FALLBACK (As requested)
+        return "I can't understand, please rephrase.";
+    }
+
+    function handleUserMessage() {
+        const userText = userInput.value.trim();
+        if (!userText) return;
+
+        addMessage("user", userText);
+        userInput.value = "";
+        setFormState(false);
+
+        const typingIndicator = showTypingIndicator();
+        // Reduced max think time slightly to feel snappier
+        const thinkTime = Math.floor(Math.random() * 400) + 500; 
+
+        setTimeout(() => {
+            // SAFETY TRY-CATCH to prevent "Stuck" state
+            try {
+                const botResponse = findSmartResponse(userText);
+                typingIndicator.remove(); // Always remove loading dots
+
+                if (botResponse === "CLEAR_COMMAND") {
+                    chatLog.innerHTML = '';
+                    const confirm = addMessage('bot', 'Chat history cleared. ✨');
+                    setTimeout(() => {
+                        confirm.classList.add('fade-out');
+                        setTimeout(() => confirm.remove(), 300);
+                    }, 2000);
+                } else {
+                    addMessage("bot", botResponse);
+                }
+            } catch (error) {
+                console.error("Chatbot Error:", error);
+                typingIndicator.remove();
+                addMessage("bot", "I encountered a temporary error. Please try again.");
+            }
+
+            setFormState(true);
+            userInput.focus();
+        }, thinkTime);
+    }
+
+    // --- 6. UI HELPERS ---
     function addMessage(role, text) {
         const msgDiv = document.createElement("div");
         msgDiv.className = `msg ${role}`;
-        const contentDiv = document.createElement("div");
-        contentDiv.className = "content";
-        contentDiv.textContent = text;
-        msgDiv.appendChild(contentDiv);
+        msgDiv.innerHTML = `<div class="content">${text}</div>`;
         chatLog.appendChild(msgDiv);
-        chatLog.scrollTo({ top: chatLog.scrollHeight, behavior: "smooth" });
-        return msgDiv; 
+        chatLog.scrollTop = chatLog.scrollHeight;
+        return msgDiv;
     }
 
     function showTypingIndicator() {
         const msgDiv = document.createElement("div");
         msgDiv.className = "msg bot typing";
-
-        const dots = document.createElement("div");
-        dots.className = "typing-indicator";
-        dots.innerHTML = "<span></span><span></span><span></span>";
-
-        msgDiv.appendChild(dots);
+        msgDiv.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
         chatLog.appendChild(msgDiv);
-        chatLog.scrollTo({ top: chatLog.scrollHeight, behavior: "smooth" });
-
+        chatLog.scrollTop = chatLog.scrollHeight;
         return msgDiv;
     }
 
     function setFormState(enabled) {
         userInput.disabled = !enabled;
         sendBtn.disabled = !enabled;
-        userInput.placeholder = enabled ? "Ask about our products..." : "Assistant is typing...";
+        userInput.placeholder = enabled ? "Ask anything..." : "ClassIt AI is thinking...";
     }
 
-    function findResponse(userText) {
-    const input = userText.toLowerCase();
+    const toggleChatbotWindow = () => chatbotWindow.classList.toggle("hidden");
 
-    for (const entry of knowledgeBase) {
-        for (const keyword of entry.keywords) {
-            // Create regex with word boundaries (\b) so "hi" doesn't match "shipping"
-            const regex = new RegExp(`\\b${keyword}\\b`, "i");
-            if (regex.test(input)) {
-                if (typeof entry.response === "function") {
-                    return entry.response();
-                }
-                return entry.response;
-            }
+    userInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleUserMessage();
         }
-    }
-    return fallbackResponse;
-}
+    });
 
-
- function handleUserMessage() {
-    const userText = userInput.value.trim();
-    if (!userText) return;
-
-      // Updated "clear chat" command logic
-    if (userText.toLowerCase() === 'clear chat') {
-        chatLog.innerHTML = ''; 
-        userInput.value = '';
-        
-        // Add the confirmation message and capture it in a variable
-        const confirmationMsg = addMessage('bot', 'Chat history cleared.');
-
-        // Set a timer to remove the message after 3 seconds
-        setTimeout(() => {
-            if (confirmationMsg) {
-                confirmationMsg.classList.add('fade-out'); // Start fading
-                // Remove the element completely after the fade animation finishes
-                setTimeout(() => {
-                    confirmationMsg.remove();
-                }, 300); // This must match the CSS transition duration
-            }
-        }, 3000); // 3000ms = 3 seconds
-
-        return; // Stop the function here
-    }
-
-    addMessage("user", userText);
-    userInput.value = "";
-    setFormState(false); // Disable the form while bot is "thinking"
-
-    const typingIndicator = showTypingIndicator();
-    
-    setTimeout(() => {
-        // Find the response from your knowledge base
-        const botResponse = findResponse(userText);
-
-        // Remove the typing indicator and show the bot's message
-        typingIndicator.remove();
-        addMessage("bot", botResponse);
-
-        // IMPORTANT: Re-enable the form so the user can type again
-        setFormState(true);
-        userInput.focus();
-    }, 1200); // Using a 1.2 second delay
-}
-
-    // --- EVENT LISTENERS ---
     sendBtn.addEventListener("click", handleUserMessage);
     chatbotToggle.addEventListener("click", toggleChatbotWindow);
-    /* ---------- Close-on-X and Close-on-outside-click (robust) ---------- */
-
-// small helper to detect if chat is open (works for .hidden or display:none)
-function isChatOpen() {
-  if (!chatbotWindow) return false;
-  // If you use a 'hidden' class, check that first:
-  if (!chatbotWindow.classList.contains('hidden')) return true;
-  // Fallback: check computed style (covers display:none or visibility)
-  const cs = getComputedStyle(chatbotWindow);
-  return cs.display !== 'none' && cs.visibility !== 'hidden' && chatbotWindow.offsetParent !== null;
-}
-
-// Close when clicking the ❌ (stopPropagation to prevent hitting document handler)
-if (closeChatbot) {
-  closeChatbot.addEventListener('click', (e) => {
-    e.stopPropagation();
-    chatbotWindow.classList.add('hidden');   // use same hide technique your code uses
-    try { userInput.blur(); } catch(_) {}
+    if (closeChatbot) {
+        closeChatbot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            chatbotWindow.classList.add('hidden');
+        });
+    }
     
-  });
-}
-
-// Close when clicking/tapping outside the chat OR pressing Escape
-document.addEventListener('pointerdown', (event) => {
-  // only act when chat is actually open
-  if (!isChatOpen()) return;
-
-  // If click is inside chat or on the toggle button, ignore it
-  const clickedInsideChat = chatbotWindow.contains(event.target);
-  const clickedToggle = chatbotToggle && chatbotToggle.contains(event.target);
-
-  if (!clickedInsideChat && !clickedToggle) {
-    chatbotWindow.classList.add('hidden'); // hide
-  }
+    document.addEventListener('pointerdown', (event) => {
+        const isOpen = !chatbotWindow.classList.contains('hidden');
+        if (!isOpen) return;
+        const clickedInside = chatbotWindow.contains(event.target);
+        const clickedToggle = chatbotToggle.contains(event.target);
+        if (!clickedInside && !clickedToggle) {
+            chatbotWindow.classList.add('hidden');
+        }
+    });
 });
-
-// Close on ESC
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && isChatOpen()) {
-    chatbotWindow.classList.add('hidden');
-  }
-});
-
-});
-
-// createBtn('‹', Math.max(1, currentPage - 1), currentPage === 1);
-//     createBtn(String(currentPage), currentPage, false, true);
-//     createBtn('›', Math.min(totalPages, currentPage + 1), currentPage === totalPages);
-//   }
