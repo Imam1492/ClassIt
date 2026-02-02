@@ -1090,3 +1090,26 @@ h1.title,
         font-size: 2.5rem !important; 
     }
 }
+
+/* --- DARK MODE LOGO SIZE FIX (Laptop Only) --- */
+@media (min-width: 1024px) {
+    /* 1. Unlock the container so it can grow */
+    .site-logo {
+        width: auto !important;
+        max-width: none !important;
+        display: flex; /* Ensures image centers in the new space */
+        align-items: center;
+    }
+
+    /* 2. Force the image to resize */
+    .site-logo .logo-dark {
+        /* CONTROL SIZE HERE */
+        width: 70px !important; 
+        
+        /* CRITICAL: Allows the height to grow to match the new width */
+        height: auto !important; 
+        
+        /* CRITICAL: Overrides the header's height limit */
+        max-height: none !important; 
+    }
+}
