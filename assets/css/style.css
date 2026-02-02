@@ -1076,11 +1076,17 @@ h1.title,
 }
 
 /* Optional: Mobile Adjustment */
+/* MOBILE SPACING ADJUSTMENT */
 @media (max-width: 768px) {
     h1.title,
     #mainTitle {
-        margin-top: 15px !important;
-        margin-bottom: 10px !important;
-        font-size: 2.5rem !important;
+        /* 1. Pull the text UP (closer to header) */
+        margin-top: 5px !important;  
+        
+        /* 2. Push the cards DOWN (away from text) */
+        margin-bottom: 35px !important; 
+        
+        /* Ensure font size stays readable */
+        font-size: 2.5rem !important; 
     }
 }
