@@ -296,8 +296,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const lowerInput = rawInput.toLowerCase();
         
         // 1. Check Smart Negation
-        if (lowerInput.includes("clear") && lowerInput.includes("chat")) {
-            if (lowerInput.includes("don't") || lowerInput.includes("not") || lowerInput.includes("never")) {
+       if (lowerInput.includes("clear") && lowerInput.includes("chat")) {
+            // Checks for: don't, dont, do not, donot, never, not, dnt
+            if (/don['’]?t|do\s*not|never|not|dnt/i.test(lowerInput)) {
                 return "Okay, I will keep the chat history safe! 🛡️";
             }
             return "CLEAR_COMMAND";
