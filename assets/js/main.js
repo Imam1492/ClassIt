@@ -47,49 +47,65 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ---------- 0. STYLE INJECTION (Homepage & Category Split) ----------
     const style = document.createElement('style');
     style.textContent = `
-        /* 1. Universal card layout (Applies to BOTH) */
-        .product-card, .js-card-fix {
-            display: flex !important;
-            flex-direction: column !important;
-            padding: 15px; 
-            box-sizing: border-box;
-            /* FIX: Add top margin to gallery cards */
-            margin-top: 40px; 
-        }
-
-        /* --- CATEGORY CARD HEIGHT --- */
-        .product-card {
-            height: 400px; /* FIXED: Locked card size and increased height */
-        }
-        /* --- HOMEPAGE CARD HEIGHT --- */
-        .js-card-fix {
-             /* No min-height! Content will define height. */
-        }
-
-
-        /* 2. --- IMAGE FIX FOR CATEGORY PAGES --- */
-        .product-card .card-image-container {
-            width: 100%;
-            height: 180px; 
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-shrink: 0; /* CRITICAL: Prevents shrinking */
-            border-radius: 8px; 
-            background-color: transparent; 
+    
+    
+    /* 1 --- IMAGE FIX FOR CATEGORY PAGES --- */
+    .product-card .card-image-container {
+        width: 100%;
+        height: 180px; 
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0; /* CRITICAL: Prevents shrinking */
+        border-radius: 8px; 
+        background-color: transparent; 
         }
         .product-card .card-image-container img {
             width: 100%;
             height: 100%;
             object-fit: cover; 
             display: block;
-        }
+            }
 
-        /* 3. --- IMAGE STYLE FOR HOMEPAGE GALLERY --- */
+            /*2. Universal card layout (Applies to BOTH) */
+            .product-card, .js-card-fix {
+                display: flex !important;
+                flex-direction: column !important;
+                padding: 15px; 
+                box-sizing: border-box;
+                /* FIX: Add top margin to gallery cards */
+                margin-top: 40px; 
+            }
+
+           
+        
+            /* --- CATEGORY CARD HEIGHT --- */
+            .product-card {
+                height: 400px; /* FIXED: Locked card size and increased height */
+            }
+           /* --- HOMEPAGE CARD HEIGHT (Mobile vs Laptop) --- */
+            .js-card-fix {
+                 /* MOBILE: Let content decide height (Compact) */
+                 height: auto; 
+                 min-height: 300px;
+            }
+        
+            /* LAPTOP: Force cards to be tall and uniform */
+            @media (min-width: 768px) {
+                .js-card-fix {
+                    height: 480px !important; 
+                }
+            }
+
+            
+
+        /* 3. --- IMAGE STYLE FOR HOMEPAGE GALLERY (Mobile vs Laptop) --- */
+        
+        /* MOBILE (Default): Smaller, Compact Image */
         .js-card-fix .card-image-container {
-            width: 100%;
-            height: 150px; /* Kept small image */
+            width: 181px;
+            height: 180px; /* Standard Mobile Height */
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -98,6 +114,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             border-radius: 8px;
             background-color: transparent; 
         }
+
+        /* LAPTOP (Override): Bigger, Taller Image */
+        @media (min-width: 768px) {
+            .js-card-fix .card-image-container {
+                height: 220px !important; /* Increased to 220px for Laptop */
+            }
+        }
+
+        /* SHARED IMAGE FIT */
         .js-card-fix .card-image-container img {
             width: 100%;
             height: 100%;
@@ -105,6 +130,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             display: block;
         }
 
+/* LAPTOP ONLY: Adds space between Text and Cards */
+@media only screen and (min-width: 769px) {
+    div:has(> .js-card-fix) {
+        padding-top: 60px !important; /* Only happens on big screens */
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    
+    /* 1. Target ONLY the Homepage Top Picks Container */
+    .js-card-fix .card-image-container {
+        width: 100%;       /* Full width */
+        height: 180px;     /* INCREASED HEIGHT: This is the key! */
+        background: #fff;  /* White background looks cleaner than gray */
+    }
+
+    /* 2. Target the Image inside it */
+    .js-card-fix .card-image-container img {
+        width: 100%;
+        height: 100%;
+     /* object-fit: contain !important;*//*Keep the full image visible */ 
+      
+    }
+}
+        
         /* 4. --- FOOTER LAYOUT (SPLIT) --- */
         
         /* Homepage Footer (Works) */
@@ -307,6 +357,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 height: 75px !important; 
             }
         }
+      
+        
+
     `;
     document.head.appendChild(style);
 
@@ -407,7 +460,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const projectId = window.SANITY_PROJECT_ID;
         if (!projectId) return [];
         const dataset = window.SANITY_DATASET || 'production';
-        const groq = `*[_type == "product"]{ title, description, price, category, link, altText, "imageUrl": image.asset->url, "slug": slug.current }`;
+        // NEW LINE (Fetches mobileImage too):
+    const groq = `*[_type == "product"]{ 
+        title, 
+        description, 
+        price, 
+        category, 
+        link, 
+        altText, 
+        "imageUrl": image.asset->url, 
+        "mobileImageUrl": mobileImage.asset->url, 
+        "slug": slug.current 
+    }`;
         const url = `https://${projectId}.api.sanity.io/v2024-11-08/data/query/${dataset}?query=${encodeURIComponent(groq)}`;
 
         try {
@@ -452,7 +516,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             return `
                 <article class="product-card" id="${createId(p.title)}">
-                <div class="card-image-container"><img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/></div>
+               <div class="card-image-container">
+                    <picture style="display: contents;">
+                        <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
+                        <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/>
+                    </picture>
+                </div>
                 <h3>${escapeHtml(p.title)}</h3>
                 
                 <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
@@ -517,7 +586,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     return `
                     <article class="product-card" id="${createId(p.title)}">
-                        <div class="card-image-container"><img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/></div>
+                        <div class="card-image-container">
+                    <picture style="display: contents;">
+                        <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
+                        <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/>
+                    </picture>
+                </div>
                         <h3>${escapeHtml(p.title)}</h3>
                         <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
                             ${shortDescWithEllipsis}
@@ -855,27 +929,31 @@ const categories = [...new Set(
     gallery.innerHTML = ""; // 🔥 HARD RESET — prevents duplicate cards
     gallery.innerHTML = topPicks.map(p => `
     <article class="card js-card-fix" id="${createId(p.title)}">
-            <div class="card-image-container">
-    <img src="${escapeHtml(p.imageUrl || "https://placehold.co/300x220?text=Image")}" 
-            alt="${escapeHtml(p.title)}"
-            onerror="this.src='https://placehold.co/300x220?text=Image'">
-</div>
-            <h3>${escapeHtml(p.title)}</h3>
+        <div class="card-image-container">
+            <picture style="display: contents;">
+                <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
+                <img src="${escapeHtml(p.imageUrl || "https://placehold.co/300x220?text=Image")}" 
+                     alt="${escapeHtml(p.title)}"
+                     onerror="this.src='https://placehold.co/300x220?text=Image'">
+            </picture>
+        </div>
+        
+        <h3>${escapeHtml(p.title)}</h3>
 
-            <p>${escapeHtml(p.description || "")}</p>
-            <div class="product-card-footer">
-                <button class="share-btn" 
-                        aria-label="Share ${escapeHtml(p.title)}"
-                        data-title="${escapeHtml(p.title)}"
-                        data-description="${escapeHtml(p.description)}"
-                        data-link="${escapeHtml(p.link || '')}"
-                        data-image="${escapeHtml(p.imageUrl || '')}"
-                    >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
-                </button>
-                <a href="${escapeHtml(p.link || "#")}" target="_blank" class="buy">Buy Now</a>
-            </div>
-            </article>
+        <p>${escapeHtml(p.description || "")}</p>
+        <div class="product-card-footer">
+            <button class="share-btn" 
+                    aria-label="Share ${escapeHtml(p.title)}"
+                    data-title="${escapeHtml(p.title)}"
+                    data-description="${escapeHtml(p.description)}"
+                    data-link="${escapeHtml(p.link || '')}"
+                    data-image="${escapeHtml(p.imageUrl || '')}"
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </button>
+            <a href="${escapeHtml(p.link || "#")}" target="_blank" class="buy">Buy Now</a>
+        </div>
+    </article>
     `).join("");
 
     const cards = Array.from(gallery.querySelectorAll(".card"));

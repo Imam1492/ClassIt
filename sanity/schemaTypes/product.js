@@ -53,6 +53,16 @@ export default {
       options: { hotspot: true }
     },
 
+    // Add this BELOW your existing 'image' field
+    {
+      name: 'mobileImage',
+      title: 'Mobile Image (Vertical)',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    },
+
     {
       name: 'altText',
       title: 'Image Alt Text',
