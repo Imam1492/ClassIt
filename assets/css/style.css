@@ -1057,3 +1057,30 @@ header img, .navbar img, .logo img {
         display: block;
     }
 }
+
+/* --- AGBALUMO FONT (Main Titles Only) --- */
+
+/* --- AGBALUMO TITLE SPACING FIX --- */
+h1.title,
+#mainTitle {
+    font-family: 'Agbalumo', cursive !important;
+    font-weight: 400;
+    font-size: 3.5rem !important; /* Keep your large size */
+    
+    /* 1. Reduce the outer spacing */
+    margin-top: 10px !important;     /* Pulls it up closer to header */
+    margin-bottom: 15px !important;  /* Pulls content below it closer */
+    
+    /* 2. Tighten the font's internal height */
+    line-height: 1.1 !important;     /* Removes invisible gap inside the text box */
+}
+
+/* Optional: Mobile Adjustment */
+@media (max-width: 768px) {
+    h1.title,
+    #mainTitle {
+        margin-top: 15px !important;
+        margin-bottom: 10px !important;
+        font-size: 2.5rem !important;
+    }
+}
