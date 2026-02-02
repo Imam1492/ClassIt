@@ -119,7 +119,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         @media (min-width: 768px) {
             .js-card-fix .card-image-container {
                 height: 220px !important; /* Increased to 220px for Laptop */
+                width: 240px !important;  /* <--- ADD THIS (Adjust 280px to preference) */
             }
+                /* ADD THIS block to make sure the card background grows with the image */
+    .js-card-fix {
+        width: 280px !important; /* <--- Match this number with the one above */
+    }
         }
 
         /* SHARED IMAGE FIT */
