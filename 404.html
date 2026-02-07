@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-  <link id="dynamic-favicon" rel="icon" type="image/png" href="/assets/images/favicon-gold-sq.png">
+  <link id="dynamic-favicon" rel="icon" type="image/png" href="/assets/images/favicon-gold-sq-v2.png">
 
 <script>
   (function () {
@@ -28,7 +28,7 @@
 
       if (theme === 'dark' && favicon) {
         // Absolute path here too
-        favicon.href = '/assets/images/favicon-dark-sq.png';
+        favicon.href = '/assets/images/favicon-dark-sq-v2.png';
         document.documentElement.setAttribute('data-theme', 'dark');
       }
     } catch (e) {}
@@ -43,6 +43,7 @@
 </head>
 
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <div id="overlay" class="overlay hidden"></div>
 
   <aside id="sidebar" class="sidebar" aria-hidden="true">
@@ -73,7 +74,7 @@
 </a>
   </header>
 
-  <main class="main">
+  <main id="main-content" class="main">
     <div class="error-page-content" style="text-align: center; margin-top: 50px;">
       <h1 class="error-code" style="font-size: 6rem; margin: 0; color: var(--text-color);">404</h1>
       <h2 class="error-title" style="margin-top: 10px;">Page Not Found</h2>
@@ -114,6 +115,15 @@
       </div>
     </div>
   </label>
+
+  <footer style="background: var(--bg-color); padding: 10px 15px; text-align: center; font-size: 0.7rem; opacity: 0.7; width: 100%; margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p style="margin: 0; line-height: 1.4;">
+      <strong>Affiliate Disclosure:</strong> ClassIt participates in the Amazon Associates Program and other affiliate partnerships.
+      <span style="margin: 0 8px;">|</span> &copy; 2026 ClassIt
+      <span style="margin: 0 8px;">|</span>
+      <a href="/contact/" style="color: inherit; text-decoration: underline;">Legal Info</a>
+    </p>
+  </footer>
 
   <script>
     window.SANITY_PROJECT_ID = "fwafbt19"; 

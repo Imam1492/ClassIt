@@ -569,3 +569,17 @@ html[data-theme="dark"] .favorite-btn.active svg {
     /* If using Gold: */
     /* color: #facc15; */
 }
+
+/* Cookie banner in dark theme */
+[data-theme="dark"] .cookie-banner.cookie-banner-visible {
+  background: var(--dark-surface);
+  color: var(--dark-primary-text);
+  border-top-color: var(--dark-border);
+}
+[data-theme="dark"] .cookie-banner-btn {
+  background: var(--dark-accent);
+  color: #fff;
+}
+[data-theme="dark"] .cookie-banner-btn:hover {
+  background: #5aa3ff;
+}

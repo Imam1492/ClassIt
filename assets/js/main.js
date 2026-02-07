@@ -515,12 +515,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     function openSidebar() {
         if (!sidebar) return;
         sidebar.classList.add('show');
-        if (overlay) overlay.classList.remove('hidden');
+        if (overlay) { overlay.classList.remove('hidden'); overlay.classList.add('show'); }
     }
     function hideSidebar() {
         if (!sidebar) return;
         sidebar.classList.remove('show');
-        if (overlay) overlay.classList.add('hidden');
+        if (overlay) { overlay.classList.add('hidden'); overlay.classList.remove('show'); }
     }
 
 //     // ---------- 6. RENDERING LOGIC (MODIFIED) ----------
@@ -568,7 +568,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 //                         >
 //                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
 //                     </button>
-//                     <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
+//                     <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
 //                 </div>
 //                 </article>
 //             `;
@@ -627,7 +627,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 //                             <button class="share-btn" aria-label="Share" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
 //                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
 //                             </button>
-//                             <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
+//                             <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
 //                         </div>
 //                     </article>
 //                     `;
@@ -664,7 +664,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 //                         <button class="share-btn" aria-label="Share" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || p.image || '')}">
 //                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
 //                         </button>
-//                         <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
+//                         <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
 //                     </div>
 //                 </article>
 //                 `;
@@ -779,7 +779,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <button class="share-btn" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
                     </button>
-                    <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
+                    <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
                 </div>
                 </article>
             `;
@@ -853,7 +853,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button class="share-btn" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
                             </button>
-                            <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
+                            <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
                         </div>
                     </article>
                     `;
@@ -899,7 +899,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <button class="share-btn" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || p.image || '')}">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
                         </button>
-                        <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
+                        <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
                     </div>
                 </article>
                 `;
@@ -1353,7 +1353,7 @@ const categories = [...new Set(
                 >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
             </button>
-            <a href="${escapeHtml(p.link || "#")}" target="_blank" class="buy">Buy Now</a>
+            <a href="${escapeHtml(p.link || "#")}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
         </div>
     </article>
     `).join("");
