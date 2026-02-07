@@ -363,6 +363,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
       
+/* --- STICKY FOOTER FIX (FORCE BOTTOM) --- */
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+    body {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 100vh !important;
+    }
+    main.main {
+        /* This is the magic line: "1" means GROW to fill space */
+        flex: 1 0 auto !important; 
+        width: 100% !important;
+        display: block !important;
+    }
+    footer {
+        flex-shrink: 0 !important;
+        margin-top: auto !important; /* Push to bottom */
+        width: 100% !important;
+    }
         
 
     `;
@@ -502,7 +523,232 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (overlay) overlay.classList.add('hidden');
     }
 
-    // ---------- 6. RENDERING LOGIC (MODIFIED) ----------
+//     // ---------- 6. RENDERING LOGIC (MODIFIED) ----------
+
+//     function renderCategoryGrid(page = 1) {
+//         if (!isCategoryPage) return;
+//         const start = (page - 1) * ITEMS_PER_PAGE_CATEGORY;
+//         const paginated = categoryItems.slice(start, start + ITEMS_PER_PAGE_CATEGORY);
+
+//         grid.innerHTML = paginated.map(p => {
+//             // --- FIX START: Changed limit from 100 to 60 ---
+//             const fullDesc = escapeHtml(p.description || "");
+//             const limit = 60; // <--- THIS IS THE KEY CHANGE
+            
+//             const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
+//             const needsToggle = fullDesc.length > limit; 
+//             const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
+//             // --- FIX END ---
+
+//             return `
+//                 <article class="product-card" id="${createId(p.title)}">
+//                <div class="card-image-container">
+//                     <picture style="display: contents;">
+//                         <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
+//                         <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/>
+//                     </picture>
+//                 </div>
+//                 <h3>${escapeHtml(p.title)}</h3>
+                
+//                 <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
+//                     ${shortDescWithEllipsis}
+//                 </p>
+//                 ${needsToggle ? `
+//                 <button class="show-more-btn" data-more-text="...more" data-less-text="less">
+//                     ...more
+//                 </button>
+//                 ` : ''}
+//                 <div class="product-card-footer">
+//                     <button class="share-btn" 
+//                             aria-label="Share ${escapeHtml(p.title)}"
+//                             data-title="${escapeHtml(p.title)}"
+//                             data-description="${escapeHtml(p.description)}"
+//                             data-link="${escapeHtml(p.link || '')}"
+//                             data-image="${escapeHtml(p.imageUrl || '')}"
+//                         >
+//                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
+//                     </button>
+//                     <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
+//                 </div>
+//                 </article>
+//             `;
+//         }).join("");
+
+//         const totalPages = Math.ceil(categoryItems.length / ITEMS_PER_PAGE_CATEGORY);
+//         renderPagination(paginationContainer, totalPages, page, renderCategoryGrid);
+//     }
+    
+//     // Renders search results and their pagination
+//     function renderSearchResults(results, page = 1, query = '') {
+//         if (!searchResults) return;
+//         const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE_SEARCH);
+//         const start = (page - 1) * ITEMS_PER_PAGE_SEARCH;
+//         const paginated = results.slice(start, start + ITEMS_PER_PAGE_SEARCH);
+
+//         if (!paginated.length) {
+//             /* --- STEP 4: TRACKING --- */
+//             gtag('event', 'search_no_results', { 'keyword': query });
+
+//             searchResults.innerHTML = `<div class="no-results-wrapper"><p class="no-results-message"><span>No results found for </span><strong>"${escapeHtml(query)}"</strong></p></div>`;
+            
+//             if (isHomePage && gallerySection) {
+//                 const galleryClone = gallerySection.cloneNode(true);
+//                 galleryClone.id = '';
+//                 galleryClone.style.display = 'block';
+//                 galleryClone.style.marginTop = '40px';
+//                 searchResults.appendChild(galleryClone);
+//             }
+
+//             if (isCategoryPage) {
+//                 const defaultItems = categoryItems.slice(0, ITEMS_PER_PAGE_CATEGORY);
+//                 const defaultGridHTML = defaultItems.map(p => {
+//                     // --- FIX START: Changed limit to 60 ---
+//                     const fullDesc = escapeHtml(p.description || "");
+//                     const limit = 60; 
+//                     const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
+//                     const needsToggle = fullDesc.length > limit; 
+//                     const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
+//                     // --- FIX END ---
+
+//                     return `
+//                     <article class="product-card" id="${createId(p.title)}">
+//                         <div class="card-image-container">
+//                     <picture style="display: contents;">
+//                         <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
+//                         <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/>
+//                     </picture>
+//                 </div>
+//                         <h3>${escapeHtml(p.title)}</h3>
+//                         <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
+//                             ${shortDescWithEllipsis}
+//                         </p>
+//                         ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
+//                         <div class="product-card-footer">
+//                             <button class="share-btn" aria-label="Share" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
+//                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
+//                             </button>
+//                             <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
+//                         </div>
+//                     </article>
+//                     `;
+//                 }).join('');
+                
+//                 const gridContainer = document.createElement('div');
+//                 gridContainer.className = 'product-grid';
+//                 gridContainer.style.marginTop = '40px';
+//                 gridContainer.innerHTML = defaultGridHTML;
+//                 searchResults.appendChild(gridContainer);
+//             }
+
+//         } else {
+//             const gridDiv = document.createElement('div');
+//             gridDiv.className = 'product-grid';
+//             gridDiv.innerHTML = paginated.map(p => {
+//                 // --- FIX START: Changed limit to 60 ---
+//                 const fullDesc = escapeHtml(p.description || "");
+//                 const limit = 60; 
+//                 const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
+//                 const needsToggle = fullDesc.length > limit; 
+//                 const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
+//                 // --- FIX END ---
+
+//                 return `
+//                 <article class="product-card">
+//                     <div class="card-image-container"><img src="${escapeHtml(p.imageUrl || p.image)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/></div>
+//                     <h3>${escapeHtml(p.title)}</h3>
+//                     <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
+//                         ${shortDescWithEllipsis}
+//                     </p>
+//                     ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
+//                     <div class="product-card-footer">
+//                         <button class="share-btn" aria-label="Share" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || p.image || '')}">
+//                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
+//                         </button>
+//                         <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
+//                     </div>
+//                 </article>
+//                 `;
+//             }).join('');
+//             searchResults.innerHTML = '';
+//             searchResults.appendChild(gridDiv);
+//         }
+
+//         searchResults.classList.remove('hidden');
+//         if (gallerySection) gallerySection.style.display = 'none';
+//         if (grid) grid.classList.add('hidden');
+//         if (paginationContainer) paginationContainer.classList.add('hidden');
+
+//         renderPagination(searchPagination, totalPages, page, (newPage) => doSearch(query, newPage));
+//     }
+//     // Generic pagination UI creator
+//   function renderPagination(container, totalPages, currentPage, clickHandler) {
+//     if (container) container.innerHTML = "";
+//     if (!container || totalPages <= 1) return;
+
+//     const createBtn = (label, targetPage, isDisabled, isActive) => {
+//         const btn = document.createElement("button");
+//         btn.textContent = label;
+//         btn.className = "pagination-btn";
+        
+//         // --- 1. MOBILE OPTIMIZATIONS ---
+//         // 'manipulation' tells mobile browsers: "Don't wait for double-tap, click instantly."
+//         btn.style.touchAction = "manipulation"; 
+//         btn.style.minWidth = "45px";  // Minimum touch target size
+//         btn.style.minHeight = "45px";
+//         btn.style.margin = "0 5px";
+
+//         // Visual State
+//         if (isActive) btn.classList.add("active");
+        
+//         // --- 2. HARD DISABLE ---
+//         // If disabled, use pointer-events: none. This makes the button "ghost" to clicks.
+//         if (isDisabled) {
+//             btn.disabled = true;
+//             btn.style.opacity = "0.5";
+//             btn.style.pointerEvents = "none"; 
+//         }
+
+//         // --- 3. CLICK HANDLER ---
+//         btn.onclick = (e) => {
+//             e.preventDefault();
+//             e.stopPropagation(); // Stop the click from bubbling up
+
+//             // Double check safety
+//             if (isDisabled || isActive) return;
+
+//             // *** THE FIX: LOCK THE UI ***
+//             // Immediately disable ALL buttons in this container.
+//             // This prevents you from tapping "Next" twice rapidly.
+//             const allButtons = container.querySelectorAll("button");
+//             allButtons.forEach(b => {
+//                 b.disabled = true;
+//                 b.style.pointerEvents = "none";
+//             });
+
+//             // Scroll Logic
+//             const productSection = document.getElementById("searchResults") || document.getElementById("gallerySection");
+//             if (productSection) {
+//                 const y = productSection.getBoundingClientRect().top + window.scrollY - 80;
+//                 window.scrollTo({ top: y, behavior: 'smooth' });
+//             } else {
+//                 window.scrollTo({ top: 0, behavior: 'smooth' });
+//             }
+
+//             // Fire the actual page change
+//             // (The buttons will be re-created enabled when this function finishes)
+//             clickHandler(targetPage);
+//         };
+
+//         container.appendChild(btn);
+//     };
+
+//     // Render logic
+//     createBtn("‹", currentPage - 1, currentPage === 1, false);
+//     createBtn(currentPage, currentPage, false, true);
+//     createBtn("›", currentPage + 1, currentPage === totalPages, false);
+// }
+
+// ---------- 6. RENDERING LOGIC (MODIFIED) ----------
 
     function renderCategoryGrid(page = 1) {
         if (!isCategoryPage) return;
@@ -510,14 +756,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const paginated = categoryItems.slice(start, start + ITEMS_PER_PAGE_CATEGORY);
 
         grid.innerHTML = paginated.map(p => {
-            // --- FIX START: Changed limit from 100 to 60 ---
             const fullDesc = escapeHtml(p.description || "");
-            const limit = 60; // <--- THIS IS THE KEY CHANGE
-            
+            const limit = 60; 
             const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
             const needsToggle = fullDesc.length > limit; 
             const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-            // --- FIX END ---
 
             return `
                 <article class="product-card" id="${createId(p.title)}">
@@ -528,23 +771,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </picture>
                 </div>
                 <h3>${escapeHtml(p.title)}</h3>
-                
                 <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
                     ${shortDescWithEllipsis}
                 </p>
-                ${needsToggle ? `
-                <button class="show-more-btn" data-more-text="...more" data-less-text="less">
-                    ...more
-                </button>
-                ` : ''}
+                ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
                 <div class="product-card-footer">
-                    <button class="share-btn" 
-                            aria-label="Share ${escapeHtml(p.title)}"
-                            data-title="${escapeHtml(p.title)}"
-                            data-description="${escapeHtml(p.description)}"
-                            data-link="${escapeHtml(p.link || '')}"
-                            data-image="${escapeHtml(p.imageUrl || '')}"
-                        >
+                    <button class="share-btn" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
                     </button>
                     <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
@@ -558,18 +790,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // Renders search results and their pagination
+// Renders search results and their pagination
     function renderSearchResults(results, page = 1, query = '') {
         if (!searchResults) return;
         const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE_SEARCH);
         const start = (page - 1) * ITEMS_PER_PAGE_SEARCH;
         const paginated = results.slice(start, start + ITEMS_PER_PAGE_SEARCH);
 
+        const mainTitle = document.getElementById('mainTitle');
+
+        // --- CASE 1: NO RESULTS FOUND ---
         if (!paginated.length) {
-            /* --- STEP 4: TRACKING --- */
+            
+            // 1. Show Title (Home Page)
+            if (mainTitle) mainTitle.style.display = 'block';
+
+            // 2. Hide Filters (Home Page)
+            const filterContainer = document.getElementById('searchFilterContainer');
+            if (isHomePage && filterContainer) {
+                filterContainer.classList.add('hidden');
+            }
+
             gtag('event', 'search_no_results', { 'keyword': query });
 
+            // 3. Render "No Results" Message
             searchResults.innerHTML = `<div class="no-results-wrapper"><p class="no-results-message"><span>No results found for </span><strong>"${escapeHtml(query)}"</strong></p></div>`;
             
+            // 4. FALLBACK: Show Homepage Gallery
             if (isHomePage && gallerySection) {
                 const galleryClone = gallerySection.cloneNode(true);
                 galleryClone.id = '';
@@ -578,32 +825,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                 searchResults.appendChild(galleryClone);
             }
 
+            // 5. FALLBACK: Show Category Grid (RESTORED THIS BLOCK)
             if (isCategoryPage) {
                 const defaultItems = categoryItems.slice(0, ITEMS_PER_PAGE_CATEGORY);
+                
                 const defaultGridHTML = defaultItems.map(p => {
-                    // --- FIX START: Changed limit to 60 ---
                     const fullDesc = escapeHtml(p.description || "");
                     const limit = 60; 
                     const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
                     const needsToggle = fullDesc.length > limit; 
                     const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-                    // --- FIX END ---
 
                     return `
                     <article class="product-card" id="${createId(p.title)}">
                         <div class="card-image-container">
-                    <picture style="display: contents;">
-                        <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
-                        <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/>
-                    </picture>
-                </div>
+                            <picture style="display: contents;">
+                                <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
+                                <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/>
+                            </picture>
+                        </div>
                         <h3>${escapeHtml(p.title)}</h3>
                         <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
                             ${shortDescWithEllipsis}
                         </p>
                         ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
                         <div class="product-card-footer">
-                            <button class="share-btn" aria-label="Share" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
+                            <button class="share-btn" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
                             </button>
                             <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
@@ -620,16 +867,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
         } else {
+            // --- CASE 2: RESULTS FOUND ---
+
+            // 1. Hide Title (Focus on results)
+            if (mainTitle) mainTitle.style.display = 'none';
+
+            // 2. Show Filters (Home Page)
+            const filterContainer = document.getElementById('searchFilterContainer');
+            if (isHomePage && filterContainer && (query || activeFilters.size > 0)) {
+                filterContainer.classList.remove('hidden');
+            }
+
             const gridDiv = document.createElement('div');
             gridDiv.className = 'product-grid';
             gridDiv.innerHTML = paginated.map(p => {
-                // --- FIX START: Changed limit to 60 ---
                 const fullDesc = escapeHtml(p.description || "");
                 const limit = 60; 
                 const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
                 const needsToggle = fullDesc.length > limit; 
                 const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-                // --- FIX END ---
 
                 return `
                 <article class="product-card">
@@ -640,7 +896,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </p>
                     ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
                     <div class="product-card-footer">
-                        <button class="share-btn" aria-label="Share" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || p.image || '')}">
+                        <button class="share-btn" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || p.image || '')}">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
                         </button>
                         <a href="${escapeHtml(p.link || '#')}" target="_blank" class="buy">Buy Now</a>
@@ -659,82 +915,53 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         renderPagination(searchPagination, totalPages, page, (newPage) => doSearch(query, newPage));
     }
-    // Generic pagination UI creator
-  function renderPagination(container, totalPages, currentPage, clickHandler) {
-    if (container) container.innerHTML = "";
-    if (!container || totalPages <= 1) return;
 
-    const createBtn = (label, targetPage, isDisabled, isActive) => {
-        const btn = document.createElement("button");
-        btn.textContent = label;
-        btn.className = "pagination-btn";
-        
-        // --- 1. MOBILE OPTIMIZATIONS ---
-        // 'manipulation' tells mobile browsers: "Don't wait for double-tap, click instantly."
-        btn.style.touchAction = "manipulation"; 
-        btn.style.minWidth = "45px";  // Minimum touch target size
-        btn.style.minHeight = "45px";
-        btn.style.margin = "0 5px";
+    function renderPagination(container, totalPages, currentPage, clickHandler) {
+        if (container) container.innerHTML = "";
+        if (!container || totalPages <= 1) return;
 
-        // Visual State
-        if (isActive) btn.classList.add("active");
-        
-        // --- 2. HARD DISABLE ---
-        // If disabled, use pointer-events: none. This makes the button "ghost" to clicks.
-        if (isDisabled) {
-            btn.disabled = true;
-            btn.style.opacity = "0.5";
-            btn.style.pointerEvents = "none"; 
-        }
-
-        // --- 3. CLICK HANDLER ---
-        btn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation(); // Stop the click from bubbling up
-
-            // Double check safety
-            if (isDisabled || isActive) return;
-
-            // *** THE FIX: LOCK THE UI ***
-            // Immediately disable ALL buttons in this container.
-            // This prevents you from tapping "Next" twice rapidly.
-            const allButtons = container.querySelectorAll("button");
-            allButtons.forEach(b => {
-                b.disabled = true;
-                b.style.pointerEvents = "none";
-            });
-
-            // Scroll Logic
-            const productSection = document.getElementById("searchResults") || document.getElementById("gallerySection");
-            if (productSection) {
-                const y = productSection.getBoundingClientRect().top + window.scrollY - 80;
-                window.scrollTo({ top: y, behavior: 'smooth' });
-            } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+        const createBtn = (label, targetPage, isDisabled, isActive) => {
+            const btn = document.createElement("button");
+            btn.textContent = label;
+            btn.className = "pagination-btn";
+            btn.style.touchAction = "manipulation"; 
+            btn.style.minWidth = "45px";  
+            btn.style.minHeight = "45px";
+            btn.style.margin = "0 5px";
+            if (isActive) btn.classList.add("active");
+            if (isDisabled) {
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+                btn.style.pointerEvents = "none"; 
             }
-
-            // Fire the actual page change
-            // (The buttons will be re-created enabled when this function finishes)
-            clickHandler(targetPage);
+            btn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isDisabled || isActive) return;
+                const allButtons = container.querySelectorAll("button");
+                allButtons.forEach(b => { b.disabled = true; b.style.pointerEvents = "none"; });
+                const productSection = document.getElementById("searchResults") || document.getElementById("gallerySection");
+                if (productSection) {
+                    const y = productSection.getBoundingClientRect().top + window.scrollY - 80;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                clickHandler(targetPage);
+            };
+            container.appendChild(btn);
         };
+        createBtn("‹", currentPage - 1, currentPage === 1, false);
+        createBtn(currentPage, currentPage, false, true);
+        createBtn("›", currentPage + 1, currentPage === totalPages, false);
+    }
 
-        container.appendChild(btn);
-    };
+    // ---------- 7. SEARCH LOGIC (SMART, FUZZY & FILTERS) ----------
 
-    // Render logic
-    createBtn("‹", currentPage - 1, currentPage === 1, false);
-    createBtn(currentPage, currentPage, false, true);
-    createBtn("›", currentPage + 1, currentPage === totalPages, false);
-}
+    let activeFilters = new Set(); // Stores "tech", "livogue", etc.
 
-   // ---------- 7. SEARCH LOGIC (SMART & FUZZY) ----------
-
-    // --- 7a. NEW: Smart Search Helpers ---
-    
-    // 1. Normalize String: Removes special chars & spaces (e.g., "Power Bank" -> "powerbank")
     const normalize = (str) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
-    // 2. Levenshtein Distance: Calculates how many "typos" away two words are
     const levenshtein = (a, b) => {
         const matrix = [];
         for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
@@ -745,9 +972,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     matrix[i][j] = matrix[i - 1][j - 1];
                 } else {
                     matrix[i][j] = Math.min(
-                        matrix[i - 1][j - 1] + 1, // deletion
-                        matrix[i][j - 1] + 1,     // insertion
-                        matrix[i - 1][j] + 1      // substitution
+                        matrix[i - 1][j - 1] + 1, 
+                        matrix[i][j - 1] + 1,     
+                        matrix[i - 1][j] + 1      
                     );
                 }
             }
@@ -755,20 +982,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return matrix[b.length][a.length];
     };
 
-    // 3. The "Brain": Decides if a product matches the query
     const isMatch = (query, text) => {
         if (!query || !text) return false;
         const q = normalize(query);
         const t = normalize(text);
-        
-        // Strict check: if the user typed "bank", matches "powerbank"
         if (t.includes(q)) return true;
-        
-        // Fuzzy check: Only runs if query is > 2 chars to prevent lag
         if (q.length > 2) {
-            // Allow 1 typo for every 4 letters (e.g. "ipone" -> "iphone")
             const allowedErrors = Math.floor(q.length / 4) || 1; 
-            // Optimization: Only check math if lengths are somewhat close
             if (Math.abs(q.length - t.length) < 4) { 
                  return levenshtein(q, t) <= allowedErrors;
             }
@@ -776,11 +996,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         return false;
     };
 
-    // --- 7b. Main Search Functions ---
+    function renderFilterUI() {
+        const container = document.getElementById('searchFilterContainer');
+        if (!container) return;
+
+        const filters = ['Livogue', 'Wellfit', 'Tech']; 
+        
+        container.innerHTML = filters.map(cat => {
+            const isActive = activeFilters.has(cat.toLowerCase());
+            return `<button class="filter-pill ${isActive ? 'active' : ''}" data-cat="${cat.toLowerCase()}">${cat}</button>`;
+        }).join('');
+
+        container.querySelectorAll('.filter-pill').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const cat = e.target.dataset.cat;
+                if (activeFilters.has(cat)) activeFilters.delete(cat);
+                else activeFilters.add(cat);
+                
+                renderFilterUI(); 
+                doSearch(searchInput.value, 1); 
+            });
+        });
+    }
 
     function resetToDefaultGrid() {
         if (searchResults) searchResults.classList.add('hidden');
         if (searchPagination) searchPagination.innerHTML = '';
+        
+        // Show the Title back
+        const mainTitle = document.getElementById('mainTitle');
+        if (mainTitle) mainTitle.style.display = 'block';
+
+        const filterContainer = document.getElementById('searchFilterContainer');
+        if (filterContainer) {
+            filterContainer.classList.add('hidden');
+            activeFilters.clear(); 
+        }
+
         if (isHomePage && gallerySection) gallerySection.style.display = 'block';
         if (isCategoryPage && grid) grid.classList.remove('hidden');
         if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
@@ -788,28 +1040,47 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function doSearch(q, page = 1) {
         const query = (q || '').trim();
-        if (!query) {
+        
+        const filterContainer = document.getElementById('searchFilterContainer');
+        if (filterContainer) {
+            if (query || activeFilters.size > 0) {
+                filterContainer.classList.remove('hidden');
+                if (filterContainer.innerHTML === '') renderFilterUI();
+            } else {
+                filterContainer.classList.add('hidden');
+            }
+        }
+
+        if (!query && activeFilters.size === 0) {
             resetToDefaultGrid();
             return;
         }
 
-        // Save to history (Standard Logic)
-        const recents = loadRecent();
-        // Only save if it's NOT already there (case insensitive)
-        if (!recents.some(x => x.toLowerCase() === query.toLowerCase())) {
-            recents.unshift(query);
-            saveRecent(recents);
+        if (query) {
+            const recents = loadRecent();
+            if (!recents.some(x => x.toLowerCase() === query.toLowerCase())) {
+                recents.unshift(query);
+                saveRecent(recents);
+            }
         }
         hideDropdown();
 
         let pool = isCategoryPage ? categoryItems : [...allProducts];
+
+        if (activeFilters.size > 0) {
+            pool = pool.filter(p => {
+                const pCat = (p.category || '').toLowerCase();
+                return [...activeFilters].some(filter => pCat.includes(filter));
+            });
+        }
         
-        // --- SMART FILTERING ---
-        // Checks Title OR Description using the smart 'isMatch' logic
-        const results = pool.filter(p => 
-            isMatch(query, p.title) || 
-            (p.description && isMatch(query, p.description))
-        );
+        let results = pool;
+        if (query) {
+             results = pool.filter(p => 
+                isMatch(query, p.title) || 
+                (p.description && isMatch(query, p.description))
+            );
+        }
         
         renderSearchResults(results, page, query);
     }
@@ -818,75 +1089,201 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     function renderDropdown(filter = '') {
         if (!searchDropdown) return;
-        
-        // Always reset selection on new type
         searchSelectedIndex = -1;
-
         const query = filter.trim();
         let displayItems = [];
 
-        // 1. Get History Matches (Always check these)
-        // We use standard 'includes' for history to keep it snappy
-        const historyMatches = loadRecent().filter(s => 
-            s.toLowerCase().includes(query.toLowerCase())
-        );
-
-        // 2. Get Product Matches (Only if typing >= 3 letters)
+        const historyMatches = loadRecent().filter(s => s.toLowerCase().includes(query.toLowerCase()));
         let productMatches = [];
         if (query.length >= 3) {
-            productMatches = allProducts
-                .filter(p => isMatch(query, p.title)) // Use smart match
-                .map(p => p.title);
+            productMatches = allProducts.filter(p => isMatch(query, p.title)).map(p => p.title);
         }
 
-        // 3. Merge: History First, Then Products
-        // Use a Set to prevent duplicates (e.g. if "Wipro" is in history AND is a product)
         const seen = new Set();
-        
-        // Add History items
         historyMatches.forEach(item => {
             const key = item.toLowerCase();
-            if(!seen.has(key)) {
-                seen.add(key);
-                displayItems.push({ text: item, type: 'history' });
-            }
+            if(!seen.has(key)) { seen.add(key); displayItems.push({ text: item, type: 'history' }); }
         });
-
-        // Add Product items (only if not seen)
         productMatches.forEach(item => {
              const key = item.toLowerCase();
-             if(!seen.has(key)) {
-                seen.add(key);
-                displayItems.push({ text: item, type: 'product' });
-            }
+             if(!seen.has(key)) { seen.add(key); displayItems.push({ text: item, type: 'product' }); }
         });
 
-        // Limit to 6 suggestions total
         displayItems = displayItems.slice(0, 6);
+        if (!displayItems.length) { hideDropdown(); return; }
 
-        if (!displayItems.length) {
-            hideDropdown();
-            return;
-        }
-
-        // Render with smart icons
         searchDropdown.innerHTML = displayItems.map(item => `
             <div class="row" data-value="${escapeHtml(item.text)}">
                 <span class="value" style="display: flex; justify-content: space-between; width: 100%;">
                     <span>${escapeHtml(item.text)}</span>
-                    ${item.type === 'product' 
-                        ? '<span style="font-size: 0.75em; opacity: 0.5; font-style: italic;">Product</span>' 
-                        : ''}
+                    ${item.type === 'product' ? '<span style="font-size: 0.75em; opacity: 0.5;">Product</span>' : ''}
                 </span>
-                
-                ${item.type === 'history' 
-                    ? `<button class="remove" data-remove="${escapeHtml(item.text)}" aria-label="Remove">✕</button>` 
-                    : ''}
+                ${item.type === 'history' ? `<button class="remove" data-remove="${escapeHtml(item.text)}">✕</button>` : ''}
             </div>
         `).join('');
-
         searchDropdown.classList.remove('hidden');
     }
+
+//    // ---------- 7. SEARCH LOGIC (SMART & FUZZY) ----------
+
+//     // --- 7a. NEW: Smart Search Helpers ---
+    
+//     // 1. Normalize String: Removes special chars & spaces (e.g., "Power Bank" -> "powerbank")
+//     const normalize = (str) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+//     // 2. Levenshtein Distance: Calculates how many "typos" away two words are
+//     const levenshtein = (a, b) => {
+//         const matrix = [];
+//         for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+//         for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+//         for (let i = 1; i <= b.length; i++) {
+//             for (let j = 1; j <= a.length; j++) {
+//                 if (b.charAt(i - 1) == a.charAt(j - 1)) {
+//                     matrix[i][j] = matrix[i - 1][j - 1];
+//                 } else {
+//                     matrix[i][j] = Math.min(
+//                         matrix[i - 1][j - 1] + 1, // deletion
+//                         matrix[i][j - 1] + 1,     // insertion
+//                         matrix[i - 1][j] + 1      // substitution
+//                     );
+//                 }
+//             }
+//         }
+//         return matrix[b.length][a.length];
+//     };
+
+//     // 3. The "Brain": Decides if a product matches the query
+//     const isMatch = (query, text) => {
+//         if (!query || !text) return false;
+//         const q = normalize(query);
+//         const t = normalize(text);
+        
+//         // Strict check: if the user typed "bank", matches "powerbank"
+//         if (t.includes(q)) return true;
+        
+//         // Fuzzy check: Only runs if query is > 2 chars to prevent lag
+//         if (q.length > 2) {
+//             // Allow 1 typo for every 4 letters (e.g. "ipone" -> "iphone")
+//             const allowedErrors = Math.floor(q.length / 4) || 1; 
+//             // Optimization: Only check math if lengths are somewhat close
+//             if (Math.abs(q.length - t.length) < 4) { 
+//                  return levenshtein(q, t) <= allowedErrors;
+//             }
+//         }
+//         return false;
+//     };
+
+//     // --- 7b. Main Search Functions ---
+
+//     function resetToDefaultGrid() {
+//         if (searchResults) searchResults.classList.add('hidden');
+//         if (searchPagination) searchPagination.innerHTML = '';
+//         if (isHomePage && gallerySection) gallerySection.style.display = 'block';
+//         if (isCategoryPage && grid) grid.classList.remove('hidden');
+//         if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
+//     }
+
+//     function doSearch(q, page = 1) {
+//         const query = (q || '').trim();
+//         if (!query) {
+//             resetToDefaultGrid();
+//             return;
+//         }
+
+//         // Save to history (Standard Logic)
+//         const recents = loadRecent();
+//         // Only save if it's NOT already there (case insensitive)
+//         if (!recents.some(x => x.toLowerCase() === query.toLowerCase())) {
+//             recents.unshift(query);
+//             saveRecent(recents);
+//         }
+//         hideDropdown();
+
+//         let pool = isCategoryPage ? categoryItems : [...allProducts];
+        
+//         // --- SMART FILTERING ---
+//         // Checks Title OR Description using the smart 'isMatch' logic
+//         const results = pool.filter(p => 
+//             isMatch(query, p.title) || 
+//             (p.description && isMatch(query, p.description))
+//         );
+        
+//         renderSearchResults(results, page, query);
+//     }
+
+//     function hideDropdown() { if (searchDropdown) searchDropdown.classList.add('hidden'); searchSelectedIndex = -1; }
+    
+//     function renderDropdown(filter = '') {
+//         if (!searchDropdown) return;
+        
+//         // Always reset selection on new type
+//         searchSelectedIndex = -1;
+
+//         const query = filter.trim();
+//         let displayItems = [];
+
+//         // 1. Get History Matches (Always check these)
+//         // We use standard 'includes' for history to keep it snappy
+//         const historyMatches = loadRecent().filter(s => 
+//             s.toLowerCase().includes(query.toLowerCase())
+//         );
+
+//         // 2. Get Product Matches (Only if typing >= 3 letters)
+//         let productMatches = [];
+//         if (query.length >= 3) {
+//             productMatches = allProducts
+//                 .filter(p => isMatch(query, p.title)) // Use smart match
+//                 .map(p => p.title);
+//         }
+
+//         // 3. Merge: History First, Then Products
+//         // Use a Set to prevent duplicates (e.g. if "Wipro" is in history AND is a product)
+//         const seen = new Set();
+        
+//         // Add History items
+//         historyMatches.forEach(item => {
+//             const key = item.toLowerCase();
+//             if(!seen.has(key)) {
+//                 seen.add(key);
+//                 displayItems.push({ text: item, type: 'history' });
+//             }
+//         });
+
+//         // Add Product items (only if not seen)
+//         productMatches.forEach(item => {
+//              const key = item.toLowerCase();
+//              if(!seen.has(key)) {
+//                 seen.add(key);
+//                 displayItems.push({ text: item, type: 'product' });
+//             }
+//         });
+
+//         // Limit to 6 suggestions total
+//         displayItems = displayItems.slice(0, 6);
+
+//         if (!displayItems.length) {
+//             hideDropdown();
+//             return;
+//         }
+
+//         // Render with smart icons
+//         searchDropdown.innerHTML = displayItems.map(item => `
+//             <div class="row" data-value="${escapeHtml(item.text)}">
+//                 <span class="value" style="display: flex; justify-content: space-between; width: 100%;">
+//                     <span>${escapeHtml(item.text)}</span>
+//                     ${item.type === 'product' 
+//                         ? '<span style="font-size: 0.75em; opacity: 0.5; font-style: italic;">Product</span>' 
+//                         : ''}
+//                 </span>
+                
+//                 ${item.type === 'history' 
+//                     ? `<button class="remove" data-remove="${escapeHtml(item.text)}" aria-label="Remove">✕</button>` 
+//                     : ''}
+//             </div>
+//         `).join('');
+
+//         searchDropdown.classList.remove('hidden');
+//     }
 
     // ---------- 8. HOME PAGE LOGIC (Gallery & Placeholder) ----------
     
@@ -1048,145 +1445,157 @@ const categories = [...new Set(
         loop(); // Start the animation
     }
 
-    // ---------- 9. EVENT LISTENERS & INITIALIZATION (MODIFIED) ----------
+// ---------- 9. EVENT LISTENERS & INITIALIZATION (MODIFIED) ----------
     async function init() {
 
         // --- NEW: Handle "View Product" Clicks from Chatbot ---
-    // This listens for any click on a link with a hash (e.g., #wooden-watch)
-    document.addEventListener('click', (e) => {
-        // Check if the clicked element is a chatbot link with a hash
-        const link = e.target.closest('a');
-        if (link && link.classList.contains('chat-link') && link.getAttribute('href').includes('#')) {
-            
-            const href = link.getAttribute('href');
-            // Extract the ID (part after #)
-            const targetId = href.split('#')[1]; 
-            const targetCard = document.getElementById(targetId);
-
-            // If the card exists on THIS page...
-            if (targetCard) {
-                e.preventDefault(); // Stop the page from reloading
-                
-                // 1. Scroll nicely to center
-                targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                // 2. Apply the "Vibrant Flash" effect
-                targetCard.style.transition = "box-shadow 0.5s ease, transform 0.5s ease";
-                
-                // Flash Gold Shadow + Scale Up slightly
-                targetCard.style.boxShadow = "0 0 20px 5px rgba(234, 179, 8, 0.6)"; // Gold glow
-                targetCard.style.transform = "scale(1.02)";
-                targetCard.style.zIndex = "10"; // Bring to front
-                
-                // Remove effect after 2 seconds
-                setTimeout(() => {
-                    targetCard.style.boxShadow = "none";
-                    targetCard.style.transform = "scale(1)";
-                    targetCard.style.zIndex = "1";
-                }, 2000);
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && link.classList.contains('chat-link') && link.getAttribute('href').includes('#')) {
+                const href = link.getAttribute('href');
+                const targetId = href.split('#')[1]; 
+                const targetCard = document.getElementById(targetId);
+                if (targetCard) {
+                    e.preventDefault(); 
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetCard.style.transition = "box-shadow 0.5s ease, transform 0.5s ease";
+                    targetCard.style.boxShadow = "0 0 20px 5px rgba(234, 179, 8, 0.6)"; 
+                    targetCard.style.transform = "scale(1.02)";
+                    targetCard.style.zIndex = "10"; 
+                    setTimeout(() => {
+                        targetCard.style.boxShadow = "none";
+                        targetCard.style.transform = "scale(1)";
+                        targetCard.style.zIndex = "1";
+                    }, 2000);
+                }
             }
-            // If card is NOT on this page, the default link behavior takes over 
-            // and navigates to the correct page (e.g. /Livogue/#id), 
-            // where your existing "Deep Link" logic will handle the highlight.
-        }
-    });
+        });
     
         // --- Global Event Listeners ---
         menuBtn?.addEventListener('click', openSidebar);
         closeSidebar?.addEventListener('click', hideSidebar);
         overlay?.addEventListener('click', hideSidebar);
-        searchBtn?.addEventListener('click', () => doSearch(searchInput.value, 1));
+
+        // --- NEW: SMART SEARCH BAR LOGIC (Google Style) ---
+        const ICON_SEARCH = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
+        const ICON_CLOSE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+
+        // 1. Button Click: Decides whether to SEARCH or CLEAR
+        searchBtn?.addEventListener('click', () => {
+            if (searchBtn.dataset.mode === 'clear') {
+                // Clear Mode: Wipe text, Focus input, Reset Icon
+                searchInput.value = '';
+                searchInput.focus(); 
+                searchBtn.innerHTML = ICON_SEARCH;
+                searchBtn.dataset.mode = 'search';
+                
+                hideDropdown();
+                resetToDefaultGrid(); 
+            } else {
+                // Search Mode: Run the search
+                doSearch(searchInput.value, 1);
+            }
+        });
 
         if (searchInput) {
+            // 2. Focus/Blur 
             searchInput.addEventListener('focus', () => {
-                // Fixed typo Tomeout -> Timeout
                 clearTimeout(animatedPlaceholderTimeout); 
                 searchInput.setAttribute("placeholder", "Search products...");
                 renderDropdown(searchInput.value);
             });
+            
             searchInput.addEventListener('blur', () => {
                 setTimeout(hideDropdown, 150);
                 if (searchInput.value === "" && isHomePage) initAnimatedPlaceholder();
             });
+
+            // 3. INSTANT TOGGLE: Switch icon immediately when typing
+            searchInput.addEventListener('input', (e) => {
+                const hasText = e.target.value.trim().length > 0;
+                
+                if (hasText && searchBtn.dataset.mode !== 'clear') {
+                    searchBtn.innerHTML = ICON_CLOSE;
+                    searchBtn.dataset.mode = 'clear';
+                } else if (!hasText && searchBtn.dataset.mode === 'clear') {
+                    searchBtn.innerHTML = ICON_SEARCH;
+                    searchBtn.dataset.mode = 'search';
+                }
+            });
+
+            // 4. DEBOUNCED SEARCH: The heavy lifting 
             searchInput.addEventListener('input', debounce((e) => {
                 renderDropdown(e.target.value || '');
                 if (!e.target.value.trim()) resetToDefaultGrid();
             }, 120));
+
+            // 5. KEYBOARD NAV (Enter, Arrows, Escape)
             searchInput.addEventListener('keydown', (e) => {
-    const rows = searchDropdown?.querySelectorAll('.row');
-    if (!rows || !rows.length) return;
+                const rows = searchDropdown?.querySelectorAll('.row');
+                
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (rows && rows.length && searchSelectedIndex >= 0) {
+                        const value = rows[searchSelectedIndex].dataset.value;
+                        searchInput.value = value;
+                        hideDropdown();
+                        searchBtn.innerHTML = ICON_CLOSE;
+                        searchBtn.dataset.mode = 'clear';
+                        doSearch(value, 1);
+                    } else {
+                        doSearch(searchInput.value, 1);
+                    }
+                    return;
+                }
 
-    if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        searchSelectedIndex = (searchSelectedIndex + 1) % rows.length;
-    }
+                if (!rows || !rows.length) return;
 
-    else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        searchSelectedIndex =
-            (searchSelectedIndex - 1 + rows.length) % rows.length;
-    }
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    searchSelectedIndex = (searchSelectedIndex + 1) % rows.length;
+                }
+                else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    searchSelectedIndex = (searchSelectedIndex - 1 + rows.length) % rows.length;
+                }
+                else if (e.key === 'Escape') {
+                    hideDropdown();
+                    return;
+                }
 
-    else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (searchSelectedIndex >= 0) {
-            const value = rows[searchSelectedIndex].dataset.value;
-            searchInput.value = value;
-            hideDropdown();
-            doSearch(value, 1);
-        } else {
-            doSearch(searchInput.value, 1);
-        }
-        return;
-    }
+                rows.forEach((row, i) => {
+                    row.classList.toggle('hover', i === searchSelectedIndex);
+                });
+            });
+            
+            // 6. DROPDOWN CLICK HANDLER
+            if (searchDropdown) {
+                 searchDropdown.addEventListener('pointerdown', (ev) => {
+                    ev.preventDefault();
+                    const removeBtn = ev.target.closest('button.remove');
+                    const row = ev.target.closest('.row');
 
-    else if (e.key === 'Escape') {
-        hideDropdown();
-        return;
-    }
+                    if (removeBtn) {
+                        ev.stopImmediatePropagation();
+                        const value = removeBtn.dataset.remove;
+                        if (!value) return;
+                        const updated = loadRecent().filter(x => x !== value);
+                        saveRecent(updated);
+                        renderDropdown(searchInput?.value || '');
+                        return;
+                    }
 
-    // Update visual active state
-    rows.forEach((row, i) => {
-    row.classList.toggle('hover', i === searchSelectedIndex);
-});
-
-});
-
-// ✅ DROPDOWN CLICK HANDLER (ROW CLICK + ❌ DELETE)
-if (searchDropdown) {
-    searchDropdown.addEventListener('pointerdown', (ev) => {
-        ev.preventDefault();
-
-        const removeBtn = ev.target.closest('button.remove');
-        const row = ev.target.closest('.row');
-
-        /* 🔴 DELETE SEARCH ITEM */
-        if (removeBtn) {
-            ev.stopImmediatePropagation();
-
-            const value = removeBtn.dataset.remove;
-            if (!value) return;
-
-            const updated = loadRecent().filter(x => x !== value);
-            saveRecent(updated);
-            renderDropdown(searchInput?.value || '');
-            return;
-        }
-
-        /* ✅ SELECT SEARCH ITEM */
-        if (row) {
-            const val = row.dataset.value;
-            if (!val) return;
-
-            if (searchInput) searchInput.value = val;
-            hideDropdown();
-            doSearch(val, 1);
-        }
-    });
-}
-
-
-
+                    if (row) {
+                        const val = row.dataset.value;
+                        if (!val) return;
+                        searchInput.value = val;
+                        hideDropdown();
+                        searchBtn.innerHTML = ICON_CLOSE;
+                        searchBtn.dataset.mode = 'clear';
+                        doSearch(val, 1);
+                    }
+                });
+            }
         }
 
         // --- MODIFIED: Event delegation for share and "show more" buttons ---
@@ -1195,86 +1604,59 @@ if (searchDropdown) {
             const showMoreButton = e.target.closest('.show-more-btn');
 
             if (shareButton) {
-    e.preventDefault(); 
+                e.preventDefault(); 
+                const { title, description, image } = shareButton.dataset;
+                const productId = createId(title);
+                const deepLink = `${window.location.origin}${window.location.pathname}#${productId}`;
+                handleShareClick(title, description, deepLink, image);
 
-    // 1. Get data, BUT ignore the 'link' from dataset (which is Amazon)
-    const { title, description, image } = shareButton.dataset;
-
-    // 2. Generate the "Deep Link" to your site
-    // This creates: https://classit.co.in/tech.html#wipro-smart-bulb
-    const productId = createId(title);
-    const deepLink = `${window.location.origin}${window.location.pathname}#${productId}`;
-
-    // 3. Call the share handler with YOUR site link
-    handleShareClick(title, description, deepLink, image);
-
-                } else if (showMoreButton) {
+            } else if (showMoreButton) {
                 e.preventDefault();
                 const card = showMoreButton.closest('.product-card');
-                if (!card) return; // Make sure we are on a category card
+                if (!card) return; 
                 const p = card.querySelector('p');
-                
-                // Toggle the state
                 const isExpanded = card.classList.toggle('is-expanded');
-
                 if (isExpanded) {
-                    // Expand: Show full text and "show less"
                     p.innerHTML = p.dataset.fullText;
                     showMoreButton.innerHTML = showMoreButton.dataset.lessText;
                 } else {
-                    // Collapse: Show short text and "show more"
                     p.innerHTML = p.dataset.shortText;
                     showMoreButton.innerHTML = showMoreButton.dataset.moreText;
                 }
             }
         };
 
-        // Add a single listener to each container
         if (grid) grid.addEventListener('click', handleGridClick);
         if (searchResults) searchResults.addEventListener('click', handleGridClick);
-        if (gallery) gallery.addEventListener('click', handleGridClick); // This listener is fine, it won't find .show-more-btn
+        if (gallery) gallery.addEventListener('click', handleGridClick); 
 
         // --- Data-dependent Initialization ---
         try {
             allProducts = await fetchProducts();
-            window.CLASSIT_PRODUCTS = allProducts; // <--- TELLS CHATBOT: "HERE ARE THE REAL PRODUCTS"
+            window.CLASSIT_PRODUCTS = allProducts; 
 
            if (isCategoryPage) {
                 const allItems = allProducts.filter((p) => (p.category || '').toLowerCase() === (currentCategory || '').toLowerCase());
                 categoryItems = shuffleArray(allItems);
 
                 // --- START: DEEP LINK "VIP" LOGIC ---
-                // If the URL has a #hash (like #wipro-bulb), find that product!
                 const hash = window.location.hash.substring(1); 
-                
                 if (hash) {
-                    // 1. Find where the product ended up after shuffling
                     const vipIndex = categoryItems.findIndex(p => createId(p.title) === hash);
-                    
                     if (vipIndex > -1) {
-                        // 2. Remove it from its random spot
                         const [vipProduct] = categoryItems.splice(vipIndex, 1);
-                        
-                        // 3. Force it to be the VERY FIRST item (Index 0)
                         categoryItems.unshift(vipProduct);
-                        
-                        // 4. Add a visual highlight and smooth scroll after rendering
                         setTimeout(() => {
                             const targetCard = document.getElementById(hash);
                             if (targetCard) {
-                                // Scroll it to the CENTER of the screen (fixes the header issue)
                                 targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                
-                                // Optional: Flash a border so they know which one it is
                                 targetCard.style.transition = "box-shadow 0.5s";
-                                targetCard.style.boxShadow = "0 0 0 4px #eab308"; // Yellow highlight
+                                targetCard.style.boxShadow = "0 0 0 4px #eab308"; 
                                 setTimeout(() => { targetCard.style.boxShadow = "none"; }, 2000);
                             }
-                        }, 500); // Wait 0.5s for the DOM to be ready
+                        }, 500); 
                     }
                 }
-                // --- END: DEEP LINK LOGIC ---
-
                 renderCategoryGrid(1);
             }
             if (isHomePage) {
@@ -1289,7 +1671,7 @@ if (searchDropdown) {
         }
     }
 
-    init(); // Run the application
+    init(); 
 });
 
 document.addEventListener("DOMContentLoaded", function() {

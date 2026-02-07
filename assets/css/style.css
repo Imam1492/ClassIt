@@ -1113,3 +1113,71 @@ h1.title,
         max-height: none !important; 
     }
 }
+
+/* --- SEARCH FILTER BUTTONS (Blue & Beige Theme) --- */
+.filter-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    padding: 0 15px;
+}
+
+.filter-container.hidden { display: none; }
+
+/* === LIGHT MODE (Beige/Earth Tone) === */
+.filter-pill {
+    background: transparent;
+    /* A nice warm Beige border */
+    border: 1px solid #C19A6B; 
+    /* Dark Brown text (Easy to read on white) */
+    color: #5D4037;            
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    font-weight: 500;
+}
+
+/* Light Mode Hover */
+.filter-pill:hover {
+    background: rgba(193, 154, 107, 0.1); /* Very light beige tint */
+    border-color: #8D6E63;
+}
+
+/* Light Mode ACTIVE (Selected) */
+.filter-pill.active {
+    background: #C19A6B;    /* Solid Beige Background */
+    color: #fff !important; /* White Text */
+    border-color: #C19A6B;
+    box-shadow: 0 4px 10px rgba(193, 154, 107, 0.4); /* Soft shadow */
+}
+
+/* === DARK MODE (Electric Blue) === */
+[data-theme="dark"] .filter-pill {
+    /* Bright Blue Border */
+    border-color: #3B82F6; 
+    /* Light Blue Text */
+    color: #60A5FA;        
+    background: transparent;
+}
+
+/* Dark Mode Hover */
+[data-theme="dark"] .filter-pill:hover {
+    background: rgba(59, 130, 246, 0.15); /* Blue tint */
+    color: #fff;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); /* Blue Glow */
+}
+
+/* Dark Mode ACTIVE (Selected) */
+[data-theme="dark"] .filter-pill.active {
+    background: #2563EB;    /* Solid Electric Blue */
+    color: #fff !important; /* White Text */
+    border-color: #2563EB;
+    /* Cool "Neon" Blue Glow */
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.6); 
+}
+
