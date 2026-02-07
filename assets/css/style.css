@@ -102,8 +102,10 @@ input:focus-visible,
   opacity: 0;
   pointer-events: none;
   z-index: 900;
+  display: none; /* hidden until .show */
 }
 .overlay.show {
+  display: block;
   opacity: 1;
   pointer-events: auto;
 }
