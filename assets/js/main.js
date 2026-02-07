@@ -515,12 +515,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     function openSidebar() {
         if (!sidebar) return;
         sidebar.classList.add('show');
-        if (overlay) overlay.classList.add('show');
+        if (overlay) {
+            overlay.classList.remove('hidden');  /* .hidden has display:none !important, so must remove */
+            overlay.classList.add('show');
+        }
     }
     function hideSidebar() {
         if (!sidebar) return;
         sidebar.classList.remove('show');
-        if (overlay) overlay.classList.remove('show');
+        if (overlay) {
+            overlay.classList.remove('show');
+            overlay.classList.add('hidden');
+        }
     }
 
 //     // ---------- 6. RENDERING LOGIC (MODIFIED) ----------
