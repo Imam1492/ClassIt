@@ -1671,10 +1671,36 @@ function setupCustomSort() {
                 renderDropdown(searchInput.value);
             });
             
-            searchInput.addEventListener('blur', () => {
-                setTimeout(hideDropdown, 150);
-                if (searchInput.value === "" && isHomePage) initAnimatedPlaceholder();
-            });
+            /* ===============================================
+   NEW SEARCH LOGIC (Fixes "Click Not Working")
+   =============================================== */
+
+// 1. Remove the old "blur" listener that was closing the menu too fast.
+// Instead, use "Click Outside" to close the menu.
+document.addEventListener('click', (e) => {
+    const isClickInside = e.target.closest('.search-wrap');
+
+    // If clicked OUTSIDE the search box, hide the dropdown
+    if (!isClickInside) {
+        hideDropdown();
+        // Resume placeholder animation if needed
+        if (searchInput && searchInput.value === "" && isHomePage) {
+            initAnimatedPlaceholder();
+        }
+    }
+});
+
+// 2. Ensure Input Focus opens the menu
+if (searchInput) {
+    searchInput.addEventListener('focus', () => {
+        clearTimeout(animatedPlaceholderTimeout);
+        searchInput.setAttribute("placeholder", "Search products...");
+        renderDropdown(searchInput.value);
+    });
+
+    // 3. Keep the "Mousedown" handler you have, it's good.
+    // But let's verify it has no interference.
+}
 
             // INSTANT TOGGLE: Switch icon immediately when typing
             searchInput.addEventListener('input', (e) => {
@@ -1735,33 +1761,60 @@ function setupCustomSort() {
             });
             
             // DROPDOWN CLICK HANDLER
-            if (searchDropdown) {
-                 searchDropdown.addEventListener('pointerdown', (ev) => {
-                    ev.preventDefault();
-                    const removeBtn = ev.target.closest('button.remove');
-                    const row = ev.target.closest('.row');
+            // DROPDOWN INTERACTION (Fixed for Mouse & Touch)
+        if (searchDropdown) {
+            const handleInteraction = (e) => {
+                // 1. CRITICAL: Stop the search input from blurring (losing focus)
+                // This keeps the dropdown open so the click can register.
+                if (e.type === 'mousedown' || e.type === 'touchstart') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
 
-                    if (removeBtn) {
-                        ev.stopImmediatePropagation();
-                        const value = removeBtn.dataset.remove;
-                        if (!value) return;
-                        const updated = loadRecent().filter(x => x !== value);
-                        saveRecent(updated);
-                        renderDropdown(searchInput?.value || '');
-                        return;
-                    }
+                const removeBtn = e.target.closest('.remove');
+                const row = e.target.closest('.row');
 
-                    if (row) {
-                        const val = row.dataset.value;
-                        if (!val) return;
-                        searchInput.value = val;
-                        hideDropdown();
+                // CASE A: Remove History Item ("X" Button)
+                if (removeBtn) {
+                    const value = removeBtn.dataset.remove;
+                    if (!value) return;
+
+                    const updated = loadRecent().filter(x => x !== value);
+                    saveRecent(updated);
+                    
+                    // Re-render immediately
+                    renderDropdown(searchInput.value || '');
+                    // Keep focus on input so keyboard stays up
+                    searchInput.focus();
+                    return;
+                }
+
+                // CASE B: Select Result (Clicking the row)
+                if (row) {
+                    const val = row.dataset.value;
+                    if (!val) return;
+                    
+                    searchInput.value = val;
+                    hideDropdown(); // Now we can hide it manually
+                    
+                    // Switch icon to "X"
+                    if (searchBtn) {
                         searchBtn.innerHTML = ICON_CLOSE;
                         searchBtn.dataset.mode = 'clear';
-                        doSearch(val, 1);
                     }
-                });
-            }
+                    
+                    doSearch(val, 1);
+                    
+                    // On mobile, we might want to close the keyboard now
+                    searchInput.blur();
+                }
+            };
+
+            // Listen for BOTH Mouse and Touch events
+            // 'passive: false' is required to allow preventDefault() on touch events
+            searchDropdown.addEventListener('mousedown', handleInteraction);
+            searchDropdown.addEventListener('touchstart', handleInteraction, { passive: false });
+        }
         }
 
         // --- 4. Event delegation for share and "show more" (PRESERVED) ---
@@ -1954,90 +2007,3 @@ document.getElementById('nextBtn')?.addEventListener('click', () => {
   gtag('event', 'gallery_navigation', { 'direction': 'right' });
 });
 
-/* ===============================================
-   SMART SORT FIX (Handles Search Results)
-   =============================================== */
-
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Index all cards on load (so we can restore "Newest" order)
-    const indexCards = () => {
-        document.querySelectorAll('.product-card').forEach((card, index) => {
-            if (!card.hasAttribute('data-index')) {
-                card.setAttribute('data-index', index);
-            }
-        });
-    };
-    
-    // Run initially and whenever search might update
-    indexCards();
-    const observer = new MutationObserver(indexCards);
-    const searchContainer = document.getElementById('searchResults');
-    if(searchContainer) observer.observe(searchContainer, { childList: true });
-
-    // 2. Hijack the Sort Clicks
-    document.querySelectorAll('.custom-option').forEach(option => {
-        option.addEventListener('click', function(e) {
-            // Wait a tiny bit for the UI to update
-            setTimeout(() => {
-                const sortType = this.getAttribute('data-value');
-                applySmartSort(sortType);
-            }, 50);
-        });
-    });
-});
-
-function applySmartSort(sortType) {
-    const searchResults = document.getElementById('searchResults');
-    const mainGrid = document.getElementById('productGrid'); 
-    
-    let containerToSort = mainGrid;
-
-    // 1. CHECK: Are we looking at search results?
-    if (searchResults && !searchResults.classList.contains('hidden') && searchResults.querySelector('.product-card')) {
-        // CRITICAL FIX: The cards are actually inside a child div called .product-grid
-        // We must sort THIS inner div, not the parent, to keep the layout.
-        const innerGrid = searchResults.querySelector('.product-grid');
-        if (innerGrid) {
-            containerToSort = innerGrid;
-        } else {
-            // Fallback: If no wrapper exists, use the parent (and ensure it has grid class)
-            containerToSort = searchResults;
-            containerToSort.classList.add('product-grid'); 
-        }
-    }
-
-    if (!containerToSort) return;
-
-    // 2. Get all cards
-    const cards = Array.from(containerToSort.querySelectorAll('.product-card'));
-
-    // 3. Sort them
-    cards.sort((a, b) => {
-        const priceA = getPriceFromCard(a);
-        const priceB = getPriceFromCard(b);
-        // Default to 0 if index is missing to prevent NaN errors
-        const indexA = parseInt(a.getAttribute('data-index') || 0);
-        const indexB = parseInt(b.getAttribute('data-index') || 0);
-        const nameA = a.querySelector('h3') ? a.querySelector('h3').innerText.toLowerCase() : '';
-        const nameB = b.querySelector('h3') ? b.querySelector('h3').innerText.toLowerCase() : '';
-
-        if (sortType === 'price-low') return priceA - priceB;
-        if (sortType === 'price-high') return priceB - priceA;
-        if (sortType === 'newest') return indexA - indexB; 
-        if (sortType === 'oldest') return indexB - indexA;
-        if (sortType === 'alpha-asc') return nameA.localeCompare(nameB);
-        return 0;
-    });
-
-    // 4. Re-append sorted cards to the CORRECT container
-    containerToSort.innerHTML = '';
-    cards.forEach(card => containerToSort.appendChild(card));
-}
-
-// Helper to extract price from text (e.g., "$1,200" -> 1200)
-function getPriceFromCard(card) {
-    // Looks for any text that looks like a price inside the card
-    const text = card.innerText;
-    const match = text.match(/[\d,.]+/); 
-    return match ? parseFloat(match[0].replace(/,/g, '')) : 0;
-}

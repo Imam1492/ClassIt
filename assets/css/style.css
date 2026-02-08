@@ -2231,3 +2231,35 @@ body #nextBtn:active {
     cursor: pointer;
 }
 
+
+/* ===============================================
+   FINAL SEARCH FIXES (Z-Index & Visuals)
+   =============================================== */
+
+/* 1. FORCE DROPDOWN TO FRONT */
+.search-dropdown {
+    z-index: 99999 !important; /* Higher than everything */
+    position: absolute !important;
+}
+
+/* 2. FORCE TOPBAR TO FRONT */
+.topbar {
+    z-index: 10000 !important; /* Ensures the parent container is also on top */
+    position: fixed !important;
+}
+
+/* 3. FIX ORANGE OUTLINE */
+.search-input:focus,
+.search-input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    border: 1px solid #888 !important; /* Neutral Grey Border */
+}
+
+/* 4. FIX TRANSLUCENT BACKGROUND (Dark Mode) */
+[data-theme="dark"] .search-dropdown {
+    background-color: #1a1a1a !important; /* Solid Black */
+    opacity: 1 !important;
+    border: 1px solid #333 !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.9) !important;
+}
