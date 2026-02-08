@@ -2263,3 +2263,23 @@ body #nextBtn:active {
     border: 1px solid #333 !important;
     box-shadow: 0 10px 40px rgba(0,0,0,0.9) !important;
 }
+
+/* ===============================================
+   HOME PAGE SORTING VISIBILITY (Mobile & Desktop)
+   =============================================== */
+
+/* 1. HIDE Sort Button by default on Home Page */
+body[data-home="true"] .sort-wrapper {
+    display: none !important;
+}
+
+/* 2. SHOW Sort Button ONLY when searching */
+body[data-home="true"].searching .sort-wrapper {
+    display: inline-block !important; /* Or flex, depending on your layout */
+    animation: fadeIn 0.3s ease;
+}
+
+/* 3. ENSURE it's always visible on Category Pages */
+body:not([data-home="true"]) .sort-wrapper {
+    display: inline-block !important;
+}

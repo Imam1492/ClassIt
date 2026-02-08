@@ -1084,6 +1084,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     function doSearch(q, page = 1) {
         const query = (q || '').trim();
         
+     // --- VISIBILITY FIX: Add 'searching' class ---
+        if (query || activeFilters.size > 0) {
+            document.body.classList.add('searching');
+        } else {
+            // If search is cleared, reset
+            resetToDefaultGrid();
+            return;
+        }
+
         const filterContainer = document.getElementById('searchFilterContainer');
         if (filterContainer) {
             if (query || activeFilters.size > 0) {
@@ -1571,48 +1580,90 @@ const categories = [...new Set(
 
     // ... existing helper functions ...
 
-// --- NEW: Custom Sort Dropdown Logic ---
-function setupCustomSort() {
-    const trigger = document.getElementById('customSortTrigger');
-    const optionsMenu = document.getElementById('customSortOptions');
-    const options = document.querySelectorAll('.custom-option');
-    const label = document.getElementById('sortLabel');
+// --- UPDATED: Setup Custom Sort (Injects Correct Options) ---
+    function setupCustomSort() {
+        const trigger = document.getElementById('customSortTrigger');
+        const optionsMenu = document.getElementById('customSortOptions');
+        const label = document.getElementById('sortLabel');
 
-    if (!trigger || !optionsMenu) return;
+        if (!trigger || !optionsMenu) return;
 
-    // 1. Toggle Menu
-    trigger.addEventListener('click', (e) => {
-        e.stopPropagation(); // Stop click from bubbling
-        optionsMenu.classList.toggle('show');
-        trigger.classList.toggle('open');
-    });
+        // 1. INJECT CORRECT OPTIONS (Fixes "Dummy" Sorting)
+        // This ensures the data-value matches your switch statement perfectly.
+        optionsMenu.innerHTML = `
+            <div class="custom-option selected" data-value="newest">Sort by: Newest</div>
+            <div class="custom-option" data-value="oldest">Sort by: Oldest</div>
+            <div class="custom-option" data-value="price-low">Price: Low to High</div>
+            <div class="custom-option" data-value="price-high">Price: High to Low</div>
+            <div class="custom-option" data-value="alpha-asc">Name: A to Z</div>
+        `;
 
-    // 2. Handle Option Selection
-    options.forEach(option => {
-        option.addEventListener('click', (e) => {
+        // 2. Re-select the newly injected options
+        const options = optionsMenu.querySelectorAll('.custom-option');
+
+        // 3. Toggle Menu
+        trigger.onclick = (e) => {
             e.stopPropagation();
-            
-            // Visual Update
-            options.forEach(opt => opt.classList.remove('selected'));
-            option.classList.add('selected');
-            label.textContent = option.textContent;
+            optionsMenu.classList.toggle('show');
+            trigger.classList.toggle('open');
+        };
 
-            // Close Menu
+        // 4. Handle Option Selection
+        options.forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                // Visual Update
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                
+                // Update Label Text
+                if(label) label.textContent = option.textContent;
+
+                // Close Menu
+                optionsMenu.classList.remove('show');
+                trigger.classList.remove('open');
+
+                // --- TRIGGER THE ACTUAL SORT ---
+                const value = option.getAttribute('data-value'); // Ensure we get the value
+                if (value) sortProducts(value);
+            });
+        });
+
+        // 5. Close when clicking outside
+        document.addEventListener('click', () => {
             optionsMenu.classList.remove('show');
             trigger.classList.remove('open');
-
-            // --- TRIGGER THE ACTUAL SORT ---
-            const value = option.dataset.value;
-            sortProducts(value); // Calls your existing sort logic
         });
-    });
+    }
 
-    // 3. Close when clicking outside
-    document.addEventListener('click', () => {
-        optionsMenu.classList.remove('show');
-        trigger.classList.remove('open');
-    });
-}
+    // --- UPDATED: Reset Grid (Handles Visibility) ---
+    function resetToDefaultGrid() {
+        if (searchResults) searchResults.classList.add('hidden');
+        if (searchPagination) searchPagination.innerHTML = '';
+        
+        // Show the Title back
+        const mainTitle = document.getElementById('mainTitle');
+        if (mainTitle) mainTitle.style.display = 'block';
+
+        // Hide Filters
+        const filterContainer = document.getElementById('searchFilterContainer');
+        if (filterContainer) {
+            filterContainer.classList.add('hidden');
+            activeFilters.clear(); 
+        }
+
+        // --- VISIBILITY FIX: Remove 'searching' class ---
+        document.body.classList.remove('searching');
+        
+        // Reset Breadcrumbs
+        if (searchInput) searchInput.value = ''; 
+        renderBreadcrumbs();
+
+        if (isHomePage && gallerySection) gallerySection.style.display = 'block';
+        if (isCategoryPage && grid) grid.classList.remove('hidden');
+        if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
+    }
 
 
 
@@ -1700,6 +1751,16 @@ if (searchInput) {
         searchInput.setAttribute("placeholder", "Search products...");
         renderDropdown(searchInput.value);
     });
+
+// --- NEW: CLICK LISTENER (Fixes the "Second Click" Issue) ---
+            // This catches clicks when the bar is ALREADY focused
+            searchInput.addEventListener('click', (e) => {
+                // Stop this click from closing the menu via the "Click Outside" listener
+                e.stopPropagation(); 
+                
+                // Force the menu to render/open again
+                renderDropdown(searchInput.value);
+            });
 
     // 3. Keep the "Mousedown" handler you have, it's good.
     // But let's verify it has no interference.
