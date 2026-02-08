@@ -1532,16 +1532,23 @@ const categories = [...new Set(
         // Determine which list to sort
         let listToSort = isCategoryPage ? categoryItems : allProducts;
         
-        // If on homepage but searching, we might be sorting search results. 
-        // But usually, sorting affects the main "pool". 
-        // For simplicity, we sort the master list, then re-render.
-        
+        // Helper to handle dates safely
+        const getDate = (d) => new Date(d || 0).getTime();
+
         switch (criteria) {
             case 'newest':
-                listToSort.sort((a, b) => new Date(b._createdAt || 0) - new Date(a._createdAt || 0));
+                listToSort.sort((a, b) => {
+                    // 1. Try to sort by Date Created
+                    const diff = getDate(b._createdAt) - getDate(a._createdAt);
+                    // 2. If dates are equal (Tie-Breaker), sort by Title
+                    return diff !== 0 ? diff : a.title.localeCompare(b.title);
+                });
                 break;
             case 'oldest':
-                listToSort.sort((a, b) => new Date(a._createdAt || 0) - new Date(b._createdAt || 0));
+                listToSort.sort((a, b) => {
+                    const diff = getDate(a._createdAt) - getDate(b._createdAt);
+                    return diff !== 0 ? diff : a.title.localeCompare(b.title);
+                });
                 break;
             case 'price-low':
                 listToSort.sort((a, b) => (a.price || 0) - (b.price || 0));
@@ -1558,11 +1565,7 @@ const categories = [...new Set(
         if (isCategoryPage) {
             renderCategoryGrid(1); // Reset to page 1
         } else if (searchInput.value.trim() !== '') {
-            // If searching, re-run search to apply sort to results
             doSearch(searchInput.value, 1);
-        } else {
-            // Homepage Gallery is usually random/curated, but we can re-init if needed.
-            // For now, we leave the gallery random as requested previously.
         }
     }
 
