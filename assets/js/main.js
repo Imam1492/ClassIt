@@ -512,20 +512,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ---------- 5. SIDEBAR LOGIC ----------
+    // Overlay: use inline styles so no CSS (e.g. .hidden !important) can block the dim
+    function getOverlay() {
+        let el = document.getElementById('overlay');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'overlay';
+            el.className = 'overlay hidden';
+            el.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(el);
+            el.addEventListener('click', hideSidebar);
+        }
+        return el;
+    }
     function openSidebar() {
         if (!sidebar) return;
         sidebar.classList.add('show');
-        if (overlay) {
-            overlay.classList.remove('hidden');  /* .hidden has display:none !important, so must remove */
-            overlay.classList.add('show');
-        }
+        const ov = getOverlay();
+        ov.classList.remove('hidden');
+        ov.classList.add('show');
+        ov.style.display = 'block';
+        ov.style.opacity = '1';
+        ov.style.pointerEvents = 'auto';
+        ov.style.background = 'rgba(0,0,0,0.5)';
+        ov.setAttribute('aria-hidden', 'false');
     }
     function hideSidebar() {
         if (!sidebar) return;
         sidebar.classList.remove('show');
-        if (overlay) {
-            overlay.classList.remove('show');
-            overlay.classList.add('hidden');
+        const ov = document.getElementById('overlay');
+        if (ov) {
+            ov.classList.remove('show');
+            ov.classList.add('hidden');
+            ov.style.display = '';
+            ov.style.opacity = '';
+            ov.style.pointerEvents = '';
+            ov.style.background = '';
+            ov.setAttribute('aria-hidden', 'true');
         }
     }
 
