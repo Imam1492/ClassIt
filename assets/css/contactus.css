@@ -5,7 +5,15 @@
 /* --- Header Adjustments --- */
 body[data-page="contact"] .topbar {
   position: relative;
-  background-color: var(--topbar-bg); /* CHANGED */
+  background-color: var(--topbar-bg);
+  
+  /* INCREASED HEIGHT */
+  height: 84px !important;      /* Default was around 84px */
+  min-height: 84px !important;  /* Forces it to stay tall */
+  
+  /* Optional: Ensure content stays centered if flexbox is used */
+  display: flex;
+  align-items: center;
 }
 
 body[data-page="contact"] .topbar::after {
@@ -169,7 +177,8 @@ body[data-page="contact"] {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin: 2rem auto 3rem;
+  /* CHANGED: reduced top margin from 2rem to 0.5rem */
+  margin: 0.5rem auto 3rem; 
   max-width: 900px;
   padding: 0 1rem;
   position: relative;

@@ -53,6 +53,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
   <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:wght@400;700&family=Agbalumo&display=block" rel="stylesheet">
+<style>
+    /* --- FORCE CONTACT PAGE SPACING --- */
+    
+    /* 1. Reset the Main Container Padding */
+    /* 85px is just enough to clear the Header (84px), removing the big gap */
+    main.main {
+        padding-top: 85px !important; 
+        min-height: auto !important;
+    }
+
+    /* 2. Shrink the Breadcrumb container */
+    .toolbar-container {
+        margin-bottom: 5px !important; /* Tiny gap between breadcrumb and title */
+        margin-top: 10px !important;   /* Tiny gap from top */
+        padding: 0 5px !important;
+    }
+
+    /* 3. Pull the "We're Here to Help" Title Up */
+    h1.title {
+        margin-top: 0 !important;      /* Zero gap above title */
+        padding-top: 0 !important;     /* Zero padding inside title */
+        line-height: 1.1 !important;   /* tighter line height */
+    }
+</style>
 </head>
 
 <body data-page="contact">
@@ -89,7 +113,11 @@
 </a>
   </header>
 
-  <main id="main-content" class="main">
+  <main id="main-content" class="main" style="padding-top: 0px !important; min-height: auto !important;">
+
+    <div class="toolbar-container" style="margin-top: 10px !important; margin-bottom: 5px !important;">
+      <div id="breadcrumbs" class="breadcrumbs"></div>
+    </div>
 
     <!-- Modernized Header -->
     <header class="page-header">

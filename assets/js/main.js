@@ -479,25 +479,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-    // ---------- 4. DATA FETCHING (From Sanity) ----------
+// ---------- 4. DATA FETCHING (From Sanity) ----------
     async function fetchProducts() {
         if (window.PRODUCTS && window.PRODUCTS.length > 0) return window.PRODUCTS;
         
         const projectId = window.SANITY_PROJECT_ID;
         if (!projectId) return [];
         const dataset = window.SANITY_DATASET || 'production';
-        // NEW LINE (Fetches mobileImage too):
-    const groq = `*[_type == "product"]{ 
-        title, 
-        description, 
-        price, 
-        category, 
-        link, 
-        altText, 
-        "imageUrl": image.asset->url, 
-        "mobileImageUrl": mobileImage.asset->url, 
-        "slug": slug.current 
-    }`;
+        
+        // UPDATED GROQ: Added _createdAt and default order
+        const groq = `*[_type == "product"] | order(_createdAt desc) { 
+            title, 
+            description, 
+            price, 
+            category, 
+            link, 
+            altText, 
+            "imageUrl": image.asset->url, 
+            "mobileImageUrl": mobileImage.asset->url, 
+            "slug": slug.current,
+            _createdAt
+        }`;
+        
         const url = `https://${projectId}.api.sanity.io/v2024-11-08/data/query/${dataset}?query=${encodeURIComponent(groq)}`;
 
         try {
@@ -1048,7 +1051,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    function resetToDefaultGrid() {
+   function resetToDefaultGrid() {
         if (searchResults) searchResults.classList.add('hidden');
         if (searchPagination) searchPagination.innerHTML = '';
         
@@ -1056,11 +1059,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         const mainTitle = document.getElementById('mainTitle');
         if (mainTitle) mainTitle.style.display = 'block';
 
+        // Hide Filters
         const filterContainer = document.getElementById('searchFilterContainer');
         if (filterContainer) {
             filterContainer.classList.add('hidden');
             activeFilters.clear(); 
         }
+
+        // --- NEW: Hide Sort Dropdown (ONLY on Home Page) ---
+        const sortWrapper = document.querySelector('.sort-wrapper');
+        if (isHomePage && sortWrapper) {
+            sortWrapper.classList.add('hidden');
+        }
+        
+        // Reset Breadcrumbs
+        if (searchInput) searchInput.value = ''; // Ensure input is visually clear
+        renderBreadcrumbs();
 
         if (isHomePage && gallerySection) gallerySection.style.display = 'block';
         if (isCategoryPage && grid) grid.classList.remove('hidden');
@@ -1084,6 +1098,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             resetToDefaultGrid();
             return;
         }
+
+        // --- NEW: Show Sort Dropdown (When Searching) ---
+        const sortWrapper = document.querySelector('.sort-wrapper');
+        if (sortWrapper) {
+            sortWrapper.classList.remove('hidden');
+        }
+        
+        // Update Breadcrumbs to show "Home / Search"
+        renderBreadcrumbs();
 
         if (query) {
             const recents = loadRecent();
@@ -1474,10 +1497,126 @@ const categories = [...new Set(
         loop(); // Start the animation
     }
 
+// ---------- NEW: BREADCRUMBS & SORTING LOGIC ----------
+
+    function renderBreadcrumbs() {
+        const container = document.getElementById('breadcrumbs');
+        if (!container) return;
+
+        // Base Path
+        let html = `<a href="/">Home</a>`;
+        
+        // 1. Check Explicit Page Tag (This fixes Contact/About)
+        const pageType = document.body.dataset.page; 
+
+        if (pageType === 'contact') {
+            html += ` <span>/</span> <span class="current">Contact</span>`;
+        }
+        else if (pageType === 'about') { // Ensure about.html has <body data-page="about">
+            html += ` <span>/</span> <span class="current">About Us</span>`;
+        }
+        // 2. Search Results
+        else if (searchInput && searchInput.value.trim() !== '') {
+             html += ` <span>/</span> <span class="current">Search</span>`;
+        }
+        // 3. Category Page
+        else if (isCategoryPage && currentCategory) {
+            const catName = currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1);
+            html += ` <span>/</span> <span class="current">${escapeHtml(catName)}</span>`;
+        } 
+
+        container.innerHTML = html;
+    }
+
+    function sortProducts(criteria) {
+        // Determine which list to sort
+        let listToSort = isCategoryPage ? categoryItems : allProducts;
+        
+        // If on homepage but searching, we might be sorting search results. 
+        // But usually, sorting affects the main "pool". 
+        // For simplicity, we sort the master list, then re-render.
+        
+        switch (criteria) {
+            case 'newest':
+                listToSort.sort((a, b) => new Date(b._createdAt || 0) - new Date(a._createdAt || 0));
+                break;
+            case 'oldest':
+                listToSort.sort((a, b) => new Date(a._createdAt || 0) - new Date(b._createdAt || 0));
+                break;
+            case 'price-low':
+                listToSort.sort((a, b) => (a.price || 0) - (b.price || 0));
+                break;
+            case 'price-high':
+                listToSort.sort((a, b) => (b.price || 0) - (a.price || 0));
+                break;
+            case 'alpha-asc':
+                listToSort.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+        }
+
+        // Re-render based on current page state
+        if (isCategoryPage) {
+            renderCategoryGrid(1); // Reset to page 1
+        } else if (searchInput.value.trim() !== '') {
+            // If searching, re-run search to apply sort to results
+            doSearch(searchInput.value, 1);
+        } else {
+            // Homepage Gallery is usually random/curated, but we can re-init if needed.
+            // For now, we leave the gallery random as requested previously.
+        }
+    }
+
+    // ... existing helper functions ...
+
+// --- NEW: Custom Sort Dropdown Logic ---
+function setupCustomSort() {
+    const trigger = document.getElementById('customSortTrigger');
+    const optionsMenu = document.getElementById('customSortOptions');
+    const options = document.querySelectorAll('.custom-option');
+    const label = document.getElementById('sortLabel');
+
+    if (!trigger || !optionsMenu) return;
+
+    // 1. Toggle Menu
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation(); // Stop click from bubbling
+        optionsMenu.classList.toggle('show');
+        trigger.classList.toggle('open');
+    });
+
+    // 2. Handle Option Selection
+    options.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Visual Update
+            options.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            label.textContent = option.textContent;
+
+            // Close Menu
+            optionsMenu.classList.remove('show');
+            trigger.classList.remove('open');
+
+            // --- TRIGGER THE ACTUAL SORT ---
+            const value = option.dataset.value;
+            sortProducts(value); // Calls your existing sort logic
+        });
+    });
+
+    // 3. Close when clicking outside
+    document.addEventListener('click', () => {
+        optionsMenu.classList.remove('show');
+        trigger.classList.remove('open');
+    });
+}
+
+
+
 // ---------- 9. EVENT LISTENERS & INITIALIZATION (MODIFIED) ----------
     async function init() {
 
-        // --- NEW: Handle "View Product" Clicks from Chatbot ---
+        // --- 1. Handle "View Product" Clicks from Chatbot (PRESERVED) ---
         document.addEventListener('click', (e) => {
             const link = e.target.closest('a');
             if (link && link.classList.contains('chat-link') && link.getAttribute('href').includes('#')) {
@@ -1500,19 +1639,18 @@ const categories = [...new Set(
             }
         });
     
-        // --- Global Event Listeners ---
+        // --- 2. Global Event Listeners (PRESERVED) ---
         menuBtn?.addEventListener('click', openSidebar);
         closeSidebar?.addEventListener('click', hideSidebar);
         overlay?.addEventListener('click', hideSidebar);
 
-        // --- NEW: SMART SEARCH BAR LOGIC (Google Style) ---
+        // --- 3. SMART SEARCH BAR LOGIC (Google Style) (PRESERVED) ---
         const ICON_SEARCH = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
         const ICON_CLOSE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
 
-        // 1. Button Click: Decides whether to SEARCH or CLEAR
+        // Button Click: Decides whether to SEARCH or CLEAR
         searchBtn?.addEventListener('click', () => {
             if (searchBtn.dataset.mode === 'clear') {
-                // Clear Mode: Wipe text, Focus input, Reset Icon
                 searchInput.value = '';
                 searchInput.focus(); 
                 searchBtn.innerHTML = ICON_SEARCH;
@@ -1521,13 +1659,12 @@ const categories = [...new Set(
                 hideDropdown();
                 resetToDefaultGrid(); 
             } else {
-                // Search Mode: Run the search
                 doSearch(searchInput.value, 1);
             }
         });
 
         if (searchInput) {
-            // 2. Focus/Blur 
+            // Focus/Blur 
             searchInput.addEventListener('focus', () => {
                 clearTimeout(animatedPlaceholderTimeout); 
                 searchInput.setAttribute("placeholder", "Search products...");
@@ -1539,7 +1676,7 @@ const categories = [...new Set(
                 if (searchInput.value === "" && isHomePage) initAnimatedPlaceholder();
             });
 
-            // 3. INSTANT TOGGLE: Switch icon immediately when typing
+            // INSTANT TOGGLE: Switch icon immediately when typing
             searchInput.addEventListener('input', (e) => {
                 const hasText = e.target.value.trim().length > 0;
                 
@@ -1552,13 +1689,13 @@ const categories = [...new Set(
                 }
             });
 
-            // 4. DEBOUNCED SEARCH: The heavy lifting 
+            // DEBOUNCED SEARCH: The heavy lifting 
             searchInput.addEventListener('input', debounce((e) => {
                 renderDropdown(e.target.value || '');
                 if (!e.target.value.trim()) resetToDefaultGrid();
             }, 120));
 
-            // 5. KEYBOARD NAV (Enter, Arrows, Escape)
+            // KEYBOARD NAV (Enter, Arrows, Escape)
             searchInput.addEventListener('keydown', (e) => {
                 const rows = searchDropdown?.querySelectorAll('.row');
                 
@@ -1597,7 +1734,7 @@ const categories = [...new Set(
                 });
             });
             
-            // 6. DROPDOWN CLICK HANDLER
+            // DROPDOWN CLICK HANDLER
             if (searchDropdown) {
                  searchDropdown.addEventListener('pointerdown', (ev) => {
                     ev.preventDefault();
@@ -1627,7 +1764,7 @@ const categories = [...new Set(
             }
         }
 
-        // --- MODIFIED: Event delegation for share and "show more" buttons ---
+        // --- 4. Event delegation for share and "show more" (PRESERVED) ---
         const handleGridClick = (e) => {
             const shareButton = e.target.closest('.share-btn');
             const showMoreButton = e.target.closest('.show-more-btn');
@@ -1659,16 +1796,37 @@ const categories = [...new Set(
         if (searchResults) searchResults.addEventListener('click', handleGridClick);
         if (gallery) gallery.addEventListener('click', handleGridClick); 
 
-        // --- Data-dependent Initialization ---
+        // --- 5. Data-dependent Initialization (UPDATED) ---
         try {
             allProducts = await fetchProducts();
             window.CLASSIT_PRODUCTS = allProducts; 
+
+            // --- NEW: Toolbar Initialization (Sort & Breadcrumbs) ---
+            renderBreadcrumbs();
+            setupCustomSort(); // <--- ADD THIS LINE HERE!
+            
+            const sortDropdown = document.getElementById('sortDropdown');
+            const sortWrapper = document.querySelector('.sort-wrapper');
+
+            // LOGIC: Hide Sort on Home Page initially, Show on Category Pages
+            if (isHomePage && sortWrapper) {
+                sortWrapper.classList.add('hidden');
+            } else if (sortWrapper) {
+                sortWrapper.classList.remove('hidden');
+            }
+
+            if (sortDropdown) {
+                sortDropdown.addEventListener('change', (e) => {
+                    sortProducts(e.target.value);
+                });
+            }
+            // --------------------------------------------------------
 
            if (isCategoryPage) {
                 const allItems = allProducts.filter((p) => (p.category || '').toLowerCase() === (currentCategory || '').toLowerCase());
                 categoryItems = shuffleArray(allItems);
 
-                // --- START: DEEP LINK "VIP" LOGIC ---
+                // Deep Link "VIP" Logic
                 const hash = window.location.hash.substring(1); 
                 if (hash) {
                     const vipIndex = categoryItems.findIndex(p => createId(p.title) === hash);
@@ -1700,34 +1858,38 @@ const categories = [...new Set(
         }
     }
 
-    init(); 
-});
+const sidebarMenu = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('menuBtn');
+    
+    // 1. Highlight Current Page (Smart Match)
+    // This removes trailing slashes and 'index.html' to ensure it works everywhere
+    const currentPath = window.location.pathname.replace(/\/$/, "").replace("/index.html", "") || "/";
+    const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
 
-document.addEventListener("DOMContentLoaded", function() {
-    const sidebar = document.getElementById('sidebar');
-    const menuBtn = document.getElementById('menuBtn');
-
-    const currentPage = window.location.pathname;
-    const navLinks = document.querySelectorAll('.sidebar-nav a');
-
-    navLinks.forEach(link => {
-        const linkPath = new URL(link.href).pathname;
-        if (linkPath === currentPage) {
-            link.classList.add('active');
-        }
+    sidebarLinks.forEach(link => {
+        try {
+            const url = new URL(link.href);
+            // Normalize the link path just like the current path
+            const linkPath = url.pathname.replace(/\/$/, "").replace("/index.html", "") || "/";
+            
+            if (linkPath === currentPath) {
+                link.classList.add('active');
+            }
+        } catch(e) { /* Ignore errors */ }
     });
 
+    // 2. Close Sidebar on Outside Click
     document.addEventListener('click', (event) => {
-        if (!sidebar || !menuBtn) return;
-        const isClickInsideSidebar = sidebar.contains(event.target);
-        const isClickOnOpenButton = menuBtn.contains(event.target);
+        if (!sidebarMenu || !sidebarToggle) return;
+        const clickedInside = sidebarMenu.contains(event.target);
+        const clickedBtn = sidebarToggle.contains(event.target);
 
-        if (sidebar.classList.contains('show') && !isClickInsideSidebar && !isClickOnOpenButton) {
-            sidebar.classList.remove('show');
+        if (sidebarMenu.classList.contains('show') && !clickedInside && !clickedBtn) {
+            sidebarMenu.classList.remove('show');
         }
     });
+init();  // <--- ADD THIS (Runs the app)
 });
-
 
 
 /* =========================================
@@ -1791,3 +1953,91 @@ document.getElementById('prevBtn')?.addEventListener('click', () => {
 document.getElementById('nextBtn')?.addEventListener('click', () => {
   gtag('event', 'gallery_navigation', { 'direction': 'right' });
 });
+
+/* ===============================================
+   SMART SORT FIX (Handles Search Results)
+   =============================================== */
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Index all cards on load (so we can restore "Newest" order)
+    const indexCards = () => {
+        document.querySelectorAll('.product-card').forEach((card, index) => {
+            if (!card.hasAttribute('data-index')) {
+                card.setAttribute('data-index', index);
+            }
+        });
+    };
+    
+    // Run initially and whenever search might update
+    indexCards();
+    const observer = new MutationObserver(indexCards);
+    const searchContainer = document.getElementById('searchResults');
+    if(searchContainer) observer.observe(searchContainer, { childList: true });
+
+    // 2. Hijack the Sort Clicks
+    document.querySelectorAll('.custom-option').forEach(option => {
+        option.addEventListener('click', function(e) {
+            // Wait a tiny bit for the UI to update
+            setTimeout(() => {
+                const sortType = this.getAttribute('data-value');
+                applySmartSort(sortType);
+            }, 50);
+        });
+    });
+});
+
+function applySmartSort(sortType) {
+    const searchResults = document.getElementById('searchResults');
+    const mainGrid = document.getElementById('productGrid'); 
+    
+    let containerToSort = mainGrid;
+
+    // 1. CHECK: Are we looking at search results?
+    if (searchResults && !searchResults.classList.contains('hidden') && searchResults.querySelector('.product-card')) {
+        // CRITICAL FIX: The cards are actually inside a child div called .product-grid
+        // We must sort THIS inner div, not the parent, to keep the layout.
+        const innerGrid = searchResults.querySelector('.product-grid');
+        if (innerGrid) {
+            containerToSort = innerGrid;
+        } else {
+            // Fallback: If no wrapper exists, use the parent (and ensure it has grid class)
+            containerToSort = searchResults;
+            containerToSort.classList.add('product-grid'); 
+        }
+    }
+
+    if (!containerToSort) return;
+
+    // 2. Get all cards
+    const cards = Array.from(containerToSort.querySelectorAll('.product-card'));
+
+    // 3. Sort them
+    cards.sort((a, b) => {
+        const priceA = getPriceFromCard(a);
+        const priceB = getPriceFromCard(b);
+        // Default to 0 if index is missing to prevent NaN errors
+        const indexA = parseInt(a.getAttribute('data-index') || 0);
+        const indexB = parseInt(b.getAttribute('data-index') || 0);
+        const nameA = a.querySelector('h3') ? a.querySelector('h3').innerText.toLowerCase() : '';
+        const nameB = b.querySelector('h3') ? b.querySelector('h3').innerText.toLowerCase() : '';
+
+        if (sortType === 'price-low') return priceA - priceB;
+        if (sortType === 'price-high') return priceB - priceA;
+        if (sortType === 'newest') return indexA - indexB; 
+        if (sortType === 'oldest') return indexB - indexA;
+        if (sortType === 'alpha-asc') return nameA.localeCompare(nameB);
+        return 0;
+    });
+
+    // 4. Re-append sorted cards to the CORRECT container
+    containerToSort.innerHTML = '';
+    cards.forEach(card => containerToSort.appendChild(card));
+}
+
+// Helper to extract price from text (e.g., "$1,200" -> 1200)
+function getPriceFromCard(card) {
+    // Looks for any text that looks like a price inside the card
+    const text = card.innerText;
+    const match = text.match(/[\d,.]+/); 
+    return match ? parseFloat(match[0].replace(/,/g, '')) : 0;
+}

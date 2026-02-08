@@ -1261,3 +1261,973 @@ h1.title,
     box-shadow: 0 0 15px rgba(37, 99, 235, 0.6); 
 }
 
+/* ===============================================
+   --- NEW: BREADCRUMBS & SORT TOOLBAR ---
+   =============================================== */
+
+/* 1. Toolbar Container */
+.toolbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+    padding: 0 5px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* 2. Breadcrumbs */
+.breadcrumbs {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+.breadcrumbs a {
+    text-decoration: none;
+    color: var(--accent, #714329);
+    transition: opacity 0.2s;
+}
+.breadcrumbs a:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+.breadcrumbs span {
+    margin: 0 6px;
+    opacity: 0.5;
+}
+.breadcrumbs .current {
+    color: var(--text);
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+/* ===============================================
+   MODERN CUSTOM SORT DROPDOWN (The Upgrade)
+   =============================================== */
+
+/* 1. Wrapper to hold everything */
+.sort-wrapper {
+    position: relative;
+    display: inline-block;
+    min-width: 180px;
+    font-family: inherit;
+}
+
+/* 2. The Trigger Button (Pill Shape) */
+.custom-sort-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    padding: 10px 20px;
+    border-radius: 50px; /* Modern Pill Shape */
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    user-select: none;
+    
+    /* LIGHT THEME DEFAULT */
+    background-color: #FDFBF7; /* Cream */
+    color: #5D4037;            /* Earthy Text */
+    border: 1px solid #EADBC8; /* Soft Beige Border */
+    box-shadow: 0 2px 5px rgba(193, 154, 107, 0.1);
+}
+
+.custom-sort-trigger:hover {
+    border-color: #C19A6B;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(193, 154, 107, 0.2);
+    transform: translateY(-1px);
+}
+
+.custom-sort-trigger:focus {
+    outline: none;
+    border-color: #8D6E63;
+}
+
+/* Arrow Rotation on Open */
+.custom-sort-trigger.open .sort-icon {
+    transform: rotate(180deg);
+}
+.sort-icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 10px;
+    transition: transform 0.3s ease;
+    stroke: #8D6E63;
+}
+
+/* 3. The Dropdown List (Modern Box) */
+.custom-sort-options {
+    position: absolute;
+    top: calc(100% + 8px); /* Float below button */
+    left: 0;
+    right: 0;
+    z-index: 100;
+    
+    background-color: #fff;
+    border-radius: 16px;   /* ROUNDED CORNERS (No more sharp box) */
+    overflow: hidden;      /* Clips content to rounded corners */
+    
+    /* Modern Shadow */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1), 
+                0 0 0 1px rgba(0,0,0,0.05);
+    
+    /* Animation */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Open State */
+.custom-sort-options.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* 4. The Options (Items) */
+.custom-option {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    color: #5D4037;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+.custom-option:last-child {
+    border-bottom: none;
+}
+
+/* --- THE FIX: BEIGE HOVER (No More Blue!) --- */
+.custom-option:hover {
+    background-color: #F3EADD; /* Soft Beige Highlight */
+    color: #3E2723;
+}
+
+.custom-option.selected {
+    background-color: #EADBC8; /* Darker Beige for Active */
+    font-weight: 700;
+}
+
+/* =========================================
+   DARK MODE OVERRIDES (Electric Blue Theme)
+   ========================================= */
+[data-theme="dark"] .custom-sort-trigger {
+    background-color: #1e1e1e;
+    color: #E0E0E0;
+    border-color: #333;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .custom-sort-trigger:hover {
+    border-color: #3B82F6; /* Blue Border Hover */
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="dark"] .sort-icon {
+    stroke: #60A5FA;
+}
+
+[data-theme="dark"] .custom-sort-options {
+    background-color: #1e1e1e;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 
+                0 0 0 1px #333;
+}
+
+[data-theme="dark"] .custom-option {
+    color: #E0E0E0;
+    border-bottom-color: #333;
+}
+
+/* Dark Mode Hover (Blue Tint) */
+[data-theme="dark"] .custom-option:hover {
+    background-color: rgba(59, 130, 246, 0.15); 
+    color: #fff;
+}
+
+[data-theme="dark"] .custom-option.selected {
+    background-color: rgba(59, 130, 246, 0.25);
+    color: #60A5FA;
+}
+
+/* =========================================
+   THEME UPDATES: BREADCRUMBS & SORT
+   (Beige for Light / Blue for Dark)
+   ========================================= */
+
+/* --- 1. LIGHT MODE (Beige/Earth Tones) --- */
+
+/* Breadcrumbs */
+.breadcrumbs {
+    color: #666; 
+}
+.breadcrumbs a {
+    color: #8D6E63; /* Earthy Brown Link */
+    font-weight: 600;
+}
+.breadcrumbs a:hover {
+    color: #5D4037; /* Darker Brown on Hover */
+    text-decoration: underline;
+}
+
+/* Sort Dropdown */
+.sort-dropdown {
+    border: 1px solid #C19A6B !important; /* Beige Border */
+    color: #5D4037 !important;            /* Earthy Text */
+    background-color: transparent;
+}
+.sort-dropdown:hover {
+    background-color: rgba(193, 154, 107, 0.1); /* Slight Beige Tint */
+}
+.sort-dropdown:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(193, 154, 107, 0.4); /* Beige Glow */
+}
+
+/* Sort Icon (The little arrow) */
+.sort-wrapper .sort-icon {
+    color: #8D6E63 !important; /* Earthy Icon */
+}
+
+
+/* --- 2. DARK MODE (Electric Blue) --- */
+
+/* Breadcrumbs */
+[data-theme="dark"] .breadcrumbs {
+    color: #9CA3AF !important; /* Muted Grey for slashes */
+}
+[data-theme="dark"] .breadcrumbs a {
+    color: #60A5FA !important; /* Bright Blue Link */
+}
+[data-theme="dark"] .breadcrumbs a:hover {
+    color: #93C5FD !important; /* Lighter Blue on Hover */
+}
+[data-theme="dark"] .breadcrumbs .current {
+    color: #F3F4F6 !important; /* White for current page text */
+}
+
+/* Sort Dropdown */
+[data-theme="dark"] .sort-dropdown {
+    border-color: #3B82F6 !important; /* Blue Border */
+    color: #E0E0E0 !important;        /* White Text */
+    background-color: #121212;        /* Dark Background */
+}
+[data-theme="dark"] .sort-dropdown:hover {
+    background-color: rgba(59, 130, 246, 0.15); /* Blue Tint */
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); /* Blue Glow */
+}
+[data-theme="dark"] .sort-dropdown:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.6); /* Strong Blue Ring */
+}
+
+/* Sort Icon */
+[data-theme="dark"] .sort-wrapper .sort-icon {
+    color: #60A5FA !important; /* Blue Icon */
+}
+
+/* Dropdown Options (The list inside) */
+[data-theme="dark"] .sort-dropdown option {
+    background-color: #1e1e1e;
+    color: #E0E0E0;
+}
+
+/* ===============================================
+   MODERN & MINIMAL SORT DROPDOWN
+   =============================================== */
+
+/* 1. THE CONTAINER (The Main Button) */
+.sort-dropdown {
+    appearance: none;         /* Removes default OS styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    border: none;             /* No hard borders */
+    border-radius: 50px;      /* Pill Shape (Modern) */
+    padding: 10px 40px 10px 20px; /* Extra right padding for arrow */
+    
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1.2;
+    
+    /* Smooth Transitions */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    /* Minimal Shadow instead of Border */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* 2. THE ARROW ICON (Custom SVG Position) */
+.sort-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* We hide the SVG arrow from HTML and use a background image for better control */
+.sort-wrapper .sort-icon {
+    display: none; 
+}
+
+/* Add custom arrow via CSS */
+.sort-dropdown {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238D6E63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+}
+
+
+/* --- LIGHT MODE (Earthy/Beige Theme) --- */
+.sort-dropdown {
+    background-color: #FDFBF7; /* Soft Cream Background */
+    color: #5D4037;            /* Earthy Text */
+    box-shadow: 0 4px 12px rgba(193, 154, 107, 0.15); /* Soft Beige Glow */
+}
+
+.sort-dropdown:hover {
+    background-color: #ffffff;
+    box-shadow: 0 6px 16px rgba(193, 154, 107, 0.25); /* Lift effect */
+    transform: translateY(-1px);
+}
+
+/* THE DROPDOWN LIST (Options) */
+/* We can color the background, but NOT the blue hover (OS limitation) */
+.sort-dropdown option {
+    background-color: #FDFBF7; /* Matches theme */
+    color: #5D4037;
+    padding: 10px;
+}
+
+
+/* --- DARK MODE (Electric Blue/Matte Theme) --- */
+[data-theme="dark"] .sort-dropdown {
+    background-color: #1e1e1e; /* Matte Dark */
+    color: #E0E0E0;            /* White Text */
+    
+    /* Blue Glow Shadow */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 
+                0 0 0 1px rgba(59, 130, 246, 0.2); /* Subtle blue ring */
+                
+    /* Update Arrow to Blue for Dark Mode */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2360A5FA' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] .sort-dropdown:hover {
+    background-color: #252525;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 
+                0 0 0 1px rgba(59, 130, 246, 0.5); /* Brighter blue ring */
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .sort-dropdown option {
+    background-color: #1e1e1e; /* Dark list background */
+    color: #E0E0E0;
+}
+
+/* ===============================================
+   MODERN CUSTOM SORT DROPDOWN (The Upgrade)
+   =============================================== */
+
+/* 1. Wrapper to hold everything */
+.sort-wrapper {
+    position: relative;
+    display: inline-block;
+    min-width: 180px;
+    font-family: inherit;
+}
+
+/* 2. The Trigger Button (Pill Shape) */
+.custom-sort-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    padding: 10px 20px;
+    border-radius: 50px; /* Modern Pill Shape */
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    user-select: none;
+    
+    /* LIGHT THEME DEFAULT */
+    background-color: #FDFBF7; /* Cream */
+    color: #5D4037;            /* Earthy Text */
+    border: 1px solid #EADBC8; /* Soft Beige Border */
+    box-shadow: 0 2px 5px rgba(193, 154, 107, 0.1);
+}
+
+.custom-sort-trigger:hover {
+    border-color: #C19A6B;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(193, 154, 107, 0.2);
+    transform: translateY(-1px);
+}
+
+.custom-sort-trigger:focus {
+    outline: none;
+    border-color: #8D6E63;
+}
+
+/* Arrow Rotation on Open */
+.custom-sort-trigger.open .sort-icon {
+    transform: rotate(180deg);
+}
+.sort-icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 10px;
+    transition: transform 0.3s ease;
+    stroke: #8D6E63;
+}
+
+/* 3. The Dropdown List (Modern Box) */
+.custom-sort-options {
+    position: absolute;
+    top: calc(100% + 8px); /* Float below button */
+    left: 0;
+    right: 0;
+    z-index: 100;
+    
+    background-color: #fff;
+    border-radius: 16px;   /* ROUNDED CORNERS */
+    overflow: hidden;      
+    
+    /* Modern Shadow */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1), 
+                0 0 0 1px rgba(0,0,0,0.05);
+    
+    /* Animation - Hidden State */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    /* Ensure it hides even if .hidden class is present */
+    display: block; 
+}
+
+/* Open State */
+.custom-sort-options.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    display: block !important; /* Force show */
+}
+
+/* 4. The Options (Items) */
+.custom-option {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    color: #5D4037;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+.custom-option:last-child {
+    border-bottom: none;
+}
+
+/* BEIGE HOVER (Light Mode) */
+.custom-option:hover {
+    background-color: #F3EADD; 
+    color: #3E2723;
+}
+
+.custom-option.selected {
+    background-color: #EADBC8; 
+    font-weight: 700;
+}
+
+/* =========================================
+   DARK MODE OVERRIDES (Electric Blue Theme)
+   ========================================= */
+[data-theme="dark"] .custom-sort-trigger {
+    background-color: #1e1e1e;
+    color: #E0E0E0;
+    border-color: #333;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .custom-sort-trigger:hover {
+    border-color: #3B82F6; /* Blue Border Hover */
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="dark"] .sort-icon {
+    stroke: #60A5FA;
+}
+
+[data-theme="dark"] .custom-sort-options {
+    background-color: #1e1e1e;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 
+                0 0 0 1px #333;
+}
+
+[data-theme="dark"] .custom-option {
+    color: #E0E0E0;
+    border-bottom-color: #333;
+}
+
+/* Dark Mode Hover (Blue Tint) */
+[data-theme="dark"] .custom-option:hover {
+    background-color: rgba(59, 130, 246, 0.15); 
+    color: #fff;
+}
+
+[data-theme="dark"] .custom-option.selected {
+    background-color: rgba(59, 130, 246, 0.25);
+    color: #60A5FA;
+}
+
+/* ===============================================
+   FINAL HOMEPAGE ALIGNMENT FIX (REFINED)
+   =============================================== */
+
+/* 1. BREADCRUMBS: Stick to Menu Bar */
+body[data-home="true"] .main {
+    padding-top: 100px !important; 
+}
+
+.toolbar-container {
+    margin-top: 0 !important;
+    margin-bottom: 5px !important; 
+    padding-left: 5px;
+}
+
+/* 2. TITLE: Added space below "Top Picks" */
+#mainTitle.title {
+    text-align: center !important;
+    width: 100%;
+    margin: 0 auto !important; 
+    
+    /* CHANGED: Increased gap between text and cards */
+    margin-bottom: 25px !important; 
+    
+    position: relative;
+    z-index: 20; 
+    line-height: 1.2 !important;
+    padding-bottom: 0 !important;
+}
+
+/* 3. GALLERY CONTAINER */
+.gallery-section {
+    position: relative;
+    display: flex;
+    justify-content: center; 
+    align-items: center;     
+    height: 420px;           
+    margin-top: 0 !important;
+    overflow: visible;       
+}
+
+.gallery {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 4. CARDS: Perfectly Centered */
+.gallery .card {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    margin-left: -128px !important; /* Half of width */
+    margin-top: -192px !important;  /* Half of height */
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    transform-origin: center center;
+}
+
+/* 5. ARROWS: Pushed Further Out */
+#prevBtn, #nextBtn {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 100 !important;
+    left: auto !important;
+    right: auto !important;
+    margin: 0 !important;
+}
+
+/* Left Arrow: Pushed further left (was 190px, now 230px) */
+#prevBtn {
+    left: calc(50% - 290px) !important; 
+}
+
+/* Right Arrow: Pushed further right (was 160px, now 200px) */
+#nextBtn {
+    left: calc(50% + 260px) !important; 
+}
+
+/* 6. RESPONSIVE: Mobile Adjustments */
+@media (max-width: 768px) {
+    /* Bring arrows closer on mobile so they don't disappear off-screen */
+    #prevBtn { left: 10px !important; }
+    #nextBtn { right: 10px !important; left: auto !important; }
+    
+    body[data-home="true"] .main {
+        padding-top: 90px !important;
+    }
+}
+
+/* ===============================================
+   FINAL MOBILE VIEW (Zero Gaps & Taller Cards)
+   =============================================== */
+
+/* --- 1. Global Card Fixes --- */
+.card.js-card-fix {
+    padding-bottom: 112px !important;
+}
+
+.js-card-fix {
+    height: auto !important;
+    min-height: 300px !important;
+}
+
+/* --- 2. TABLET/MOBILE BREAKPOINT (< 768px) --- */
+@media (max-width: 768px) {
+    
+    /* REDUCE SPACE ABOVE: Tighter Main Padding */
+    body[data-home="true"] .main {
+        padding-top: 60px !important; /* Was 70px, now tighter to header */
+    }
+
+    /* REDUCE SPACE ABOVE: Remove Breadcrumb Gap */
+    .toolbar-container {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* REDUCE SPACE BELOW: Tighten Title */
+    #mainTitle.title {
+        font-size: 2.5rem !important; 
+        
+        /* Pull Up (Above) */
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        
+        /* Pull Down (Below) - Negative margin pulls cards closer */
+        margin-bottom: -20px !important; 
+        
+        line-height: 1 !important;
+    }
+
+    /* GALLERY CONTAINER */
+    .gallery-section {
+        height: 560px !important; 
+        width: 100%;
+        overflow: visible !important; 
+        position: relative;
+        margin-top: 0 !important; /* Remove any inherited top margin */
+        margin-bottom: 20px;
+    }
+
+    /* CARDS */
+    .gallery .card {
+        width: 240px !important;  
+        height: 440px !important; 
+        
+        position: absolute !important;
+        left: 50% !important;
+        top: 50% !important;
+        
+        margin-left: -120px !important; 
+        margin-top: -225px !important;
+        
+        margin-right: 0 !important;
+        margin-bottom: 0 !important;
+        transform-origin: center center;
+    }
+
+    /* ARROWS */
+  /* ARROWS (Layout - Shared) */
+    #prevBtn, #nextBtn {
+        position: absolute !important;
+        top: 50% !important;
+        /* Ensure tilt transform works by adding it here or allowing transition */
+        transform: translateY(-50%) !important; 
+        z-index: 100 !important;
+        
+        width: 30px !important;
+        height: 50px !important;
+        border-radius: 50px !important;
+        
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        text-shadow: none !important;
+        opacity: 0.9 !important;
+        transition: all 0.2s ease !important;
+    }
+
+    /* LIGHT THEME (Peach) */
+    [data-theme="light"] #prevBtn, 
+    [data-theme="light"] #nextBtn {
+        background: #D0B9A7 !important;
+        border: 2px solid #fff !important;
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+    }
+
+    /* DARK THEME (Black) */
+    [data-theme="dark"] #prevBtn, 
+    [data-theme="dark"] #nextBtn {
+        background: #1a1a1a !important;   /* Matte Black */
+        border: 1px solid #444 !important; /* Dark Grey Border */
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important;
+    }
+    
+    #prevBtn { left: 5px !important; right: auto !important; }
+    #nextBtn { right: 5px !important; left: auto !important; }
+
+    /* Side Cards */
+    .card.left { transform: translate(-40px) rotate(-12deg) scale(0.95) !important; }
+    .card.right { transform: translate(40px) rotate(12deg) scale(0.95) !important; }
+}
+
+/* --- 3. LARGE PHONE BREAKPOINT (< 520px) --- */
+@media (max-width: 520px) {
+    .gallery .card {
+        width: 240px !important;
+        height: 450px !important;
+        padding-bottom: 80px !important;
+        
+        left: 50% !important;
+        top: 50% !important;
+        margin-left: -120px !important; 
+        margin-top: -225px !important; 
+    }
+
+    .card.left { transform: translate(-20px) rotate(-12deg) scale(0.95) !important; }
+    .card.right { transform: translate(20px) rotate(12deg) scale(0.95) !important; }
+}
+
+/* --- 4. SMALL PHONE BREAKPOINT (< 420px) --- */
+@media (max-width: 420px) {
+    .gallery .card {
+        width: 220px !important;
+        height: 460px !important;
+        padding-bottom: 90px !important;
+
+        margin-left: -110px !important; 
+        margin-top: -230px !important; 
+    }
+    
+    #mainTitle.title {
+        font-size: 2.5rem !important;
+    }
+}
+
+
+
+/* ===============================================
+   FINAL ARROW TILT FIX (Transition Repair)
+   =============================================== */
+
+/* 1. Override Base State (Enable Transition) */
+body #prevBtn, 
+body #nextBtn {
+    /* Ensure the transform is set, but allow transition */
+    transform: translateY(-50%) rotate(0deg) scale(1) !important;
+    
+    /* Force the transition to listen to !important changes */
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s !important;
+}
+
+/* 2. Left Arrow Click (Tilt Outward) */
+body #prevBtn:active {
+    transform: translateY(-50%) rotate(-25deg) scale(0.9) !important;
+    transition-duration: 0.1s !important; /* Snap quickly when clicked */
+}
+
+/* 3. Right Arrow Click (Tilt Outward) */
+body #nextBtn:active {
+    transform: translateY(-50%) rotate(25deg) scale(0.9) !important;
+    transition-duration: 0.1s !important; /* Snap quickly when clicked */
+}
+
+
+/* 4. Touch Device Support (Ensures taps register as clicks) */
+@media (hover: none) {
+    body #prevBtn:active, 
+    body #nextBtn:active {
+        background-color: rgba(0,0,0,0.1); /* Visual feedback for touch */
+    }
+}
+
+/* ===============================================
+   FINAL DARK MODE INTERACTION (Hover + Active)
+   =============================================== */
+
+/* 1. HOVER STATE: Turns Lighter Black (Charcoal) immediately */
+[data-theme="dark"] #prevBtn:hover, 
+[data-theme="dark"] #nextBtn:hover {
+    background: #333333 !important;   /* Charcoal Grey */
+    border-color: #555 !important;     /* Lighter Grey Border */
+    color: #fff !important;
+}
+
+/* 2. ACTIVE STATE: Stays Lighter Black (Charcoal) when clicked */
+[data-theme="dark"] #prevBtn:active, 
+[data-theme="dark"] #nextBtn:active {
+    background: #333333 !important;   /* Remains Charcoal */
+    border-color: #666 !important;
+    transition: none !important;      /* Instant response */
+}
+
+/* ===============================================
+/* ===============================================
+   CATEGORY PAGES: REDUCE SPACE BELOW HEADING
+   =============================================== */
+@media (max-width: 768px) {
+    
+    /* 1. HEADING: Keep top space, Kill bottom space */
+    .main h1, 
+    h1.title,
+    .page-header h1 {
+        text-align: center !important;
+        width: 100% !important;
+        display: block !important;
+        
+        margin-top: 20px !important;    /* Keeps the space ABOVE comfy */
+        margin-bottom: -10px !important;  /* TIGHTENS the space BELOW */
+        padding-bottom: 0 !important;
+        line-height: 1.1 !important;
+    }
+
+    /* 2. SORTING TOOLBAR: Pull it up closer to the heading */
+    .toolbar-container,
+    .sort-wrapper {
+        margin-top: 0 !important;       /* Removes gap above the sort button */
+        padding-top: 0 !important;
+        margin-bottom: 15px !important; /* Gap between sort button and products */
+        
+        display: flex !important;
+        justify-content: center !important;
+    }
+}
+
+/* ===============================================
+   FINAL DESKTOP FIX (Tighter Spacing)
+   =============================================== */
+@media (min-width: 769px) {
+
+    /* 1. CONTAINER: Prepare for positioning */
+    .main, .page-header {
+        position: relative !important;
+        padding-top: 80px !important; 
+    }
+
+    /* 2. TOOLBAR: Positioned below the header */
+    .toolbar-container {
+        position: absolute !important;
+        top: 85px !important;       /* Adjusted height */
+        left: 0 !important;
+        width: 100% !important;
+        
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 0 40px !important;
+        z-index: 50 !important;
+    }
+
+    /* 3. TITLE: Drastically Reduced Margins */
+    .main h1, h1.title, .page-header h1 {
+        text-align: center !important;
+        width: 100% !important;
+        display: block !important;
+        
+        /* PULL UP: Reduced from 80px to 30px */
+        margin-top: 30px !important; 
+        
+        /* PULL DOWN: Reduced from 30px to 10px */
+        margin-bottom: 10px !important;
+        
+        margin-left: auto !important;
+        margin-right: auto !important;
+        line-height: 1 !important;
+    }
+
+    /* 4. PRODUCT GRID: Remove any extra top gap */
+    .products-grid, 
+    .category-products, 
+    #productGrid {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* 5. Sort Popup Positioning (Keeps it working) */
+    .sort-wrapper { position: relative !important; margin: 0 !important; }
+    
+    .custom-sort-options {
+        position: absolute !important;
+        top: 110% !important;
+        right: 0 !important;
+        left: auto !important;
+        width: 200px !important;
+        background: var(--bg) !important;
+        border: 1px solid var(--earth-1) !important;
+        border-radius: 12px !important;
+        padding: 5px !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+        z-index: 1000 !important;
+        display: block; 
+    }
+}
+
+/* ===============================================
+   FINAL DARK MODE SORT: ROUNDED BLUE & BLACK
+   =============================================== */
+
+/* 1. The Container (Rounded & Black) */
+[data-theme="dark"] .custom-sort-options {
+    background-color: #121212 !important; /* Pure Black Background */
+    border: 1px solid #333 !important;    /* Subtle Border */
+    border-radius: 16px !important;       /* MORE ROUNDED CORNERS */
+    overflow: hidden !important;          /* Clips the blue header to round shape */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
+    padding: 0 !important;                /* Remove padding so header touches edges */
+}
+
+/* 2. THE SELECTED HEADER (Deep Blue Top) */
+[data-theme="dark"] .custom-option.selected {
+    background-color: #1e293b !important; /* Deep Navy Blue */
+    color: #60a5fa !important;            /* Bright Blue Text */
+    font-weight: 700 !important;
+    padding: 14px 20px !important;        /* Taller click area */
+    border-bottom: 1px solid #334155 !important; /* Blue-ish separator */
+}
+
+/* 3. THE UNSELECTED ITEMS (Black Body) */
+[data-theme="dark"] .custom-option:not(.selected) {
+    background-color: #121212 !important; /* Pitch Black */
+    color: #e2e8f0 !important;            /* White-ish Text */
+    padding: 12px 20px !important;
+    border-bottom: 1px solid #222 !important; /* Dark Grey Separator */
+}
+
+/* 4. Remove border from the very last item */
+[data-theme="dark"] .custom-option:last-child {
+    border-bottom: none !important;
+}
+
+/* 5. Hover Effects */
+[data-theme="dark"] .custom-option:not(.selected):hover {
+    background-color: #1e1e1e !important; /* Slightly lighter black */
+    color: #fff !important;
+    cursor: pointer;
+}
+

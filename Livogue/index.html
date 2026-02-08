@@ -109,6 +109,25 @@
 
   <!-- Main -->
   <main class="main" data-page="category">
+    <div class="toolbar-container">
+      <div id="breadcrumbs" class="breadcrumbs"></div>
+      
+  <div class="sort-wrapper">
+  <div id="customSortTrigger" class="custom-sort-trigger" tabindex="0">
+    <span id="sortLabel">Sort by: Newest</span>
+    <svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M6 9l6 6 6-6"></path>
+    </svg>
+  </div>
+
+  <div id="customSortOptions" class="custom-sort-options hidden">
+    <div class="custom-option selected" data-value="newest">Sort by: Newest</div>
+    <div class="custom-option" data-value="oldest">Sort by: Oldest</div>
+    <div class="custom-option" data-value="price-low">Price: Low to High</div>
+    <div class="custom-option" data-value="price-high">Price: High to Low</div>
+    <div class="custom-option" data-value="alpha-asc">Name: A to Z</div>
+  </div>
+</div>
     <h1 class="title">Livogue</h1>
 
     <section id="searchResults" class="search-results hidden"></section>

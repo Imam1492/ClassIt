@@ -53,6 +53,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
   <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:wght@400;700&family=Agbalumo&display=block" rel="stylesheet">
+  <style>
+    /* Reduce top space specifically for this page */
+    main.main {
+        padding-top: 90px !important; /* Reduced from 120px */
+    }
+    /* Pull the title up closer to the breadcrumbs */
+    h1.title {
+        margin-top: 0 !important;
+    }
+  </style>
 </head>
 
 <body data-page="about">
@@ -100,6 +110,9 @@
   </header>
 
   <main id="main-content" class="main">
+    <div class="toolbar-container">
+      <div id="breadcrumbs" class="breadcrumbs"></div>
+    </div>
     <h1 class="title">Vibe-Checked & Quality-Approved.</h1>
     
     <div class="about-content">
