@@ -585,11 +585,12 @@ html[data-theme="dark"] .favorite-btn.active svg {
 }
 
 [data-theme="dark"] .site-footer {
+  background: transparent;
   border-top-color: rgba(255, 255, 255, 0.16);
-  opacity: 0.92;
-  color: var(--dark-secondary-text);
+  opacity: 1;
+  color: var(--dark-primary-text);
 }
 
 [data-theme="dark"] .site-footer-link {
-  color: var(--dark-primary-text);
+  color: inherit;
 }

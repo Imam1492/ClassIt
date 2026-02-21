@@ -443,6 +443,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const STORAGE_KEY = 'ClassIt_recent_searches_v1';
     const loadRecent = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } };
  const saveRecent = (arr) => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0, 3))); } catch {} };
+    let homeFooterObserver = null;
 
     // Keep homepage footer anchored even when search results are short.
     function enforceHomeFooterLayout() {
@@ -461,6 +462,54 @@ document.addEventListener('DOMContentLoaded', async () => {
         footerEl.style.setProperty('flex-shrink', '0', 'important');
         footerEl.style.setProperty('width', '100%', 'important');
         footerEl.style.setProperty('margin-top', 'auto', 'important');
+    }
+
+    // During homepage search, show footer only when user reaches the bottom.
+    function updateSearchFooterVisibility() {
+        if (!isHomePage) return;
+
+        const isSearching = document.body.classList.contains('searching');
+        if (!isSearching) {
+            document.body.classList.remove('show-search-footer');
+            return;
+        }
+
+        let anchorEl = document.getElementById('homeSearchBottomSentinel');
+        const hasSearchPagination = searchPagination && searchPagination.childElementCount > 0 && !searchPagination.classList.contains('hidden');
+        if (!anchorEl && hasSearchPagination) anchorEl = searchPagination;
+        if (!anchorEl && searchResults && searchResults.lastElementChild) anchorEl = searchResults.lastElementChild;
+        if (!anchorEl && searchResults) anchorEl = searchResults;
+
+        if (!anchorEl) {
+            document.body.classList.remove('show-search-footer');
+            return;
+        }
+
+        const revealThreshold = 4;
+        const rect = anchorEl.getBoundingClientRect();
+        const isAtBottom = rect.top <= (window.innerHeight + revealThreshold);
+
+        document.body.classList.toggle('show-search-footer', isAtBottom);
+    }
+
+    function setupHomeSearchFooterObserver() {
+        if (!isHomePage) return;
+
+        const sentinel = document.getElementById('homeSearchBottomSentinel');
+        if (!sentinel || !('IntersectionObserver' in window)) return;
+
+        if (homeFooterObserver) {
+            homeFooterObserver.disconnect();
+        }
+
+        homeFooterObserver = new IntersectionObserver((entries) => {
+            const entry = entries && entries[0];
+            const isSearching = document.body.classList.contains('searching');
+            const shouldShow = Boolean(isSearching && entry && entry.isIntersecting);
+            document.body.classList.toggle('show-search-footer', shouldShow);
+        }, { root: null, threshold: 0, rootMargin: '0px' });
+
+        homeFooterObserver.observe(sentinel);
     }
 
     // --- NEW: Share Function ---
@@ -972,6 +1021,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         renderPagination(searchPagination, totalPages, page, (newPage) => doSearch(query, newPage));
         enforceHomeFooterLayout();
+        updateSearchFooterVisibility();
     }
 
     function renderPagination(container, totalPages, currentPage, clickHandler) {
@@ -1105,6 +1155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isHomePage && gallerySection) gallerySection.style.display = 'block';
         if (isCategoryPage && grid) grid.classList.remove('hidden');
         if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
+        updateSearchFooterVisibility();
     }
 
     function doSearch(q, page = 1) {
@@ -1113,6 +1164,9 @@ document.addEventListener('DOMContentLoaded', async () => {
      // --- VISIBILITY FIX: Add 'searching' class ---
         if (query || activeFilters.size > 0) {
             document.body.classList.add('searching');
+            const mainTitle = document.getElementById('mainTitle');
+            if (isHomePage && mainTitle) mainTitle.style.display = 'none';
+            document.body.classList.remove('show-search-footer');
         } else {
             // If search is cleared, reset
             resetToDefaultGrid();
@@ -1167,6 +1221,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 isMatch(query, p.title) || 
                 (p.description && isMatch(query, p.description))
             );
+        }
+
+        // On homepage, hide title when there are search matches.
+        const mainTitle = document.getElementById('mainTitle');
+        if (isHomePage && mainTitle) {
+            mainTitle.style.display = results.length > 0 ? 'none' : 'block';
         }
         
         renderSearchResults(results, page, query);
@@ -1697,6 +1757,7 @@ const categories = [...new Set(
         if (isCategoryPage && grid) grid.classList.remove('hidden');
         if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
         enforceHomeFooterLayout();
+        updateSearchFooterVisibility();
     }
 
 
@@ -2042,45 +2103,22 @@ const sidebarMenu = document.getElementById('sidebar');
     });
     window.addEventListener('resize', () => {
         enforceHomeFooterLayout();
+        updateSearchFooterVisibility();
     });
+    window.addEventListener('scroll', updateSearchFooterVisibility, { passive: true });
     if (searchResults) {
         searchResults.addEventListener('load', (e) => {
             if (e.target && e.target.tagName === 'IMG') {
                 enforceHomeFooterLayout();
+                updateSearchFooterVisibility();
             }
         }, true);
     }
+    setupHomeSearchFooterObserver();
     enforceHomeFooterLayout();
+    updateSearchFooterVisibility();
 init();
 });
-
-  // Footer visibility logic
-  function updateFooterVisibility() {
-    const body = document.body;
-    const footer = document.querySelector('footer');
-    if (!footer) return;
-
-    const scrollHeight = body.scrollHeight;
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const clientHeight = window.innerHeight;
-
-    // Check if scrolled to the final bottom
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px tolerance
-
-    if (isAtBottom) {
-      body.classList.add('show-footer');
-    } else {
-      body.classList.remove('show-footer');
-    }
-  }
-
-  // Initial check
-  updateFooterVisibility();
-
-  // Listen for scroll events
-  window.addEventListener('scroll', updateFooterVisibility);
-  window.addEventListener('resize', updateFooterVisibility);
-
 
 /* =========================================
    THEME SWITCHER LOGIC (Correct HREF Swap)
