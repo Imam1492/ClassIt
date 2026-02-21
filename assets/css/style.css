@@ -2301,9 +2301,25 @@ body[data-home="true"].searching .sort-wrapper {
     animation: fadeIn 0.3s ease;
 }
 
-/* Hide "Top Picks" title while home-page search is active */
-body[data-home="true"].searching #mainTitle {
+/* Hide "Top Picks" only when home-page search has actual results */
+body[data-home="true"].searching.search-has-results #mainTitle {
     display: none !important;
+}
+
+@media (max-width: 768px) {
+    body[data-home="true"].searching.search-no-results #searchResults {
+        position: relative;
+    }
+
+    body[data-home="true"].searching.search-no-results #searchResults .no-results-wrapper {
+        position: relative !important;
+        z-index: 2 !important;
+        margin: 22px 0 30px !important;
+    }
+
+    body[data-home="true"].searching.search-no-results #searchResults .gallery-section {
+        margin-top: 84px !important;
+    }
 }
 
 /* Home search footer: fixed, but hidden until bottom marker is reached */
@@ -2330,6 +2346,12 @@ body[data-home="true"].searching.show-search-footer .site-footer {
 /* Reserve room so fixed footer doesn't cover the last row/pagination */
 body[data-home="true"].searching > main.main {
     padding-bottom: 110px !important;
+}
+
+@media (max-width: 768px) {
+    body[data-home="true"].searching > main.main {
+        padding-bottom: 72px !important;
+    }
 }
 
 /* Extra visual gap above fixed footer when search results are shown */
@@ -2572,39 +2594,4 @@ body[data-home="true"] > footer {
     width: 100%;
 }
 
-/* ===============================================
-   HIDE "TOP PICKS" TITLE DURING SEARCH
-   =============================================== */
-body[data-home="true"].searching #mainTitle {
-    display: none !important;
-}
 
-/* ===============================================
-   MOBILE COLLISION & "NO RESULTS" FIX
-   =============================================== */
-
-/* 1. Stop the Title from crashing into the cards */
-@media (max-width: 768px) {
-    #mainTitle.title, 
-    .title {
-        margin-bottom: 20px !important; /* Changed from -20px to +20px for breathing room */
-        line-height: 1.2 !important;
-        position: relative !important;
-        z-index: 10 !important;
-    }
-}
-
-/* 2. Fix the "No Results" text layout (Protects it from Grid rules) */
-#searchResults > .no-results-wrapper {
-    display: block !important;
-    width: 100% !important;
-    margin: 20px auto 40px auto !important;
-    text-align: center !important;
-}
-
-/* 3. Restore the Fallback Gallery Layout (Protects it from Grid rules) */
-#searchResults > .gallery-section {
-    display: flex !important; /* Restores normal centering */
-    width: 100% !important;
-    margin-top: 30px !important;
-}

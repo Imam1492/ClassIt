@@ -904,6 +904,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const paginated = results.slice(start, start + ITEMS_PER_PAGE_SEARCH);
 
         const mainTitle = document.getElementById('mainTitle');
+        if (isHomePage) {
+            document.body.classList.toggle('search-has-results', paginated.length > 0);
+            document.body.classList.toggle('search-no-results', paginated.length === 0);
+        }
 
         // --- CASE 1: NO RESULTS FOUND ---
         if (!paginated.length) {
@@ -1155,6 +1159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isHomePage && gallerySection) gallerySection.style.display = 'block';
         if (isCategoryPage && grid) grid.classList.remove('hidden');
         if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
+        document.body.classList.remove('search-has-results', 'search-no-results');
         updateSearchFooterVisibility();
     }
 
@@ -1756,6 +1761,7 @@ const categories = [...new Set(
         if (isHomePage && gallerySection) gallerySection.style.display = 'block';
         if (isCategoryPage && grid) grid.classList.remove('hidden');
         if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
+        document.body.classList.remove('search-has-results', 'search-no-results');
         enforceHomeFooterLayout();
         updateSearchFooterVisibility();
     }
