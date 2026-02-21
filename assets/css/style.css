@@ -2301,6 +2301,11 @@ body[data-home="true"].searching .sort-wrapper {
     animation: fadeIn 0.3s ease;
 }
 
+/* Hide "Top Picks" title while home-page search is active */
+body[data-home="true"].searching #mainTitle {
+    display: none !important;
+}
+
 /* Home search footer: fixed, but hidden until bottom marker is reached */
 body[data-home="true"].searching .site-footer {
     position: fixed !important;
@@ -2567,3 +2572,9 @@ body[data-home="true"] > footer {
     width: 100%;
 }
 
+/* ===============================================
+   HIDE "TOP PICKS" TITLE DURING SEARCH
+   =============================================== */
+body[data-home="true"].searching #mainTitle {
+    display: none !important;
+}
