@@ -2578,3 +2578,33 @@ body[data-home="true"] > footer {
 body[data-home="true"].searching #mainTitle {
     display: none !important;
 }
+
+/* ===============================================
+   MOBILE COLLISION & "NO RESULTS" FIX
+   =============================================== */
+
+/* 1. Stop the Title from crashing into the cards */
+@media (max-width: 768px) {
+    #mainTitle.title, 
+    .title {
+        margin-bottom: 20px !important; /* Changed from -20px to +20px for breathing room */
+        line-height: 1.2 !important;
+        position: relative !important;
+        z-index: 10 !important;
+    }
+}
+
+/* 2. Fix the "No Results" text layout (Protects it from Grid rules) */
+#searchResults > .no-results-wrapper {
+    display: block !important;
+    width: 100% !important;
+    margin: 20px auto 40px auto !important;
+    text-align: center !important;
+}
+
+/* 3. Restore the Fallback Gallery Layout (Protects it from Grid rules) */
+#searchResults > .gallery-section {
+    display: flex !important; /* Restores normal centering */
+    width: 100% !important;
+    margin-top: 30px !important;
+}
