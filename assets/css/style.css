@@ -10,12 +10,25 @@
    --- 1. BASE & RESET STYLES ---
    =============================================== */
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%; overflow-x: hidden;}
-body{
-  font-family: Inter, system-ui, Arial, sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
+html {
+    height: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    /* min-height allows the page to grow infinitely */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    overflow-x: hidden;
+    
+    font-family: Inter, system-ui, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
 /* Keyboard focus (accessibility) */
@@ -27,6 +40,15 @@ input:focus-visible,
   outline-offset: 2px;
 }
 .hidden{ display:none!important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 /* Skip to main content (accessibility) */
 .skip-link {
@@ -2283,3 +2305,221 @@ body[data-home="true"].searching .sort-wrapper {
 body:not([data-home="true"]) .sort-wrapper {
     display: inline-block !important;
 }
+
+/* ===============================================
+   LAPTOP SPACING FIX (Sort Bar Gap)
+   =============================================== */
+@media (min-width: 769px) {
+    
+    /* 1. Push the Sort Bar & Breadcrumbs down */
+    .toolbar-container {
+        top: 100px !important; /* Increased from 85px to give it breathing room */
+    }
+
+    /* 2. Push the Title down slightly so it doesn't touch the Sort Bar */
+    .main h1, h1.title, .page-header h1 {
+        margin-top: 50px !important; /* Increased to prevent overlap */
+    }
+}
+
+
+/* ===============================================
+   FINAL SKELETON FIX (Silver Card + Invisible Footer)
+   =============================================== */
+
+.skeleton-card {
+    /* 1. MATCH REAL CARD DIMENSIONS */
+    width: 100% !important;
+    height: 400px !important;
+    
+    /* 2. BASE COLORS (Light Mode) */
+    background-color: #ffffff !important; 
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    
+    /* 3. LAYOUT */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+    
+    /* 4. VISIBILITY */
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 1 !important;
+    margin: 0 !important;
+}
+
+/* --- INNER ELEMENTS (Light Mode) --- */
+.skeleton-image {
+    width: 100% !important;
+    height: 180px !important;
+    background-color: #E0E0E0 !important;
+    border-radius: 8px !important;
+    margin-bottom: 15px !important;
+    flex-shrink: 0 !important;
+}
+
+.skeleton-title {
+    width: 90% !important;
+    height: 20px !important;
+    background-color: #E0E0E0 !important;
+    border-radius: 6px !important;
+    margin-bottom: 10px !important;
+    flex-shrink: 0 !important;
+}
+
+.skeleton-text {
+    width: 100% !important;
+    height: 50px !important;
+    background-color: #E0E0E0 !important;
+    border-radius: 6px !important;
+    margin-bottom: auto !important;
+    flex-shrink: 0 !important;
+}
+
+/* --- FOOTER FIX (The Invisible Container) --- */
+.skeleton-footer {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding-top: 10px !important;
+    margin-top: 10px !important;
+    flex-shrink: 0 !important;
+    
+    /* CRITICAL: Force it to be invisible */
+    background: transparent !important; 
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    animation: none !important; /* Stop it from shimmering */
+}
+
+/* Share Circle */
+.skeleton-circle {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    background-color: #E0E0E0 !important;
+    grid-column: 1 / 2;
+}
+
+/* Buy Button Pill */
+.skeleton-btn {
+    width: 100px !important;
+    height: 36px !important;
+    border-radius: 20px !important;
+    background-color: #E0E0E0 !important;
+    grid-column: 2 / 3;
+    justify-self: center;
+}
+
+/* ANIMATION (Applied ONLY to the blocks, NOT the footer container) */
+.skeleton-image, .skeleton-title, .skeleton-text, .skeleton-circle, .skeleton-btn {
+    background: linear-gradient(90deg, #E0E0E0 0%, #F5F5F5 50%, #E0E0E0 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite linear;
+}
+
+@keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+
+/* ===============================================
+   DARK MODE OVERRIDES (Silver Card Style)
+   =============================================== */
+[data-theme="dark"] .skeleton-card {
+    /* Silver Card Background */
+    background-color: #D6D6D6 !important; 
+    border-color: #555 !important;
+}
+
+/* Make inner elements DARKER GREY for contrast */
+[data-theme="dark"] .skeleton-image, 
+[data-theme="dark"] .skeleton-title,
+[data-theme="dark"] .skeleton-text,
+[data-theme="dark"] .skeleton-circle,
+[data-theme="dark"] .skeleton-btn {
+    /* Darker Grey so they pop against the Silver card */
+    background-color: #999999 !important; 
+    
+    /* Subtle Dark Shimmer */
+    background: linear-gradient(90deg, #999999 0%, #B3B3B3 50%, #999999 100%) !important;
+    background-size: 200% 100%;
+}
+
+/* Shared affiliate footer */
+.site-footer {
+    background: var(--bg-color, var(--bg));
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 12px 15px;
+    text-align: center;
+    font-size: 0.75rem;
+    opacity: 0.85;
+    width: 100%;
+    margin-top: 40px;
+}
+
+.site-footer-text {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.site-footer-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.site-footer-link:hover {
+    opacity: 1;
+}
+
+
+
+main.main, .main {
+    flex: 1 0 auto;       /* This pushes the footer to the bottom */
+    width: 100%;
+    padding-top: 120px;
+    padding-bottom: 50px; /* Adds space between Pagination and Footer */
+    display: block;       
+}
+
+/* Keep category-page affiliate footer at the true page bottom */
+body[data-category] {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body[data-category] > main.main {
+    flex: 1 0 auto;
+}
+
+body[data-category] > footer {
+    margin-top: auto !important;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+/* Keep homepage affiliate footer at the true page bottom (including search state) */
+body[data-home="true"] {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body[data-home="true"] > main.main {
+    flex: 1 0 auto;
+}
+
+body[data-home="true"] > footer {
+    margin-top: auto !important;
+    flex-shrink: 0;
+    width: 100%;
+}
+

@@ -583,3 +583,13 @@ html[data-theme="dark"] .favorite-btn.active svg {
 [data-theme="dark"] .cookie-banner-btn:hover {
   background: #5aa3ff;
 }
+
+[data-theme="dark"] .site-footer {
+  border-top-color: rgba(255, 255, 255, 0.16);
+  opacity: 0.92;
+  color: var(--dark-secondary-text);
+}
+
+[data-theme="dark"] .site-footer-link {
+  color: var(--dark-primary-text);
+}

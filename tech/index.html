@@ -20,14 +20,14 @@
       if (theme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
         // Make sure this points to your SQUARE silver icon
-        if(favIcon) favIcon.href = '../assets/images/favicon-dark-sq.png';
+        if(favIcon) favIcon.href = '../assets/images/favicon-dark-sq-v2.png';
       }
     } catch (e) { /* Ignore errors */ }
   })();
 </script>
 
 <link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
-<link id="dynamic-favicon" rel="icon" type="image/png" sizes="96x96" href="../assets/images/favicon-gold-sq.png">
+<link id="dynamic-favicon" rel="icon" type="image/png" sizes="96x96" href="../assets/images/favicon-gold-sq-v2.png">
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
 
@@ -105,61 +105,111 @@
     <div class="custom-option" data-value="alpha-asc">Name: A to Z</div>
   </div>
 </div>
+    </div>
     <h1 class="title">Tech</h1>
 
     <section id="searchResults" class="search-results hidden"></section>
     <div id="searchPagination" class="pagination hidden"></div>
 
     <section id="productGrid" class="product-grid" data-category="tech">
-      <article class="skeleton-card">
+    <article class="skeleton-card">
     <div class="skeleton-image"></div>
+    <div class="skeleton-title"></div>
     <div class="skeleton-text"></div>
-    <div class="skeleton-text short"></div>
+    <div class="skeleton-footer">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-btn"></div>
+    </div>
   </article>
+
   <article class="skeleton-card">
     <div class="skeleton-image"></div>
+    <div class="skeleton-title"></div>
     <div class="skeleton-text"></div>
-    <div class="skeleton-text short"></div>
+    <div class="skeleton-footer">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-btn"></div>
+    </div>
   </article>
+
   <article class="skeleton-card">
     <div class="skeleton-image"></div>
+    <div class="skeleton-title"></div>
     <div class="skeleton-text"></div>
-    <div class="skeleton-text short"></div>
+    <div class="skeleton-footer">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-btn"></div>
+    </div>
   </article>
+
   <article class="skeleton-card">
     <div class="skeleton-image"></div>
+    <div class="skeleton-title"></div>
     <div class="skeleton-text"></div>
-    <div class="skeleton-text short"></div>
+    <div class="skeleton-footer">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-btn"></div>
+    </div>
   </article>
+
   <article class="skeleton-card">
     <div class="skeleton-image"></div>
+    <div class="skeleton-title"></div>
     <div class="skeleton-text"></div>
-    <div class="skeleton-text short"></div>
+    <div class="skeleton-footer">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-btn"></div>
+    </div>
   </article>
+
   <article class="skeleton-card">
     <div class="skeleton-image"></div>
+    <div class="skeleton-title"></div>
     <div class="skeleton-text"></div>
-    <div class="skeleton-text short"></div>
+    <div class="skeleton-footer">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-btn"></div>
+    </div>
   </article>
+
   <article class="skeleton-card">
     <div class="skeleton-image"></div>
+    <div class="skeleton-title"></div>
     <div class="skeleton-text"></div>
-    <div class="skeleton-text short"></div>
+    <div class="skeleton-footer">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-btn"></div>
+    </div>
   </article>
+
   <article class="skeleton-card">
     <div class="skeleton-image"></div>
+    <div class="skeleton-title"></div>
     <div class="skeleton-text"></div>
-    <div class="skeleton-text short"></div>
+    <div class="skeleton-footer">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-btn"></div>
+    </div>
   </article>
+
   <article class="skeleton-card">
     <div class="skeleton-image"></div>
+    <div class="skeleton-title"></div>
     <div class="skeleton-text"></div>
-    <div class="skeleton-text short"></div>
+    <div class="skeleton-footer">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-btn"></div>
+    </div>
   </article>
+
   <article class="skeleton-card">
     <div class="skeleton-image"></div>
+    <div class="skeleton-title"></div>
     <div class="skeleton-text"></div>
-    <div class="skeleton-text short"></div>
+    <div class="skeleton-footer">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-btn"></div>
+    </div>
   </article>
   </section>
     <div id="defaultPagination" class="pagination"></div>
@@ -223,22 +273,14 @@
     </div>
   </label>
 
-<footer style="
-    background: var(--bg-color); 
-    padding: 10px 15px; 
-    text-align: center; 
-    font-size: 0.7rem; 
-    opacity: 0.7; 
-    margin-top: 40px; 
-    border-top: 1px solid rgba(255,255,255,0.1);
-">
-  <p style="margin: 0; line-height: 1.4;">
+<footer class="site-footer">
+  <p class="site-footer-text">
     <strong>Affiliate Disclosure:</strong> ClassIt participates in the Amazon Associates Program and other affiliate partnerships (like Flipkart). 
     We earn from qualifying purchases.
     <span style="margin: 0 8px;">|</span> 
     &copy; 2026 ClassIt 
     <span style="margin: 0 8px;">|</span>
-    <a href="/contact/" style="color: inherit; text-decoration: underline;">Legal Info</a>
+    <a href="/contact/" class="site-footer-link">Legal Info</a>
   </p>
 </footer>
 

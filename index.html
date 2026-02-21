@@ -42,41 +42,7 @@
     })();
   </script>
 
-  <style>
-    /* --- 1. LAYOUT FIXES (Keeps footer at bottom) --- */
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    main.main {
-      flex: 1 0 auto;
-      width: 100%;
-      position: relative;
-      display: block; 
-    }
-    #searchResults:not(.hidden) {
-      display: flow-root; 
-      width: 100%;
-      overflow: visible; 
-      min-height: 200px; 
-    }
-    footer {
-      flex-shrink: 0;
-      position: relative !important;
-      z-index: 10;
-      clear: both; 
-      background: var(--bg-color);
-    }
 
-    
-
-  </style>
 
   <link rel="stylesheet" href="./assets/css/style.css">
   <link rel="stylesheet" href="./assets/css/chatbot.css">
@@ -234,25 +200,7 @@
   </label>
 
 
-  <footer style="
-    background: var(--bg-color); 
-    padding: 10px 15px; 
-    text-align: center; 
-    font-size: 0.7rem; 
-    opacity: 0.7; 
-    width: 100%;
-    margin-top: 50px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-  ">
-    <p style="margin: 0; line-height: 1.4;">
-      <strong>Affiliate Disclosure:</strong> ClassIt participates in the Amazon Associates Program and other affiliate partnerships (like Flipkart). 
-      We earn from qualifying purchases.
-      <span style="margin: 0 8px;">|</span> 
-      &copy; 2026 ClassIt 
-      <span style="margin: 0 8px;">|</span>
-      <a href="/contact/" style="color: inherit; text-decoration: underline;">Legal Info</a>
-    </p>
-  </footer>
+
 
   <script>
     // Force cleanup when search is cleared to prevent "zombie" results
@@ -275,5 +223,18 @@
     });
   </script>
 
+<footer class="site-footer">
+  <p class="site-footer-text">
+    <strong>Affiliate Disclosure:</strong> ClassIt participates in the Amazon Associates Program and other affiliate partnerships (like Flipkart). 
+    We earn from qualifying purchases.
+    <span style="margin: 0 8px;">|</span> 
+    &copy; 2026 ClassIt 
+    <span style="margin: 0 8px;">|</span>
+    <a href="/contact/" class="site-footer-link">Legal Info</a>
+  </p>
+</footer>
+
+
 </body>
 </html>
+

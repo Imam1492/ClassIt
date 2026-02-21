@@ -119,11 +119,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         @media (min-width: 768px) {
             .js-card-fix .card-image-container {
                 height: 220px !important; /* Increased to 220px for Laptop */
-                width: 240px !important;  /* <--- ADD THIS (Adjust 280px to preference) */
+                width: 240px !important;
             }
-                /* ADD THIS block to make sure the card background grows with the image */
+            /* Keep card width aligned with image width on larger screens */
     .js-card-fix {
-        width: 280px !important; /* <--- Match this number with the one above */
+        width: 280px !important;
     }
         }
 
@@ -365,8 +365,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       
 /* --- STICKY FOOTER FIX (FORCE BOTTOM) --- */
     html, body {
-        height: 100%;
+        height: auto !important;
+        min-height: 100%;
         margin: 0;
+        padding: 0;
+        overflow-x: hidden;
     }
     body {
         display: flex !important;
@@ -374,15 +377,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         min-height: 100vh !important;
     }
     main.main {
-        /* This is the magic line: "1" means GROW to fill space */
-        flex: 1 0 auto !important; 
+        flex: 1 0 auto !important; /* Pushes footer to bottom */
         width: 100% !important;
         display: block !important;
     }
     footer {
         flex-shrink: 0 !important;
-        margin-top: auto !important; /* Push to bottom */
+        margin-top: auto !important;
         width: 100% !important;
+        position: relative !important;
+        z-index: 10 !important;
     }
         
 
@@ -438,7 +442,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const STORAGE_KEY = 'ClassIt_recent_searches_v1';
     const loadRecent = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } };
-    const saveRecent = (arr) => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0, 3))); } catch {} };
+ const saveRecent = (arr) => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0, 3))); } catch {} };
+
+    // Keep homepage footer anchored even when search results are short.
+    function enforceHomeFooterLayout() {
+        if (!isHomePage) return;
+        const body = document.body;
+        const mainEl = document.querySelector('body > main.main');
+        const footerEl = document.querySelector('body > footer');
+        if (!body || !mainEl || !footerEl) return;
+
+        body.style.setProperty('min-height', '100vh', 'important');
+        body.style.setProperty('display', 'flex', 'important');
+        body.style.setProperty('flex-direction', 'column', 'important');
+
+        mainEl.style.setProperty('flex', '1 0 auto', 'important');
+        mainEl.style.removeProperty('min-height');
+        footerEl.style.setProperty('flex-shrink', '0', 'important');
+        footerEl.style.setProperty('width', '100%', 'important');
+        footerEl.style.setProperty('margin-top', 'auto', 'important');
+    }
 
     // --- NEW: Share Function ---
     // --- NEW: Share Function (Simplified for Text/Link sharing) ---
@@ -487,8 +510,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!projectId) return [];
         const dataset = window.SANITY_DATASET || 'production';
         
-        // UPDATED GROQ: Added _createdAt and default order
-        const groq = `*[_type == "product"] | order(_createdAt desc) { 
+        // Include timestamps so sorting can use latest updates.
+        const groq = `*[_type == "product"] | order(_updatedAt desc) { 
             title, 
             description, 
             price, 
@@ -498,7 +521,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             "imageUrl": image.asset->url, 
             "mobileImageUrl": mobileImage.asset->url, 
             "slug": slug.current,
-            _createdAt
+            _createdAt,
+            _updatedAt  
         }`;
         
         const url = `https://${projectId}.api.sanity.io/v2024-11-08/data/query/${dataset}?query=${encodeURIComponent(groq)}`;
@@ -507,6 +531,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const res = await fetch(url);
             if (!res.ok) { console.warn('Sanity fetch not ok', res.status); return []; }
             const json = await res.json();
+            
             return json.result || [];
         } catch (err) {
             console.error('Error fetching Sanity products', err);
@@ -565,7 +590,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 //         grid.innerHTML = paginated.map(p => {
 //             // --- FIX START: Changed limit from 100 to 60 ---
 //             const fullDesc = escapeHtml(p.description || "");
-//             const limit = 60; // <--- THIS IS THE KEY CHANGE
+//             const limit = 60;
             
 //             const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
 //             const needsToggle = fullDesc.length > limit; 
@@ -946,6 +971,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (paginationContainer) paginationContainer.classList.add('hidden');
 
         renderPagination(searchPagination, totalPages, page, (newPage) => doSearch(query, newPage));
+        enforceHomeFooterLayout();
     }
 
     function renderPagination(container, totalPages, currentPage, clickHandler) {
@@ -1537,28 +1563,36 @@ const categories = [...new Set(
         container.innerHTML = html;
     }
 
+    // Sort products by selected criteria.
     function sortProducts(criteria) {
-        // Determine which list to sort
+        // 1. Sort the underlying data
         let listToSort = isCategoryPage ? categoryItems : allProducts;
         
-        // Helper to handle dates safely
         const getDate = (d) => new Date(d || 0).getTime();
 
         switch (criteria) {
             case 'newest':
                 listToSort.sort((a, b) => {
-                    // 1. Try to sort by Date Created
-                    const diff = getDate(b._createdAt) - getDate(a._createdAt);
-                    // 2. If dates are equal (Tie-Breaker), sort by Title
+                    // Sort by Last Modified (or Created)
+                    const dateA = getDate(a._updatedAt || a._createdAt);
+                    const dateB = getDate(b._updatedAt || b._createdAt);
+                    const diff = dateB - dateA;
+                    // Tie-Breaker: A -> Z
                     return diff !== 0 ? diff : a.title.localeCompare(b.title);
                 });
                 break;
+
             case 'oldest':
                 listToSort.sort((a, b) => {
-                    const diff = getDate(a._createdAt) - getDate(b._createdAt);
-                    return diff !== 0 ? diff : a.title.localeCompare(b.title);
+                    // Sort by Last Modified (Oldest First)
+                    const dateA = getDate(a._updatedAt || a._createdAt);
+                    const dateB = getDate(b._updatedAt || b._createdAt);
+                    const diff = dateA - dateB;
+                    // Tie-Breaker: Z -> A (Reversed)
+                    return diff !== 0 ? diff : b.title.localeCompare(a.title);
                 });
                 break;
+
             case 'price-low':
                 listToSort.sort((a, b) => (a.price || 0) - (b.price || 0));
                 break;
@@ -1570,17 +1604,16 @@ const categories = [...new Set(
                 break;
         }
 
-        // Re-render based on current page state
-        if (isCategoryPage) {
-            renderCategoryGrid(1); // Reset to page 1
-        } else if (searchInput.value.trim() !== '') {
+        // Re-render active search results before category/default grids.
+        // This ensures we re-render the search results, not the hidden category grid.
+        if (searchInput.value.trim() !== '') {
             doSearch(searchInput.value, 1);
+        } else if (isCategoryPage) {
+            renderCategoryGrid(1); 
         }
     }
 
-    // ... existing helper functions ...
-
-// --- UPDATED: Setup Custom Sort (Injects Correct Options) ---
+    // Setup custom sort options and interactions.
     function setupCustomSort() {
         const trigger = document.getElementById('customSortTrigger');
         const optionsMenu = document.getElementById('customSortOptions');
@@ -1637,7 +1670,7 @@ const categories = [...new Set(
         });
     }
 
-    // --- UPDATED: Reset Grid (Handles Visibility) ---
+    // Reset grid state when search is cleared.
     function resetToDefaultGrid() {
         if (searchResults) searchResults.classList.add('hidden');
         if (searchPagination) searchPagination.innerHTML = '';
@@ -1663,6 +1696,7 @@ const categories = [...new Set(
         if (isHomePage && gallerySection) gallerySection.style.display = 'block';
         if (isCategoryPage && grid) grid.classList.remove('hidden');
         if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
+        enforceHomeFooterLayout();
     }
 
 
@@ -1913,14 +1947,14 @@ if (searchInput) {
         if (searchResults) searchResults.addEventListener('click', handleGridClick);
         if (gallery) gallery.addEventListener('click', handleGridClick); 
 
-        // --- 5. Data-dependent Initialization (UPDATED) ---
+        // Data-dependent initialization.
         try {
             allProducts = await fetchProducts();
             window.CLASSIT_PRODUCTS = allProducts; 
 
             // --- NEW: Toolbar Initialization (Sort & Breadcrumbs) ---
             renderBreadcrumbs();
-            setupCustomSort(); // <--- ADD THIS LINE HERE!
+            setupCustomSort();
             
             const sortDropdown = document.getElementById('sortDropdown');
             const sortWrapper = document.querySelector('.sort-wrapper');
@@ -1966,6 +2000,7 @@ if (searchInput) {
             if (isHomePage) {
                 initGallery();
                 initAnimatedPlaceholder();
+                enforceHomeFooterLayout();
             }
         } catch (error) {
             console.error("Error initializing page:", error);
@@ -2005,8 +2040,46 @@ const sidebarMenu = document.getElementById('sidebar');
             sidebarMenu.classList.remove('show');
         }
     });
-init();  // <--- ADD THIS (Runs the app)
+    window.addEventListener('resize', () => {
+        enforceHomeFooterLayout();
+    });
+    if (searchResults) {
+        searchResults.addEventListener('load', (e) => {
+            if (e.target && e.target.tagName === 'IMG') {
+                enforceHomeFooterLayout();
+            }
+        }, true);
+    }
+    enforceHomeFooterLayout();
+init();
 });
+
+  // Footer visibility logic
+  function updateFooterVisibility() {
+    const body = document.body;
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+
+    const scrollHeight = body.scrollHeight;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const clientHeight = window.innerHeight;
+
+    // Check if scrolled to the final bottom
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px tolerance
+
+    if (isAtBottom) {
+      body.classList.add('show-footer');
+    } else {
+      body.classList.remove('show-footer');
+    }
+  }
+
+  // Initial check
+  updateFooterVisibility();
+
+  // Listen for scroll events
+  window.addEventListener('scroll', updateFooterVisibility);
+  window.addEventListener('resize', updateFooterVisibility);
 
 
 /* =========================================
