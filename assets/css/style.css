@@ -653,14 +653,31 @@ transition:
   backface-visibility: hidden;
 }
 
-/* LIGHT THEME — Category Page Cards Beige */
-body:not([data-theme="dark"]) .main[data-page="category"] .product-card {
+/* LIGHT THEME — Category Grid Only */
+body:not([data-theme="dark"]) 
+.main[data-page="category"] 
+.product-grid 
+.product-card {
   background: #eae0d6;
 
   border: 1px solid #e4d7ca;
 }
 
 
+/* =====================================
+   GALLERY CARD WARMTH HIERARCHY
+===================================== */
+
+/* Center card — warmest */
+.gallery .card.center {
+  background: #e6d5c6;   /* slightly warmer tone */
+}
+
+/* Side cards — slightly lighter */
+.gallery .card.left,
+.gallery .card.right {
+  background: #efe6dc;   /* softer beige */
+}
 
 
 .card .card-image-container {
