@@ -103,8 +103,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const getGreeting = () => {
         const { hour24 } = getNowParts();
-        if (hour24 < 12) return "Good morning!";
-        if (hour24 < 18) return "Good afternoon!";
+        
+        // Between 12:00 AM and 3:59 AM (Late night / very early morning)
+        if (hour24 >= 0 && hour24 < 4) return "Hello!"; 
+        
+        // Between 4:00 AM and 11:59 AM
+        if (hour24 >= 4 && hour24 < 12) return "Good morning!";
+        
+        // Between 12:00 PM and 5:59 PM
+        if (hour24 >= 12 && hour24 < 18) return "Good afternoon!";
+        
+        // From 6:00 PM to 11:59 PM
         return "Good evening!";
     };
 
