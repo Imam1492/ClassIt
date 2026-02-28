@@ -799,3 +799,9 @@ html[data-theme="dark"] .favorite-btn.active svg {
   border-color: #242424;
   transform: none;
 }
+
+[data-theme="dark"] .search-input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.9px rgba(56, 42, 252, 0.1);
+}
+

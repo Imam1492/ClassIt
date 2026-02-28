@@ -897,6 +897,8 @@ function renderSearchResults(results, page = 1, query = '') {
 
     if (isHomePage && ui.gallerySection) {
       ui.gallerySection.classList.remove('hidden');
+        ui.mainTitle?.classList.remove('hidden');   // 🔥 ADD THIS LINE
+
     }
 
     if (isCategoryPage) {
