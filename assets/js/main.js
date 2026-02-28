@@ -1,2190 +1,1346 @@
 import './chatbot.js';
 
-// Helper: Turns "Wipro Smart Bulb" into "wipro-smart-bulb"
+const STORAGE_KEY = 'ClassIt_recent_searches_v1';
+const ITEMS_PER_PAGE_CATEGORY = 15;
+const ITEMS_PER_PAGE_SEARCH = 16;
+
+const ICON_SEARCH = `
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="11" cy="11" r="7"></circle>
+  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+</svg>
+`;
+
+const ICON_CLOSE = `
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <line x1="18" y1="6" x2="6" y2="18"></line>
+  <line x1="6" y1="6" x2="18" y2="18"></line>
+</svg>
+`;
+
+const SEARCH_FILTERS = [
+  { key: 'livogue', label: 'Livogue' },
+  { key: 'wellfit', label: 'Wellfit' },
+  { key: 'tech', label: 'Tech' },
+];
+
 function createId(name) {
-  return name
+  return String(name || '')
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-') // Replace weird chars with hyphens
-    .replace(/(^-|-$)/g, '');    // Remove leading/trailing hyphens
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 }
 
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
+}
 
-// function setFavicon(theme) {
-//   // Remove existing favicon
-//   const oldFavicon = document.getElementById('dynamic-favicon');
-//   if (oldFavicon) {
-//     oldFavicon.remove();
-//   }
+function shuffleArray(items) {
+  const list = [...items];
+  for (let i = list.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list;
+}
 
-//   // Create a new favicon element
-//   const link = document.createElement('link');
-//   link.id = 'dynamic-favicon';
-//   link.rel = 'icon';
-//   link.type = 'image/png';
+function debounce(fn, wait = 200) {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), wait);
+  };
+}
 
-//   // Cache-busting query
-//   const version = Date.now();
+function normalizeText(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
 
-//   link.href =
-//     theme === 'dark'
-//       ? `/favicon-dark-sq-v2.png?v=${version}`
-//       : `/favicon-gold-sq-v2.png?v=${version}`;
+function normalizeCategory(value) {
+  const normalized = normalizeText(value);
+  if (!normalized) return '';
+  if (normalized.includes('wellfit') || normalized.includes('fit')) return 'wellfit';
+  if (normalized.includes('livogue')) return 'livogue';
+  if (normalized.includes('tech')) return 'tech';
+  return normalized;
+}
 
-//   document.head.appendChild(link);
-// }
-/* REPLACE THE OLD setFavicon FUNCTION WITH THIS CLEAN VERSION */
+function levenshtein(a, b) {
+  const rows = b.length + 1;
+  const cols = a.length + 1;
+  const matrix = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+  for (let row = 0; row < rows; row += 1) matrix[row][0] = row;
+  for (let col = 0; col < cols; col += 1) matrix[0][col] = col;
+
+  for (let row = 1; row < rows; row += 1) {
+    for (let col = 1; col < cols; col += 1) {
+      if (b[row - 1] === a[col - 1]) {
+        matrix[row][col] = matrix[row - 1][col - 1];
+      } else {
+        matrix[row][col] = Math.min(
+          matrix[row - 1][col - 1] + 1,
+          matrix[row][col - 1] + 1,
+          matrix[row - 1][col] + 1,
+        );
+      }
+    }
+  }
+
+  return matrix[rows - 1][cols - 1];
+}
+
+function fuzzyMatch(query, target) {
+  if (!query || !target) return false;
+
+  const q = normalizeText(query);
+  const t = normalizeText(target);
+  if (!q || !t) return false;
+
+  if (t.includes(q)) return true;
+  if (q.length <= 2) return false;
+
+  const allowedErrors = Math.max(1, Math.floor(q.length / 4));
+  if (Math.abs(q.length - t.length) > 3) return false;
+  return levenshtein(q, t) <= allowedErrors;
+}
+
+function loadRecent() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveRecent(items) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(0, 3)));
+  } catch (error) {
+    // Intentionally ignored.
+  }
+}
+
+function safeTrack(eventName, payload = {}) {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', eventName, payload);
+  }
+}
+
 function setFavicon(theme) {
   const favicon = document.getElementById('dynamic-favicon');
   if (!favicon) return;
-  // Just swap the href. Do not remove/create elements.
-  favicon.href = theme === 'dark' 
-      ? '/favicon-dark-sq-v2.png' 
-      : '/favicon-gold-sq-v2.png';
+
+  const currentHref = favicon.getAttribute('href') || '';
+  const nextName = theme === 'dark'
+    ? 'favicon-dark-sq-v2.png'
+    : 'favicon-gold-sq-v2.png';
+
+  if (/favicon-(dark|gold)-sq-v2\.png/.test(currentHref)) {
+    favicon.setAttribute('href', currentHref.replace(/favicon-(dark|gold)-sq-v2\.png/, nextName));
+    return;
+  }
+
+  if (currentHref.includes('/assets/images/')) {
+    favicon.setAttribute('href', currentHref.replace(/[^/]*$/, nextName));
+    return;
+  }
+
+  favicon.setAttribute('href', `/assets/images/${nextName}`);
 }
 
+function applyTheme(theme, themeToggle, shouldTrack = false) {
+  const nextTheme = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', nextTheme);
+  localStorage.setItem('theme', nextTheme);
+  if (themeToggle) {
+    themeToggle.checked = nextTheme === 'dark';
+  }
+  setFavicon(nextTheme);
+
+  if (shouldTrack) {
+    safeTrack('theme_toggle', { theme_selected: nextTheme });
+  }
+}
+
+function buildImageMarkup(product) {
+  const desktopImage = escapeHtml(product.imageUrl || 'https://placehold.co/600x400?text=Image');
+  const mobileImage = escapeHtml(product.mobileImageUrl || product.imageUrl || '');
+  const altText = escapeHtml(product.altText || product.title || 'Product image');
+
+  return `
+    <div class="card-image-container">
+      <picture>
+        ${mobileImage ? `<source media="(max-width: 768px)" srcset="${mobileImage}">` : ''}
+        <img src="${desktopImage}" alt="${altText}" onerror="this.src='https://placehold.co/600x400?text=Image'">
+      </picture>
+    </div>
+  `;
+}
+
+function buildShareButtonMarkup(product) {
+  return `
+    <button
+      type="button"
+      class="share-btn"
+      aria-label="Share ${escapeHtml(product.title || 'product')}"
+      data-title="${escapeHtml(product.title || '')}"
+      data-description="${escapeHtml(product.description || '')}"
+      data-link="${escapeHtml(product.link || '')}"
+      data-image="${escapeHtml(product.imageUrl || '')}"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.36 3.36 0 0 0 0-1.4l7.05-4.11A2.97 2.97 0 0 0 18 8a3 3 0 1 0-3-3c0 .24.04.47.09.7L8.04 9.81A2.99 2.99 0 1 0 6 15a3 3 0 0 0 2.04-.81l7.12 4.16a2.99 2.99 0 1 0 2.84-2.27z"></path>
+      </svg>
+    </button>
+  `;
+}
+
+function buildBuyLinkMarkup(product) {
+  return `
+    <a href="${escapeHtml(product.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">
+      Buy Now
+    </a>
+  `;
+}
+
+function buildDescriptionParts(description, limit = 60) {
+  const plain = String(description || '');
+  const short = plain.slice(0, limit);
+  const needsToggle = plain.length > limit;
+  const shortEscaped = escapeHtml(short);
+
+  return {
+    full: escapeHtml(plain),
+    short: shortEscaped,
+    shortWithEllipsis: `${shortEscaped}${needsToggle ? '...' : ''}`,
+    needsToggle,
+  };
+}
+
+function renderGridCard(product) {
+  const parts = buildDescriptionParts(product.description, 60);
+
+  return `
+    <article class="product-card" id="${createId(product.title)}">
+      ${buildImageMarkup(product)}
+      <h3>${escapeHtml(product.title)}</h3>
+      <p data-full-text="${parts.full}" data-short-text="${parts.shortWithEllipsis}">
+        ${parts.shortWithEllipsis}
+      </p>
+      ${parts.needsToggle ? '<button type="button" class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>' : ''}
+      <div class="product-card-footer">
+        ${buildShareButtonMarkup(product)}
+        ${buildBuyLinkMarkup(product)}
+      </div>
+    </article>
+  `;
+}
+
+function renderGalleryCard(product) {
+  return `
+    <article class="card js-card-fix" id="${createId(product.title)}">
+      ${buildImageMarkup(product)}
+      <h3>${escapeHtml(product.title)}</h3>
+      <p>${escapeHtml(product.description || '')}</p>
+      <div class="product-card-footer">
+        ${buildShareButtonMarkup(product)}
+        ${buildBuyLinkMarkup(product)}
+      </div>
+    </article>
+  `;
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
-// ---------- 0. STYLE INJECTION (Homepage & Category Split) ----------
-    const style = document.createElement('style');
-    style.textContent = `
-    
-    
-    /* 1 --- IMAGE FIX FOR CATEGORY PAGES --- */
-    .product-card .card-image-container {
-        width: 100%;
-        height: 180px; 
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-shrink: 0; /* CRITICAL: Prevents shrinking */
-        border-radius: 8px; 
-        background-color: transparent; 
-        }
-        .product-card .card-image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; 
-            display: block;
-            }
-
-            /*2. Universal card layout (Applies to BOTH) */
-            .product-card, .js-card-fix {
-                display: flex !important;
-                flex-direction: column !important;
-                padding: 15px; 
-                box-sizing: border-box;
-                /* FIX: Add top margin to gallery cards */
-                margin-top: 40px; 
-            }
-
-           
-        
-            /* --- CATEGORY CARD HEIGHT --- */
-            .product-card {
-                height: 400px; /* FIXED: Locked card size and increased height */
-            }
-           /* --- HOMEPAGE CARD HEIGHT (Mobile vs Laptop) --- */
-            .js-card-fix {
-                 /* MOBILE: Let content decide height (Compact) */
-                 height: auto; 
-                 min-height: 300px;
-            }
-        
-            /* LAPTOP: Force cards to be tall and uniform */
-            @media (min-width: 768px) {
-                .js-card-fix {
-                    height: 480px !important; 
-                }
-            }
-
-            
-
-        /* 3. --- IMAGE STYLE FOR HOMEPAGE GALLERY (Mobile vs Laptop) --- */
-        
-        /* MOBILE (Default): Smaller, Compact Image */
-        .js-card-fix .card-image-container {
-            width: 181px;
-            height: 180px; /* Standard Mobile Height */
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-shrink: 0;
-            border-radius: 8px;
-            background-color: transparent; 
-        }
-
-        /* LAPTOP (Override): Bigger, Taller Image */
-        @media (min-width: 768px) {
-            .js-card-fix .card-image-container {
-                height: 220px !important; /* Increased to 220px for Laptop */
-                width: 240px !important;
-            }
-            /* Keep card width aligned with image width on larger screens */
-    .js-card-fix {
-        width: 280px !important;
-    }
-        }
-
-        /* SHARED IMAGE FIT */
-        .js-card-fix .card-image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; 
-            display: block;
-        }
-
-/* LAPTOP ONLY: Adds space between Text and Cards */
-@media only screen and (min-width: 769px) {
-    div:has(> .js-card-fix) {
-        padding-top: 60px !important; /* Only happens on big screens */
-    }
-}
-
-@media only screen and (max-width: 768px) {
-    
-    /* 1. Target ONLY the Homepage Top Picks Container */
-    .js-card-fix .card-image-container {
-        width: 100%;       /* Full width */
-        height: 180px;     /* INCREASED HEIGHT: This is the key! */
-        background: #fff;  /* White background looks cleaner than gray */
-    }
-
-    /* 2. Target the Image inside it */
-    .js-card-fix .card-image-container img {
-        width: 100%;
-        height: 100%;
-     /* object-fit: contain !important;*//*Keep the full image visible */ 
-      
-    }
-}
-        
-        /* 4. --- FOOTER LAYOUT (SPLIT) --- */
-        
-        /* Homepage Footer (Works) */
-        .js-card-fix .product-card-footer {
-            margin-top: auto; 
-            padding-top: 15px; 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0; /* CRITICAL */
-        }
-
-        /* Category Page Footer (FIXED) */
-        .product-card .product-card-footer {
-            margin-top: auto; /* FIXED: Re-added margin-top: auto */
-            padding-top: 15px; 
-            display: grid;
-            grid-template-columns: 1fr auto 1fr; /* 3 columns: left, center, right */
-            align-items: center;
-            width: 100%;
-            flex-shrink: 0; /* CRITICAL: Prevents shrinking */
-        }
-
-        /* 5. --- SHARE BUTTON (SPLIT) --- */
-        
-        /* Homepage Share Button (Works) */
-        .js-card-fix .share-btn {
-            background: none; border: none; padding: 5px; margin: 0;
-            cursor: pointer; border-radius: 50%; display: inline-flex;
-            color: var(--text-color, #555); opacity: 0.6;
-            transition: opacity 0.2s, background-color 0.2s;
-            flex-shrink: 0; 
-        }
-        .js-card-fix .share-btn svg {
-            width: 22px; height: 22px; fill: currentColor;
-        }
-
-        /* Category Page Share Button (FIXED) */
-        .product-card .share-btn {
-            grid-column: 1 / 2; /* Place in left column */
-            justify-self: start; /* Align to the left */
-            align-self: center; /* FIXED: Aligned to center */
-            position: relative;
-            left: -7px; /* Nudges the button 5px to the left */
-            /* top: 10px; (REMOVED) */
-            
-            background: none; border: none; padding: 5px; margin: 0;
-            cursor: pointer; border-radius: 50%; display: inline-flex;
-            color: var(--text-color, #555); opacity: 0.6;
-            transition: opacity 0.2s, background-color 0.2s;
-        }
-        .product-card .share-btn svg {
-            width: 18px; /* Smaller icon */
-            height: 18px; /* Smaller icon */
-            fill: currentColor;
-        }
-
-        .share-btn:hover { /* Universal hover */
-            opacity: 1;
-            background-color: var(--hover-bg, rgba(0,0,0,0.05));
-        }
-
-        /* 6. Description Truncation (MODIFIED) */
-        
-       /* Category page description (FIXED VISUALS) */
-        .product-card > p {
-            flex-grow: 0; 
-            flex-shrink: 0; 
-            overflow: hidden; 
-            line-height: 1.4em;
-            
-            /* CHANGE 1: Increase height slightly so letters aren't cut */
-            max-height: 4.5em; 
-            
-            /* CHANGE 2: Add these 3 lines to force "..." at the end */
-            display: -webkit-box;
-            -webkit-line-clamp: 3; 
-            -webkit-box-orient: vertical;
-
-            margin-bottom: 0; 
-            margin-top: 10px;
-            transition: max-height 0.3s ease-out;
-            scrollbar-width: none;
-            scrollbar-color: #8B4513 var(--card-bg, #f0e6dd);
-        }
-
-        /* Homepage description (Unchanged) */
-        .js-card-fix > p {
-            flex-grow: 0; flex-shrink: 0; 
-            overflow: hidden; display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 4; /* 4 lines */
-            line-height: 1.3em; 
-            max-height: 5.2em; /* 1.3 * 4 */
-            margin-bottom: 0;
-            margin-top: 0.5em; /* Kept 0.5em margin */
-        }
-
-        /* 7. Title truncation (MODIFIED) */
-        .product-card > h3 {
-            flex-grow: 0; flex-shrink: 0; /* CRITICAL */
-            overflow: hidden; display: -webkit-box;
-            -webkit-box-orient: vertical; -webkit-line-clamp: 3;
-            line-height: 1.3em; max-height: 3.9em;
-        }
-        .js-card-fix > h3 {
-            flex-grow: 0; flex-shrink: 0; /* CRITICAL */
-            overflow: hidden; display: -webkit-box;
-            -webkit-box-orient: vertical; -webkit-line-clamp: 2; /* 2 lines */
-            line-height: 1.25em; 
-            max-height: 2.5em; /* 1.25 * 2 */
-            margin-top: 10px;
-            margin-bottom: 0;
-        }
-
-        /* 8. --- BUY BUTTON (SPLIT) --- */
-        
-        /* Homepage Buy Button (Works) */
-        .js-card-fix .product-card-footer .buy {
-            flex-shrink: 0; 
-        }
-
-        /* Category Page Buy Button (FIXED) */
-        .product-card .product-card-footer .buy {
-            grid-column: 2 / 3; /* Place in center column */
-            justify-self: center; /* Align to the center */
-        }
-
-        /* 9. --- "Show More" Button Style --- */
-        .show-more-btn {
-            background: none;
-            border: none;
-            padding: 2px 0 0 0; /* Tighter padding */
-            margin: 0;
-            font-size: 0.85em;
-            font-weight: 600;
-            color: var(--brand-color, #8B4513); /* Use a theme color */
-            cursor: pointer;
-            align-self: flex-start; /* Aligns to the left */
-            flex-shrink: 0; /* CRITICAL */
-        }
-        .show-more-btn:hover {
-            text-decoration: underline;
-        }
-
-        /* 10. --- MODIFIED: Expanded Card State --- */
-        .product-card.is-expanded > p {
-            max-height: 7em; /* FIXED: 1.4em * 5 lines */
-            overflow-y: auto; /* FIXED: Add scrollbar */
-            scrollbar-width: thin; /* For Firefox */
-            transition: max-height 0.3s ease-in;
-        }
-
-        /* 11. --- NEW: Small Scrollbar Styling --- */
-        .product-card > p::-webkit-scrollbar {
-            width: 5px; /* Small scrollbar */
-        }
-        .product-card > p::-webkit-scrollbar-track {
-            background: var(--card-bg, #f0e6dd); /* Track matches card */
-        }
-        .product-card > p::-webkit-scrollbar-thumb {
-            background-color: var(--brand-color, #8B4513); /* Scrollbar color */
-            border-radius: 4px;
-        }
-
-        /* --- LOGO SIZING FIX --- */
-        .site-logo {
-            display: flex;
-            align-items: center;
-        }
-
-        .site-logo img {
-            /* DESKTOP: Make it nice and big */
-            height: 63px !important; 
-            width: auto;
-            
-            /* SAFETY: Never let it be taller than the navigation bar itself */
-            max-height: 80%; 
-            object-fit: contain;
-        }
-
-            /* MOBILE: Slightly smaller to fit the tighter top bar */
-        @media (max-width: 768px) {
-            .site-logo img {
-                height: 75px !important; /* Increase this if you have space */
-            }
-        }
-
-        /* --- MOBILE DARK MODE TOP BAR FIX --- */
-        @media (max-width: 768px) {
-            [data-theme="dark"] .topbar {
-                height: 60px !important;     /* Force it smaller (Standard is usually 60px) */
-                min-height: 50px !important; /* Override any minimums */
-                padding-top: 0 !important;   /* Remove extra padding */
-                padding-bottom: 0 !important;
-            }
-            
-            /* Optional: Adjust logo slightly if the bar gets too tight */
-            [data-theme="dark"] .site-logo img {
-                height: 75px !important; 
-            }
-        }
-      
-/* --- STICKY FOOTER FIX (FORCE BOTTOM) --- */
-    html, body {
-        height: auto !important;
-        min-height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-    }
-    body {
-        display: flex !important;
-        flex-direction: column !important;
-        min-height: 100vh !important;
-    }
-    main.main {
-        flex: 1 0 auto !important; /* Pushes footer to bottom */
-        width: 100% !important;
-        display: block !important;
-    }
-    footer {
-        flex-shrink: 0 !important;
-        margin-top: auto !important;
-        width: 100% !important;
-        position: relative !important;
-        z-index: 10 !important;
-    }
-        
-
-    `;
-    document.head.appendChild(style);
-
-    // ---------- 1. ELEMENT SELECTORS (Unified) ----------
-    const menuBtn = document.getElementById("menuBtn");
-    const sidebar = document.getElementById("sidebar");
-    const closeSidebar = document.getElementById("closeSidebar");
-    const overlay = document.getElementById("overlay");
-    const searchInput = document.getElementById("searchInput");
-    const searchBtn = document.getElementById("searchBtn");
-    const searchDropdown = document.getElementById('searchDropdown');
-    const searchResults = document.getElementById("searchResults");
-    const searchPagination = document.getElementById("searchPagination");
-    const grid = document.getElementById("productGrid");
-    const paginationContainer = document.getElementById("defaultPagination");
-    const gallery = document.getElementById("gallery");
-    const gallerySection = document.querySelector('.gallery-section');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const errorMessage = document.getElementById('error-message');
-
-    // ---------- 2. CONFIG & STATE (Unified) ----------
-    const ITEMS_PER_PAGE_CATEGORY = 15;
-    const ITEMS_PER_PAGE_SEARCH = 10;
-    const isHomePage = document.body.dataset.home === "true";
-    const isCategoryPage = !!grid;
-    const currentCategory = isCategoryPage ? grid.dataset.category : null;
-    let allProducts = [];
-    let categoryItems = [];
-    let searchSelectedIndex = -1;
-    let animatedPlaceholderTimeout;
-   
-
-
-    // ---------- 3. HELPER FUNCTIONS (Unified) ----------
-    const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    const debounce = (fn, wait = 200) => {
-        let t;
-        return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
-    };
-
-    const STORAGE_KEY = 'ClassIt_recent_searches_v1';
-    const loadRecent = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } };
- const saveRecent = (arr) => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0, 3))); } catch {} };
-    let homeFooterObserver = null;
-
-    // Keep homepage footer anchored even when search results are short.
-    function enforceHomeFooterLayout() {
-        if (!isHomePage) return;
-        const body = document.body;
-        const mainEl = document.querySelector('body > main.main');
-        const footerEl = document.querySelector('body > footer');
-        if (!body || !mainEl || !footerEl) return;
-
-        body.style.setProperty('min-height', '100vh', 'important');
-        body.style.setProperty('display', 'flex', 'important');
-        body.style.setProperty('flex-direction', 'column', 'important');
-
-        mainEl.style.setProperty('flex', '1 0 auto', 'important');
-        mainEl.style.removeProperty('min-height');
-        footerEl.style.setProperty('flex-shrink', '0', 'important');
-        footerEl.style.setProperty('width', '100%', 'important');
-        footerEl.style.setProperty('margin-top', 'auto', 'important');
-    }
-
-    // During homepage search, show footer only when user reaches the bottom.
-    function updateSearchFooterVisibility() {
-        if (!isHomePage) return;
-
-        const isSearching = document.body.classList.contains('searching');
-        if (!isSearching) {
-            document.body.classList.remove('show-search-footer');
-            return;
-        }
-
-        let anchorEl = document.getElementById('homeSearchBottomSentinel');
-        const hasSearchPagination = searchPagination && searchPagination.childElementCount > 0 && !searchPagination.classList.contains('hidden');
-        if (!anchorEl && hasSearchPagination) anchorEl = searchPagination;
-        if (!anchorEl && searchResults && searchResults.lastElementChild) anchorEl = searchResults.lastElementChild;
-        if (!anchorEl && searchResults) anchorEl = searchResults;
-
-        if (!anchorEl) {
-            document.body.classList.remove('show-search-footer');
-            return;
-        }
-
-        const revealThreshold = 4;
-        const rect = anchorEl.getBoundingClientRect();
-        const isAtBottom = rect.top <= (window.innerHeight + revealThreshold);
-
-        document.body.classList.toggle('show-search-footer', isAtBottom);
-    }
-
-    function setupHomeSearchFooterObserver() {
-        if (!isHomePage) return;
-
-        const sentinel = document.getElementById('homeSearchBottomSentinel');
-        if (!sentinel || !('IntersectionObserver' in window)) return;
-
-        if (homeFooterObserver) {
-            homeFooterObserver.disconnect();
-        }
-
-        homeFooterObserver = new IntersectionObserver((entries) => {
-            const entry = entries && entries[0];
-            const isSearching = document.body.classList.contains('searching');
-            const shouldShow = Boolean(isSearching && entry && entry.isIntersecting);
-            document.body.classList.toggle('show-search-footer', shouldShow);
-        }, { root: null, threshold: 0, rootMargin: '0px' });
-
-        homeFooterObserver.observe(sentinel);
-    }
-
-    // --- NEW: Share Function ---
-    // --- NEW: Share Function (Simplified for Text/Link sharing) ---
-    async function handleShareClick(title, description, link, imageUrl) {
-        const shareUrl = link || window.location.href;
-        const shareTitle = title || "Check out this product";
-        const shareDescription = description || "I thought you might like this!";
-        
-        // This text is what will pre-fill the body of the message (e.g., in WhatsApp)
-        const shareText = `${shareTitle}\n\n${shareDescription}`;
-
-        const shareData = {
-            title: shareTitle, // Used as email subject, etc.
-            text: shareText,   // Pre-fills the message body
-            url: shareUrl      // The link the app will create a preview for
-        };
-
-        // Check if Web Share API is supported
-        if (navigator.share) {
-            try {
-                await navigator.share(shareData);
-            } catch (error) {
-                // This catches if the user cancels the share
-                console.log('Share canceled or failed:', error);
-            }
-        } else {
-            // Fallback for desktop
-            try {
-                // Combine all info for the clipboard
-                await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
-                alert('Share not supported on this device. Product info copied to clipboard!');
-            } catch (err) {
-                console.error('Failed to copy to clipboard:', err);
-                alert('Share not supported on this device.');
-            }
-        }
-    }
-
-
-
-// ---------- 4. DATA FETCHING (From Sanity) ----------
-    async function fetchProducts() {
-        if (window.PRODUCTS && window.PRODUCTS.length > 0) return window.PRODUCTS;
-        
-        const projectId = window.SANITY_PROJECT_ID;
-        if (!projectId) return [];
-        const dataset = window.SANITY_DATASET || 'production';
-        
-        // Include timestamps so sorting can use latest updates.
-        const groq = `*[_type == "product"] | order(_updatedAt desc) { 
-            title, 
-            description, 
-            price, 
-            category, 
-            link, 
-            altText, 
-            "imageUrl": image.asset->url, 
-            "mobileImageUrl": mobileImage.asset->url, 
-            "slug": slug.current,
-            _createdAt,
-            _updatedAt  
-        }`;
-        
-        const url = `https://${projectId}.api.sanity.io/v2024-11-08/data/query/${dataset}?query=${encodeURIComponent(groq)}`;
-
-        try {
-            const res = await fetch(url);
-            if (!res.ok) { console.warn('Sanity fetch not ok', res.status); return []; }
-            const json = await res.json();
-            
-            return json.result || [];
-        } catch (err) {
-            console.error('Error fetching Sanity products', err);
-            return [];
-        }
-    }
-
-    // ---------- 5. SIDEBAR LOGIC ----------
-    // Overlay: use inline styles so no CSS (e.g. .hidden !important) can block the dim
-    function getOverlay() {
-        let el = document.getElementById('overlay');
-        if (!el) {
-            el = document.createElement('div');
-            el.id = 'overlay';
-            el.className = 'overlay hidden';
-            el.setAttribute('aria-hidden', 'true');
-            document.body.appendChild(el);
-            el.addEventListener('click', hideSidebar);
-        }
-        return el;
-    }
-    function openSidebar() {
-        if (!sidebar) return;
-        sidebar.classList.add('show');
-        const ov = getOverlay();
-        ov.classList.remove('hidden');
-        ov.classList.add('show');
-        ov.style.display = 'block';
-        ov.style.opacity = '1';
-        ov.style.pointerEvents = 'auto';
-        ov.style.background = 'rgba(0,0,0,0.5)';
-        ov.setAttribute('aria-hidden', 'false');
-    }
-    function hideSidebar() {
-        if (!sidebar) return;
-        sidebar.classList.remove('show');
-        const ov = document.getElementById('overlay');
-        if (ov) {
-            ov.classList.remove('show');
-            ov.classList.add('hidden');
-            ov.style.display = '';
-            ov.style.opacity = '';
-            ov.style.pointerEvents = '';
-            ov.style.background = '';
-            ov.setAttribute('aria-hidden', 'true');
-        }
-    }
-
-//     // ---------- 6. RENDERING LOGIC (MODIFIED) ----------
-
-//     function renderCategoryGrid(page = 1) {
-//         if (!isCategoryPage) return;
-//         const start = (page - 1) * ITEMS_PER_PAGE_CATEGORY;
-//         const paginated = categoryItems.slice(start, start + ITEMS_PER_PAGE_CATEGORY);
-
-//         grid.innerHTML = paginated.map(p => {
-//             // --- FIX START: Changed limit from 100 to 60 ---
-//             const fullDesc = escapeHtml(p.description || "");
-//             const limit = 60;
-            
-//             const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
-//             const needsToggle = fullDesc.length > limit; 
-//             const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-//             // --- FIX END ---
-
-//             return `
-//                 <article class="product-card" id="${createId(p.title)}">
-//                <div class="card-image-container">
-//                     <picture style="display: contents;">
-//                         <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
-//                         <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/>
-//                     </picture>
-//                 </div>
-//                 <h3>${escapeHtml(p.title)}</h3>
-                
-//                 <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
-//                     ${shortDescWithEllipsis}
-//                 </p>
-//                 ${needsToggle ? `
-//                 <button class="show-more-btn" data-more-text="...more" data-less-text="less">
-//                     ...more
-//                 </button>
-//                 ` : ''}
-//                 <div class="product-card-footer">
-//                     <button class="share-btn" 
-//                             aria-label="Share ${escapeHtml(p.title)}"
-//                             data-title="${escapeHtml(p.title)}"
-//                             data-description="${escapeHtml(p.description)}"
-//                             data-link="${escapeHtml(p.link || '')}"
-//                             data-image="${escapeHtml(p.imageUrl || '')}"
-//                         >
-//                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
-//                     </button>
-//                     <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
-//                 </div>
-//                 </article>
-//             `;
-//         }).join("");
-
-//         const totalPages = Math.ceil(categoryItems.length / ITEMS_PER_PAGE_CATEGORY);
-//         renderPagination(paginationContainer, totalPages, page, renderCategoryGrid);
-//     }
-    
-//     // Renders search results and their pagination
-//     function renderSearchResults(results, page = 1, query = '') {
-//         if (!searchResults) return;
-//         const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE_SEARCH);
-//         const start = (page - 1) * ITEMS_PER_PAGE_SEARCH;
-//         const paginated = results.slice(start, start + ITEMS_PER_PAGE_SEARCH);
-
-//         if (!paginated.length) {
-//             /* --- STEP 4: TRACKING --- */
-//             gtag('event', 'search_no_results', { 'keyword': query });
-
-//             searchResults.innerHTML = `<div class="no-results-wrapper"><p class="no-results-message"><span>No results found for </span><strong>"${escapeHtml(query)}"</strong></p></div>`;
-            
-//             if (isHomePage && gallerySection) {
-//                 const galleryClone = gallerySection.cloneNode(true);
-//                 galleryClone.id = '';
-//                 galleryClone.style.display = 'block';
-//                 galleryClone.style.marginTop = '40px';
-//                 searchResults.appendChild(galleryClone);
-//             }
-
-//             if (isCategoryPage) {
-//                 const defaultItems = categoryItems.slice(0, ITEMS_PER_PAGE_CATEGORY);
-//                 const defaultGridHTML = defaultItems.map(p => {
-//                     // --- FIX START: Changed limit to 60 ---
-//                     const fullDesc = escapeHtml(p.description || "");
-//                     const limit = 60; 
-//                     const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
-//                     const needsToggle = fullDesc.length > limit; 
-//                     const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-//                     // --- FIX END ---
-
-//                     return `
-//                     <article class="product-card" id="${createId(p.title)}">
-//                         <div class="card-image-container">
-//                     <picture style="display: contents;">
-//                         <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
-//                         <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/>
-//                     </picture>
-//                 </div>
-//                         <h3>${escapeHtml(p.title)}</h3>
-//                         <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
-//                             ${shortDescWithEllipsis}
-//                         </p>
-//                         ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
-//                         <div class="product-card-footer">
-//                             <button class="share-btn" aria-label="Share" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
-//                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
-//                             </button>
-//                             <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
-//                         </div>
-//                     </article>
-//                     `;
-//                 }).join('');
-                
-//                 const gridContainer = document.createElement('div');
-//                 gridContainer.className = 'product-grid';
-//                 gridContainer.style.marginTop = '40px';
-//                 gridContainer.innerHTML = defaultGridHTML;
-//                 searchResults.appendChild(gridContainer);
-//             }
-
-//         } else {
-//             const gridDiv = document.createElement('div');
-//             gridDiv.className = 'product-grid';
-//             gridDiv.innerHTML = paginated.map(p => {
-//                 // --- FIX START: Changed limit to 60 ---
-//                 const fullDesc = escapeHtml(p.description || "");
-//                 const limit = 60; 
-//                 const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
-//                 const needsToggle = fullDesc.length > limit; 
-//                 const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-//                 // --- FIX END ---
-
-//                 return `
-//                 <article class="product-card">
-//                     <div class="card-image-container"><img src="${escapeHtml(p.imageUrl || p.image)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/></div>
-//                     <h3>${escapeHtml(p.title)}</h3>
-//                     <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
-//                         ${shortDescWithEllipsis}
-//                     </p>
-//                     ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
-//                     <div class="product-card-footer">
-//                         <button class="share-btn" aria-label="Share" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || p.image || '')}">
-//                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
-//                         </button>
-//                         <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
-//                     </div>
-//                 </article>
-//                 `;
-//             }).join('');
-//             searchResults.innerHTML = '';
-//             searchResults.appendChild(gridDiv);
-//         }
-
-//         searchResults.classList.remove('hidden');
-//         if (gallerySection) gallerySection.style.display = 'none';
-//         if (grid) grid.classList.add('hidden');
-//         if (paginationContainer) paginationContainer.classList.add('hidden');
-
-//         renderPagination(searchPagination, totalPages, page, (newPage) => doSearch(query, newPage));
-//     }
-//     // Generic pagination UI creator
-//   function renderPagination(container, totalPages, currentPage, clickHandler) {
-//     if (container) container.innerHTML = "";
-//     if (!container || totalPages <= 1) return;
-
-//     const createBtn = (label, targetPage, isDisabled, isActive) => {
-//         const btn = document.createElement("button");
-//         btn.textContent = label;
-//         btn.className = "pagination-btn";
-        
-//         // --- 1. MOBILE OPTIMIZATIONS ---
-//         // 'manipulation' tells mobile browsers: "Don't wait for double-tap, click instantly."
-//         btn.style.touchAction = "manipulation"; 
-//         btn.style.minWidth = "45px";  // Minimum touch target size
-//         btn.style.minHeight = "45px";
-//         btn.style.margin = "0 5px";
-
-//         // Visual State
-//         if (isActive) btn.classList.add("active");
-        
-//         // --- 2. HARD DISABLE ---
-//         // If disabled, use pointer-events: none. This makes the button "ghost" to clicks.
-//         if (isDisabled) {
-//             btn.disabled = true;
-//             btn.style.opacity = "0.5";
-//             btn.style.pointerEvents = "none"; 
-//         }
-
-//         // --- 3. CLICK HANDLER ---
-//         btn.onclick = (e) => {
-//             e.preventDefault();
-//             e.stopPropagation(); // Stop the click from bubbling up
-
-//             // Double check safety
-//             if (isDisabled || isActive) return;
-
-//             // *** THE FIX: LOCK THE UI ***
-//             // Immediately disable ALL buttons in this container.
-//             // This prevents you from tapping "Next" twice rapidly.
-//             const allButtons = container.querySelectorAll("button");
-//             allButtons.forEach(b => {
-//                 b.disabled = true;
-//                 b.style.pointerEvents = "none";
-//             });
-
-//             // Scroll Logic
-//             const productSection = document.getElementById("searchResults") || document.getElementById("gallerySection");
-//             if (productSection) {
-//                 const y = productSection.getBoundingClientRect().top + window.scrollY - 80;
-//                 window.scrollTo({ top: y, behavior: 'smooth' });
-//             } else {
-//                 window.scrollTo({ top: 0, behavior: 'smooth' });
-//             }
-
-//             // Fire the actual page change
-//             // (The buttons will be re-created enabled when this function finishes)
-//             clickHandler(targetPage);
-//         };
-
-//         container.appendChild(btn);
-//     };
-
-//     // Render logic
-//     createBtn("‹", currentPage - 1, currentPage === 1, false);
-//     createBtn(currentPage, currentPage, false, true);
-//     createBtn("›", currentPage + 1, currentPage === totalPages, false);
-// }
-
-// ---------- 6. RENDERING LOGIC (MODIFIED) ----------
-
-    function renderCategoryGrid(page = 1) {
-        if (!isCategoryPage) return;
-        const start = (page - 1) * ITEMS_PER_PAGE_CATEGORY;
-        const paginated = categoryItems.slice(start, start + ITEMS_PER_PAGE_CATEGORY);
-
-        grid.innerHTML = paginated.map(p => {
-            const fullDesc = escapeHtml(p.description || "");
-            const limit = 60; 
-            const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
-            const needsToggle = fullDesc.length > limit; 
-            const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-
-            return `
-                <article class="product-card" id="${createId(p.title)}">
-               <div class="card-image-container">
-                    <picture style="display: contents;">
-                        <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
-                        <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/>
-                    </picture>
-                </div>
-                <h3>${escapeHtml(p.title)}</h3>
-                <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
-                    ${shortDescWithEllipsis}
-                </p>
-                ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
-                <div class="product-card-footer">
-                    <button class="share-btn" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
-                    </button>
-                    <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
-                </div>
-                </article>
-            `;
-        }).join("");
-
-        const totalPages = Math.ceil(categoryItems.length / ITEMS_PER_PAGE_CATEGORY);
-        renderPagination(paginationContainer, totalPages, page, renderCategoryGrid);
-    }
-    
-    // Renders search results and their pagination
-// Renders search results and their pagination
-    function renderSearchResults(results, page = 1, query = '') {
-        if (!searchResults) return;
-        const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE_SEARCH);
-        const start = (page - 1) * ITEMS_PER_PAGE_SEARCH;
-        const paginated = results.slice(start, start + ITEMS_PER_PAGE_SEARCH);
-
-        const mainTitle = document.getElementById('mainTitle');
-        if (isHomePage) {
-            document.body.classList.toggle('search-has-results', paginated.length > 0);
-            document.body.classList.toggle('search-no-results', paginated.length === 0);
-        }
-
-        // --- CASE 1: NO RESULTS FOUND ---
-        if (!paginated.length) {
-            
-            // 1. Show Title (Home Page)
-            if (mainTitle) mainTitle.style.display = 'block';
-
-            // 2. Hide Filters (Home Page)
-            const filterContainer = document.getElementById('searchFilterContainer');
-            if (isHomePage && filterContainer) {
-                filterContainer.classList.add('hidden');
-            }
-
-            gtag('event', 'search_no_results', { 'keyword': query });
-
-            // 3. Render "No Results" Message
-            searchResults.innerHTML = `<div class="no-results-wrapper"><p class="no-results-message"><span>No results found for </span><strong>"${escapeHtml(query)}"</strong></p></div>`;
-            
-            // 4. FALLBACK: Show Homepage Gallery
-            if (isHomePage && gallerySection) {
-                const galleryClone = gallerySection.cloneNode(true);
-                galleryClone.id = '';
-                galleryClone.style.display = 'block';
-                galleryClone.style.marginTop = '40px';
-                searchResults.appendChild(galleryClone);
-            }
-
-            // 5. FALLBACK: Show Category Grid (RESTORED THIS BLOCK)
-            if (isCategoryPage) {
-                const defaultItems = categoryItems.slice(0, ITEMS_PER_PAGE_CATEGORY);
-                
-                const defaultGridHTML = defaultItems.map(p => {
-                    const fullDesc = escapeHtml(p.description || "");
-                    const limit = 60; 
-                    const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
-                    const needsToggle = fullDesc.length > limit; 
-                    const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-
-                    return `
-                    <article class="product-card" id="${createId(p.title)}">
-                        <div class="card-image-container">
-                            <picture style="display: contents;">
-                                <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
-                                <img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/>
-                            </picture>
-                        </div>
-                        <h3>${escapeHtml(p.title)}</h3>
-                        <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
-                            ${shortDescWithEllipsis}
-                        </p>
-                        ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
-                        <div class="product-card-footer">
-                            <button class="share-btn" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || '')}">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
-                            </button>
-                            <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
-                        </div>
-                    </article>
-                    `;
-                }).join('');
-                
-                const gridContainer = document.createElement('div');
-                gridContainer.className = 'product-grid';
-                gridContainer.style.marginTop = '40px';
-                gridContainer.innerHTML = defaultGridHTML;
-                searchResults.appendChild(gridContainer);
-            }
-
-        } else {
-            // --- CASE 2: RESULTS FOUND ---
-
-            // 1. Hide Title (Focus on results)
-            if (mainTitle) mainTitle.style.display = 'none';
-
-            // 2. Show Filters (Home Page)
-            const filterContainer = document.getElementById('searchFilterContainer');
-            if (isHomePage && filterContainer && (query || activeFilters.size > 0)) {
-                filterContainer.classList.remove('hidden');
-            }
-
-            const gridDiv = document.createElement('div');
-            gridDiv.className = 'product-grid';
-            gridDiv.innerHTML = paginated.map(p => {
-                const fullDesc = escapeHtml(p.description || "");
-                const limit = 60; 
-                const shortDesc = `${escapeHtml((p.description || "").slice(0, limit))}`;
-                const needsToggle = fullDesc.length > limit; 
-                const shortDescWithEllipsis = `${shortDesc}${needsToggle ? '...' : ''}`;
-
-                return `
-                <article class="product-card">
-                    <div class="card-image-container"><img src="${escapeHtml(p.imageUrl || p.image)}" alt="${escapeHtml(p.title)}" onerror="this.src='https://placehold.co/300x220?text=Image'"/></div>
-                    <h3>${escapeHtml(p.title)}</h3>
-                    <p data-full-text="${fullDesc}" data-short-text="${shortDescWithEllipsis}">
-                        ${shortDescWithEllipsis}
-                    </p>
-                    ${needsToggle ? `<button class="show-more-btn" data-more-text="...more" data-less-text="less">...more</button>` : ''}
-                    <div class="product-card-footer">
-                        <button class="share-btn" data-title="${escapeHtml(p.title)}" data-description="${escapeHtml(p.description)}" data-link="${escapeHtml(p.link || '')}" data-image="${escapeHtml(p.imageUrl || p.image || '')}">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
-                        </button>
-                        <a href="${escapeHtml(p.link || '#')}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
-                    </div>
-                </article>
-                `;
-            }).join('');
-            searchResults.innerHTML = '';
-            searchResults.appendChild(gridDiv);
-        }
-
-        searchResults.classList.remove('hidden');
-        if (gallerySection) gallerySection.style.display = 'none';
-        if (grid) grid.classList.add('hidden');
-        if (paginationContainer) paginationContainer.classList.add('hidden');
-
-        renderPagination(searchPagination, totalPages, page, (newPage) => doSearch(query, newPage));
-        enforceHomeFooterLayout();
-        updateSearchFooterVisibility();
-    }
-
-    function renderPagination(container, totalPages, currentPage, clickHandler) {
-        if (container) container.innerHTML = "";
-        if (!container || totalPages <= 1) return;
-
-        const createBtn = (label, targetPage, isDisabled, isActive) => {
-            const btn = document.createElement("button");
-            btn.textContent = label;
-            btn.className = "pagination-btn";
-            btn.style.touchAction = "manipulation"; 
-            btn.style.minWidth = "45px";  
-            btn.style.minHeight = "45px";
-            btn.style.margin = "0 5px";
-            if (isActive) btn.classList.add("active");
-            if (isDisabled) {
-                btn.disabled = true;
-                btn.style.opacity = "0.5";
-                btn.style.pointerEvents = "none"; 
-            }
-            btn.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (isDisabled || isActive) return;
-                const allButtons = container.querySelectorAll("button");
-                allButtons.forEach(b => { b.disabled = true; b.style.pointerEvents = "none"; });
-                const productSection = document.getElementById("searchResults") || document.getElementById("gallerySection");
-                if (productSection) {
-                    const y = productSection.getBoundingClientRect().top + window.scrollY - 80;
-                    window.scrollTo({ top: y, behavior: 'smooth' });
-                } else {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-                clickHandler(targetPage);
-            };
-            container.appendChild(btn);
-        };
-        createBtn("‹", currentPage - 1, currentPage === 1, false);
-        createBtn(currentPage, currentPage, false, true);
-        createBtn("›", currentPage + 1, currentPage === totalPages, false);
-    }
-
-    // ---------- 7. SEARCH LOGIC (SMART, FUZZY & FILTERS) ----------
-
-    let activeFilters = new Set(); // Stores "tech", "livogue", etc.
-
-    const normalize = (str) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-
-    const levenshtein = (a, b) => {
-        const matrix = [];
-        for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
-        for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
-        for (let i = 1; i <= b.length; i++) {
-            for (let j = 1; j <= a.length; j++) {
-                if (b.charAt(i - 1) == a.charAt(j - 1)) {
-                    matrix[i][j] = matrix[i - 1][j - 1];
-                } else {
-                    matrix[i][j] = Math.min(
-                        matrix[i - 1][j - 1] + 1, 
-                        matrix[i][j - 1] + 1,     
-                        matrix[i - 1][j] + 1      
-                    );
-                }
-            }
-        }
-        return matrix[b.length][a.length];
-    };
-
-    const isMatch = (query, text) => {
-        if (!query || !text) return false;
-        const q = normalize(query);
-        const t = normalize(text);
-        if (t.includes(q)) return true;
-        if (q.length > 2) {
-            const allowedErrors = Math.floor(q.length / 4) || 1; 
-            if (Math.abs(q.length - t.length) < 4) { 
-                 return levenshtein(q, t) <= allowedErrors;
-            }
-        }
-        return false;
-    };
-
-    function renderFilterUI() {
-        const container = document.getElementById('searchFilterContainer');
-        if (!container) return;
-
-        const filters = ['Livogue', 'Wellfit', 'Tech']; 
-        
-        container.innerHTML = filters.map(cat => {
-            const isActive = activeFilters.has(cat.toLowerCase());
-            return `<button class="filter-pill ${isActive ? 'active' : ''}" data-cat="${cat.toLowerCase()}">${cat}</button>`;
-        }).join('');
-
-        container.querySelectorAll('.filter-pill').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const cat = e.target.dataset.cat;
-                if (activeFilters.has(cat)) activeFilters.delete(cat);
-                else activeFilters.add(cat);
-                
-                renderFilterUI(); 
-                doSearch(searchInput.value, 1); 
-            });
-        });
-    }
-
-   function resetToDefaultGrid() {
-        if (searchResults) searchResults.classList.add('hidden');
-        if (searchPagination) searchPagination.innerHTML = '';
-        
-        // Show the Title back
-        const mainTitle = document.getElementById('mainTitle');
-        if (mainTitle) mainTitle.style.display = 'block';
-
-        // Hide Filters
-        const filterContainer = document.getElementById('searchFilterContainer');
-        if (filterContainer) {
-            filterContainer.classList.add('hidden');
-            activeFilters.clear(); 
-        }
-
-        // --- NEW: Hide Sort Dropdown (ONLY on Home Page) ---
-        const sortWrapper = document.querySelector('.sort-wrapper');
-        if (isHomePage && sortWrapper) {
-            sortWrapper.classList.add('hidden');
-        }
-        
-        // Reset Breadcrumbs
-        if (searchInput) searchInput.value = ''; // Ensure input is visually clear
-        renderBreadcrumbs();
-
-        if (isHomePage && gallerySection) gallerySection.style.display = 'block';
-        if (isCategoryPage && grid) grid.classList.remove('hidden');
-        if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
-        document.body.classList.remove('search-has-results', 'search-no-results');
-        updateSearchFooterVisibility();
-    }
-
-    function doSearch(q, page = 1) {
-        const query = (q || '').trim();
-        
-     // --- VISIBILITY FIX: Add 'searching' class ---
-        if (query || activeFilters.size > 0) {
-            document.body.classList.add('searching');
-            const mainTitle = document.getElementById('mainTitle');
-            if (isHomePage && mainTitle) mainTitle.style.display = 'none';
-            document.body.classList.remove('show-search-footer');
-        } else {
-            // If search is cleared, reset
-            resetToDefaultGrid();
-            return;
-        }
-
-        const filterContainer = document.getElementById('searchFilterContainer');
-        if (filterContainer) {
-            if (query || activeFilters.size > 0) {
-                filterContainer.classList.remove('hidden');
-                if (filterContainer.innerHTML === '') renderFilterUI();
-            } else {
-                filterContainer.classList.add('hidden');
-            }
-        }
-
-        if (!query && activeFilters.size === 0) {
-            resetToDefaultGrid();
-            return;
-        }
-
-        // --- NEW: Show Sort Dropdown (When Searching) ---
-        const sortWrapper = document.querySelector('.sort-wrapper');
-        if (sortWrapper) {
-            sortWrapper.classList.remove('hidden');
-        }
-        
-        // Update Breadcrumbs to show "Home / Search"
-        renderBreadcrumbs();
-
-        if (query) {
-            const recents = loadRecent();
-            if (!recents.some(x => x.toLowerCase() === query.toLowerCase())) {
-                recents.unshift(query);
-                saveRecent(recents);
-            }
-        }
-        hideDropdown();
-
-        let pool = isCategoryPage ? categoryItems : [...allProducts];
-
-        if (activeFilters.size > 0) {
-            pool = pool.filter(p => {
-                const pCat = (p.category || '').toLowerCase();
-                return [...activeFilters].some(filter => pCat.includes(filter));
-            });
-        }
-        
-        let results = pool;
-        if (query) {
-             results = pool.filter(p => 
-                isMatch(query, p.title) || 
-                (p.description && isMatch(query, p.description))
-            );
-        }
-
-        // On homepage, hide title when there are search matches.
-        const mainTitle = document.getElementById('mainTitle');
-        if (isHomePage && mainTitle) {
-            mainTitle.style.display = results.length > 0 ? 'none' : 'block';
-        }
-        
-        renderSearchResults(results, page, query);
-    }
-
-    function hideDropdown() { if (searchDropdown) searchDropdown.classList.add('hidden'); searchSelectedIndex = -1; }
-    
-    function renderDropdown(filter = '') {
-        if (!searchDropdown) return;
-        searchSelectedIndex = -1;
-        const query = filter.trim();
-        let displayItems = [];
-
-        const historyMatches = loadRecent().filter(s => s.toLowerCase().includes(query.toLowerCase()));
-        let productMatches = [];
-        if (query.length >= 3) {
-            productMatches = allProducts.filter(p => isMatch(query, p.title)).map(p => p.title);
-        }
-
-        const seen = new Set();
-        historyMatches.forEach(item => {
-            const key = item.toLowerCase();
-            if(!seen.has(key)) { seen.add(key); displayItems.push({ text: item, type: 'history' }); }
-        });
-        productMatches.forEach(item => {
-             const key = item.toLowerCase();
-             if(!seen.has(key)) { seen.add(key); displayItems.push({ text: item, type: 'product' }); }
-        });
-
-        displayItems = displayItems.slice(0, 6);
-        if (!displayItems.length) { hideDropdown(); return; }
-
-        searchDropdown.innerHTML = displayItems.map(item => `
-            <div class="row" data-value="${escapeHtml(item.text)}">
-                <span class="value" style="display: flex; justify-content: space-between; width: 100%;">
-                    <span>${escapeHtml(item.text)}</span>
-                    ${item.type === 'product' ? '<span style="font-size: 0.75em; opacity: 0.5;">Product</span>' : ''}
-                </span>
-                ${item.type === 'history' ? `<button class="remove" data-remove="${escapeHtml(item.text)}">✕</button>` : ''}
-            </div>
-        `).join('');
-        searchDropdown.classList.remove('hidden');
-    }
-
-//    // ---------- 7. SEARCH LOGIC (SMART & FUZZY) ----------
-
-//     // --- 7a. NEW: Smart Search Helpers ---
-    
-//     // 1. Normalize String: Removes special chars & spaces (e.g., "Power Bank" -> "powerbank")
-//     const normalize = (str) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-
-//     // 2. Levenshtein Distance: Calculates how many "typos" away two words are
-//     const levenshtein = (a, b) => {
-//         const matrix = [];
-//         for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
-//         for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
-//         for (let i = 1; i <= b.length; i++) {
-//             for (let j = 1; j <= a.length; j++) {
-//                 if (b.charAt(i - 1) == a.charAt(j - 1)) {
-//                     matrix[i][j] = matrix[i - 1][j - 1];
-//                 } else {
-//                     matrix[i][j] = Math.min(
-//                         matrix[i - 1][j - 1] + 1, // deletion
-//                         matrix[i][j - 1] + 1,     // insertion
-//                         matrix[i - 1][j] + 1      // substitution
-//                     );
-//                 }
-//             }
-//         }
-//         return matrix[b.length][a.length];
-//     };
-
-//     // 3. The "Brain": Decides if a product matches the query
-//     const isMatch = (query, text) => {
-//         if (!query || !text) return false;
-//         const q = normalize(query);
-//         const t = normalize(text);
-        
-//         // Strict check: if the user typed "bank", matches "powerbank"
-//         if (t.includes(q)) return true;
-        
-//         // Fuzzy check: Only runs if query is > 2 chars to prevent lag
-//         if (q.length > 2) {
-//             // Allow 1 typo for every 4 letters (e.g. "ipone" -> "iphone")
-//             const allowedErrors = Math.floor(q.length / 4) || 1; 
-//             // Optimization: Only check math if lengths are somewhat close
-//             if (Math.abs(q.length - t.length) < 4) { 
-//                  return levenshtein(q, t) <= allowedErrors;
-//             }
-//         }
-//         return false;
-//     };
-
-//     // --- 7b. Main Search Functions ---
-
-//     function resetToDefaultGrid() {
-//         if (searchResults) searchResults.classList.add('hidden');
-//         if (searchPagination) searchPagination.innerHTML = '';
-//         if (isHomePage && gallerySection) gallerySection.style.display = 'block';
-//         if (isCategoryPage && grid) grid.classList.remove('hidden');
-//         if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
-//     }
-
-//     function doSearch(q, page = 1) {
-//         const query = (q || '').trim();
-//         if (!query) {
-//             resetToDefaultGrid();
-//             return;
-//         }
-
-//         // Save to history (Standard Logic)
-//         const recents = loadRecent();
-//         // Only save if it's NOT already there (case insensitive)
-//         if (!recents.some(x => x.toLowerCase() === query.toLowerCase())) {
-//             recents.unshift(query);
-//             saveRecent(recents);
-//         }
-//         hideDropdown();
-
-//         let pool = isCategoryPage ? categoryItems : [...allProducts];
-        
-//         // --- SMART FILTERING ---
-//         // Checks Title OR Description using the smart 'isMatch' logic
-//         const results = pool.filter(p => 
-//             isMatch(query, p.title) || 
-//             (p.description && isMatch(query, p.description))
-//         );
-        
-//         renderSearchResults(results, page, query);
-//     }
-
-//     function hideDropdown() { if (searchDropdown) searchDropdown.classList.add('hidden'); searchSelectedIndex = -1; }
-    
-//     function renderDropdown(filter = '') {
-//         if (!searchDropdown) return;
-        
-//         // Always reset selection on new type
-//         searchSelectedIndex = -1;
-
-//         const query = filter.trim();
-//         let displayItems = [];
-
-//         // 1. Get History Matches (Always check these)
-//         // We use standard 'includes' for history to keep it snappy
-//         const historyMatches = loadRecent().filter(s => 
-//             s.toLowerCase().includes(query.toLowerCase())
-//         );
-
-//         // 2. Get Product Matches (Only if typing >= 3 letters)
-//         let productMatches = [];
-//         if (query.length >= 3) {
-//             productMatches = allProducts
-//                 .filter(p => isMatch(query, p.title)) // Use smart match
-//                 .map(p => p.title);
-//         }
-
-//         // 3. Merge: History First, Then Products
-//         // Use a Set to prevent duplicates (e.g. if "Wipro" is in history AND is a product)
-//         const seen = new Set();
-        
-//         // Add History items
-//         historyMatches.forEach(item => {
-//             const key = item.toLowerCase();
-//             if(!seen.has(key)) {
-//                 seen.add(key);
-//                 displayItems.push({ text: item, type: 'history' });
-//             }
-//         });
-
-//         // Add Product items (only if not seen)
-//         productMatches.forEach(item => {
-//              const key = item.toLowerCase();
-//              if(!seen.has(key)) {
-//                 seen.add(key);
-//                 displayItems.push({ text: item, type: 'product' });
-//             }
-//         });
-
-//         // Limit to 6 suggestions total
-//         displayItems = displayItems.slice(0, 6);
-
-//         if (!displayItems.length) {
-//             hideDropdown();
-//             return;
-//         }
-
-//         // Render with smart icons
-//         searchDropdown.innerHTML = displayItems.map(item => `
-//             <div class="row" data-value="${escapeHtml(item.text)}">
-//                 <span class="value" style="display: flex; justify-content: space-between; width: 100%;">
-//                     <span>${escapeHtml(item.text)}</span>
-//                     ${item.type === 'product' 
-//                         ? '<span style="font-size: 0.75em; opacity: 0.5; font-style: italic;">Product</span>' 
-//                         : ''}
-//                 </span>
-                
-//                 ${item.type === 'history' 
-//                     ? `<button class="remove" data-remove="${escapeHtml(item.text)}" aria-label="Remove">✕</button>` 
-//                     : ''}
-//             </div>
-//         `).join('');
-
-//         searchDropdown.classList.remove('hidden');
-//     }
-
-    // ---------- 8. HOME PAGE LOGIC (Gallery & Placeholder) ----------
-    
-    let galleryInitialized = false;
-
-
-    function initGallery() {
-    if (!isHomePage || !gallery) return;
-    if (galleryInitialized) return;
-    galleryInitialized = true;
-
-
-   const normalizeCategory = (cat) => {
-  if (!cat) return null;
-  const c = cat.toLowerCase().trim();
-
-  if (c.includes('fit')) return 'fitness';
-  if (c.includes('livogue')) return 'livogue';
-  if (c.includes('tech')) return 'tech';
-
-  return c;
-};
-
-const categories = [...new Set(
-  allProducts
-    .map(p => normalizeCategory(p.category))
-    .filter(Boolean)
-)];
-
-
-    const topPicks = categories.map(cat => {
-       const pool = allProducts.filter(
-  p => normalizeCategory(p.category) === cat
-);
-
-        return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
-    }).filter(Boolean);
-
-    if (topPicks.length === 0) {
-        if (gallery.parentElement) gallery.parentElement.style.display = "none";
+  const ui = {
+    menuBtn: document.getElementById('menuBtn'),
+    sidebar: document.getElementById('sidebar'),
+    closeSidebar: document.getElementById('closeSidebar'),
+    overlay: document.getElementById('overlay'),
+    searchWrap: document.querySelector('.search-wrap'),
+    searchInput: document.getElementById('searchInput'),
+    searchBtn: document.getElementById('searchBtn'),
+    searchDropdown: document.getElementById('searchDropdown'),
+    searchResults: document.getElementById('searchResults'),
+    searchPagination: document.getElementById('searchPagination'),
+    grid: document.getElementById('productGrid'),
+    paginationContainer: document.getElementById('defaultPagination'),
+    gallery: document.getElementById('gallery'),
+    gallerySection: document.getElementById('gallerySection'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    breadcrumbs: document.getElementById('breadcrumbs'),
+    errorMessage: document.getElementById('error-message'),
+    filterContainer: document.getElementById('searchFilterContainer'),
+    mainTitle: document.getElementById('mainTitle'),
+    sortWrapper: document.querySelector('.sort-wrapper'),
+    customSortTrigger: document.getElementById('customSortTrigger'),
+    customSortOptions: document.getElementById('customSortOptions'),
+    sortLabel: document.getElementById('sortLabel'),
+    homeBottomSentinel: document.getElementById('homeSearchBottomSentinel'),
+  };
+
+  const state = {
+    allProducts: [],
+    categoryItems: [],
+    activeFilters: new Set(),
+    searchSelectedIndex: -1,
+    currentSort: 'newest',
+  };
+
+  const isHomePage = document.body.dataset.home === 'true';
+  const isCategoryPage = Boolean(ui.grid);
+  const currentCategory = isCategoryPage ? normalizeCategory(ui.grid.dataset.category) : '';
+
+  let homeFooterObserver = null;
+  let placeholderTimer = null;
+  let galleryTimer = null;
+  let galleryCards = [];
+  let activeGalleryIndex = 0;
+
+  function stopPlaceholderAnimation() {
+    clearTimeout(placeholderTimer);
+  }
+
+  function startPlaceholderAnimation() {
+    if (!isHomePage || !ui.searchInput || document.body.classList.contains('searching')) return;
+    if (!state.allProducts.length) return;
+
+    stopPlaceholderAnimation();
+
+    const names = shuffleArray(
+      state.allProducts
+        .map((product) => product.title)
+        .filter(Boolean),
+    );
+    if (!names.length) return;
+
+    let wordIndex = 0;
+    let characterIndex = 0;
+    let deleting = false;
+
+    const loop = () => {
+      const word = names[wordIndex];
+      if (!word) return;
+
+      if (deleting) characterIndex -= 1;
+      else characterIndex += 1;
+
+      const fragment = word.slice(0, Math.max(0, characterIndex));
+      ui.searchInput.setAttribute('placeholder', `Search ${fragment}...`);
+
+      if (!deleting && characterIndex >= word.length) {
+        deleting = true;
+        placeholderTimer = setTimeout(loop, 1400);
         return;
-    }
-
-    let active = 0;
-    gallery.innerHTML = ""; // 🔥 HARD RESET — prevents duplicate cards
-    gallery.innerHTML = topPicks.map(p => `
-    <article class="card js-card-fix" id="${createId(p.title)}">
-        <div class="card-image-container">
-            <picture style="display: contents;">
-                <source media="(max-width: 768px)" srcset="${escapeHtml(p.mobileImageUrl || p.imageUrl)}">
-                <img src="${escapeHtml(p.imageUrl || "https://placehold.co/300x220?text=Image")}" 
-                     alt="${escapeHtml(p.title)}"
-                     onerror="this.src='https://placehold.co/300x220?text=Image'">
-            </picture>
-        </div>
-        
-        <h3>${escapeHtml(p.title)}</h3>
-
-        <p>${escapeHtml(p.description || "")}</p>
-        <div class="product-card-footer">
-            <button class="share-btn" 
-                    aria-label="Share ${escapeHtml(p.title)}"
-                    data-title="${escapeHtml(p.title)}"
-                    data-description="${escapeHtml(p.description)}"
-                    data-link="${escapeHtml(p.link || '')}"
-                    data-image="${escapeHtml(p.imageUrl || '')}"
-                >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.23-.09.46-.09.7 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
-            </button>
-            <a href="${escapeHtml(p.link || "#")}" target="_blank" rel="noopener noreferrer" class="buy">Buy Now</a>
-        </div>
-    </article>
-    `).join("");
-
-    const cards = Array.from(gallery.querySelectorAll(".card"));
-    let autoplayTimer;
-
-    function updateGallery() {
-        cards.forEach((card, i) => {
-            card.classList.remove("center", "left", "right", "hidden");
-            if (i === active) card.classList.add("center");
-            else if (i === (active - 1 + cards.length) % cards.length) card.classList.add("left");
-            else if (i === (active + 1) % cards.length) card.classList.add("right");
-            else card.classList.add("hidden");
-        });
-    }
-
-    const next = () => { active = (active + 1) % cards.length; updateGallery(); };
-    const prev = () => { active = (active - 1 + cards.length) % cards.length; updateGallery(); };
-
-    if (prevBtn) prevBtn.addEventListener("click", prev);
-    if (nextBtn) nextBtn.addEventListener("click", next);
-
-    function startAutoplay() { stopAutoplay(); autoplayTimer = setInterval(next, 4200); }
-    function stopAutoplay() { if (autoplayTimer) clearInterval(autoplayTimer); }
-
-    gallery.addEventListener("mouseenter", stopAutoplay);
-    gallery.addEventListener("mouseleave", startAutoplay);
-
-    document.addEventListener("keydown", e => {
-        if (document.activeElement === searchInput) return;
-        if (e.key === "ArrowLeft") prev();
-        if (e.key === "ArrowRight") next();
-    });
-
-    if (gallerySection) gallerySection.classList.remove("is-loading");
-    updateGallery();
-    startAutoplay();
-    }
-
-    // --- NEW FUNCTION: ANIMATED PLACEHOLDER ---
-    function initAnimatedPlaceholder() {
-        // Ensure we are on the homepage and have products to show
-        if (!isHomePage || !allProducts || allProducts.length === 0) {
-            if (searchInput) searchInput.setAttribute("placeholder", "Search products...");
-            return;
-        }
-
-        // Shuffle the products and get a list of titles
-        const productNames = shuffleArray([...allProducts].map(p => p.title).filter(Boolean));
-        if (productNames.length === 0) return;
-
-        let index = 0;
-        let charIndex = 0;
-        let isDeleting = false;
-        
-        const typingSpeed = 100;
-        const deletingSpeed = 60;
-        const pauseDuration = 1500;
-
-        function loop() {
-            clearTimeout(animatedPlaceholderTimeout);
-            
-            const currentWord = productNames[index];
-            let displayText;
-
-            if (isDeleting) {
-                charIndex--;
-                displayText = currentWord.substring(0, charIndex);
-            } else {
-                charIndex++;
-                displayText = currentWord.substring(0, charIndex);
-            }
-            
-            if(searchInput) searchInput.setAttribute("placeholder", `Search ${displayText}...`);
-
-            if (!isDeleting && charIndex === currentWord.length) {
-                isDeleting = true;
-                animatedPlaceholderTimeout = setTimeout(loop, pauseDuration);
-            } else if (isDeleting && charIndex === 0) {
-                isDeleting = false;
-                index = (index + 1) % productNames.length;
-                animatedPlaceholderTimeout = setTimeout(loop, 500);
-            } else {
-                const speed = isDeleting ? deletingSpeed : typingSpeed;
-                animatedPlaceholderTimeout = setTimeout(loop, speed);
-            }
-        }
-        loop(); // Start the animation
-    }
-
-// ---------- NEW: BREADCRUMBS & SORTING LOGIC ----------
-
-    function renderBreadcrumbs() {
-        const container = document.getElementById('breadcrumbs');
-        if (!container) return;
-
-        // Base Path
-        let html = `<a href="/">Home</a>`;
-        
-        // 1. Check Explicit Page Tag (This fixes Contact/About)
-        const pageType = document.body.dataset.page; 
-
-        if (pageType === 'contact') {
-            html += ` <span>/</span> <span class="current">Contact</span>`;
-        }
-        else if (pageType === 'about') { // Ensure about.html has <body data-page="about">
-            html += ` <span>/</span> <span class="current">About Us</span>`;
-        }
-        // 2. Search Results
-        else if (searchInput && searchInput.value.trim() !== '') {
-             html += ` <span>/</span> <span class="current">Search</span>`;
-        }
-        // 3. Category Page
-        else if (isCategoryPage && currentCategory) {
-            const catName = currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1);
-            html += ` <span>/</span> <span class="current">${escapeHtml(catName)}</span>`;
-        } 
-
-        container.innerHTML = html;
-    }
-
-    // Sort products by selected criteria.
-    function sortProducts(criteria) {
-        // 1. Sort the underlying data
-        let listToSort = isCategoryPage ? categoryItems : allProducts;
-        
-        const getDate = (d) => new Date(d || 0).getTime();
-
-        switch (criteria) {
-            case 'newest':
-                listToSort.sort((a, b) => {
-                    // Sort by Last Modified (or Created)
-                    const dateA = getDate(a._updatedAt || a._createdAt);
-                    const dateB = getDate(b._updatedAt || b._createdAt);
-                    const diff = dateB - dateA;
-                    // Tie-Breaker: A -> Z
-                    return diff !== 0 ? diff : a.title.localeCompare(b.title);
-                });
-                break;
-
-            case 'oldest':
-                listToSort.sort((a, b) => {
-                    // Sort by Last Modified (Oldest First)
-                    const dateA = getDate(a._updatedAt || a._createdAt);
-                    const dateB = getDate(b._updatedAt || b._createdAt);
-                    const diff = dateA - dateB;
-                    // Tie-Breaker: Z -> A (Reversed)
-                    return diff !== 0 ? diff : b.title.localeCompare(a.title);
-                });
-                break;
-
-            case 'price-low':
-                listToSort.sort((a, b) => (a.price || 0) - (b.price || 0));
-                break;
-            case 'price-high':
-                listToSort.sort((a, b) => (b.price || 0) - (a.price || 0));
-                break;
-            case 'alpha-asc':
-                listToSort.sort((a, b) => a.title.localeCompare(b.title));
-                break;
-        }
-
-        // Re-render active search results before category/default grids.
-        // This ensures we re-render the search results, not the hidden category grid.
-        if (searchInput.value.trim() !== '') {
-            doSearch(searchInput.value, 1);
-        } else if (isCategoryPage) {
-            renderCategoryGrid(1); 
-        }
-    }
-
-    // Setup custom sort options and interactions.
-    function setupCustomSort() {
-        const trigger = document.getElementById('customSortTrigger');
-        const optionsMenu = document.getElementById('customSortOptions');
-        const label = document.getElementById('sortLabel');
-
-        if (!trigger || !optionsMenu) return;
-
-        // 1. INJECT CORRECT OPTIONS (Fixes "Dummy" Sorting)
-        // This ensures the data-value matches your switch statement perfectly.
-        optionsMenu.innerHTML = `
-            <div class="custom-option selected" data-value="newest">Sort by: Newest</div>
-            <div class="custom-option" data-value="oldest">Sort by: Oldest</div>
-            <div class="custom-option" data-value="price-low">Price: Low to High</div>
-            <div class="custom-option" data-value="price-high">Price: High to Low</div>
-            <div class="custom-option" data-value="alpha-asc">Name: A to Z</div>
-        `;
-
-        // 2. Re-select the newly injected options
-        const options = optionsMenu.querySelectorAll('.custom-option');
-
-        // 3. Toggle Menu
-        trigger.onclick = (e) => {
-            e.stopPropagation();
-            optionsMenu.classList.toggle('show');
-            trigger.classList.toggle('open');
-        };
-
-        // 4. Handle Option Selection
-        options.forEach(option => {
-            option.addEventListener('click', (e) => {
-                e.stopPropagation();
-                
-                // Visual Update
-                options.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-                
-                // Update Label Text
-                if(label) label.textContent = option.textContent;
-
-                // Close Menu
-                optionsMenu.classList.remove('show');
-                trigger.classList.remove('open');
-
-                // --- TRIGGER THE ACTUAL SORT ---
-                const value = option.getAttribute('data-value'); // Ensure we get the value
-                if (value) sortProducts(value);
-            });
-        });
-
-        // 5. Close when clicking outside
-        document.addEventListener('click', () => {
-            optionsMenu.classList.remove('show');
-            trigger.classList.remove('open');
-        });
-    }
-
-    // Reset grid state when search is cleared.
-    function resetToDefaultGrid() {
-        if (searchResults) searchResults.classList.add('hidden');
-        if (searchPagination) searchPagination.innerHTML = '';
-        
-        // Show the Title back
-        const mainTitle = document.getElementById('mainTitle');
-        if (mainTitle) mainTitle.style.display = 'block';
-
-        // Hide Filters
-        const filterContainer = document.getElementById('searchFilterContainer');
-        if (filterContainer) {
-            filterContainer.classList.add('hidden');
-            activeFilters.clear(); 
-        }
-
-        // --- VISIBILITY FIX: Remove 'searching' class ---
-        document.body.classList.remove('searching');
-        
-        // Reset Breadcrumbs
-        if (searchInput) searchInput.value = ''; 
-        renderBreadcrumbs();
-
-        if (isHomePage && gallerySection) gallerySection.style.display = 'block';
-        if (isCategoryPage && grid) grid.classList.remove('hidden');
-        if (isCategoryPage && paginationContainer) paginationContainer.classList.remove('hidden');
-        document.body.classList.remove('search-has-results', 'search-no-results');
-        enforceHomeFooterLayout();
-        updateSearchFooterVisibility();
-    }
-
-
-
-// ---------- 9. EVENT LISTENERS & INITIALIZATION (MODIFIED) ----------
-    async function init() {
-
-        // --- 1. Handle "View Product" Clicks from Chatbot (PRESERVED) ---
-        document.addEventListener('click', (e) => {
-            const link = e.target.closest('a');
-            if (link && link.classList.contains('chat-link') && link.getAttribute('href').includes('#')) {
-                const href = link.getAttribute('href');
-                const targetId = href.split('#')[1]; 
-                const targetCard = document.getElementById(targetId);
-                if (targetCard) {
-                    e.preventDefault(); 
-                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    targetCard.style.transition = "box-shadow 0.5s ease, transform 0.5s ease";
-                    targetCard.style.boxShadow = "0 0 20px 5px rgba(234, 179, 8, 0.6)"; 
-                    targetCard.style.transform = "scale(1.02)";
-                    targetCard.style.zIndex = "10"; 
-                    setTimeout(() => {
-                        targetCard.style.boxShadow = "none";
-                        targetCard.style.transform = "scale(1)";
-                        targetCard.style.zIndex = "1";
-                    }, 2000);
-                }
-            }
-        });
-    
-        // --- 2. Global Event Listeners (PRESERVED) ---
-        menuBtn?.addEventListener('click', openSidebar);
-        closeSidebar?.addEventListener('click', hideSidebar);
-        overlay?.addEventListener('click', hideSidebar);
-
-        // --- 3. SMART SEARCH BAR LOGIC (Google Style) (PRESERVED) ---
-        const ICON_SEARCH = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`;
-        const ICON_CLOSE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-
-        // Button Click: Decides whether to SEARCH or CLEAR
-        searchBtn?.addEventListener('click', () => {
-            if (searchBtn.dataset.mode === 'clear') {
-                searchInput.value = '';
-                searchInput.focus(); 
-                searchBtn.innerHTML = ICON_SEARCH;
-                searchBtn.dataset.mode = 'search';
-                
-                hideDropdown();
-                resetToDefaultGrid(); 
-            } else {
-                doSearch(searchInput.value, 1);
-            }
-        });
-
-        if (searchInput) {
-            // Focus/Blur 
-            searchInput.addEventListener('focus', () => {
-                clearTimeout(animatedPlaceholderTimeout); 
-                searchInput.setAttribute("placeholder", "Search products...");
-                renderDropdown(searchInput.value);
-            });
-            
-            /* ===============================================
-   NEW SEARCH LOGIC (Fixes "Click Not Working")
-   =============================================== */
-
-// 1. Remove the old "blur" listener that was closing the menu too fast.
-// Instead, use "Click Outside" to close the menu.
-document.addEventListener('click', (e) => {
-    const isClickInside = e.target.closest('.search-wrap');
-
-    // If clicked OUTSIDE the search box, hide the dropdown
-    if (!isClickInside) {
-        hideDropdown();
-        // Resume placeholder animation if needed
-        if (searchInput && searchInput.value === "" && isHomePage) {
-            initAnimatedPlaceholder();
-        }
-    }
-});
-
-// 2. Ensure Input Focus opens the menu
-if (searchInput) {
-    searchInput.addEventListener('focus', () => {
-        clearTimeout(animatedPlaceholderTimeout);
-        searchInput.setAttribute("placeholder", "Search products...");
-        renderDropdown(searchInput.value);
-    });
-
-// --- NEW: CLICK LISTENER (Fixes the "Second Click" Issue) ---
-            // This catches clicks when the bar is ALREADY focused
-            searchInput.addEventListener('click', (e) => {
-                // Stop this click from closing the menu via the "Click Outside" listener
-                e.stopPropagation(); 
-                
-                // Force the menu to render/open again
-                renderDropdown(searchInput.value);
-            });
-
-    // 3. Keep the "Mousedown" handler you have, it's good.
-    // But let's verify it has no interference.
-}
-
-            // INSTANT TOGGLE: Switch icon immediately when typing
-            searchInput.addEventListener('input', (e) => {
-                const hasText = e.target.value.trim().length > 0;
-                
-                if (hasText && searchBtn.dataset.mode !== 'clear') {
-                    searchBtn.innerHTML = ICON_CLOSE;
-                    searchBtn.dataset.mode = 'clear';
-                } else if (!hasText && searchBtn.dataset.mode === 'clear') {
-                    searchBtn.innerHTML = ICON_SEARCH;
-                    searchBtn.dataset.mode = 'search';
-                }
-            });
-
-            // DEBOUNCED SEARCH: The heavy lifting 
-            searchInput.addEventListener('input', debounce((e) => {
-                renderDropdown(e.target.value || '');
-                if (!e.target.value.trim()) resetToDefaultGrid();
-            }, 120));
-
-            // KEYBOARD NAV (Enter, Arrows, Escape)
-            searchInput.addEventListener('keydown', (e) => {
-                const rows = searchDropdown?.querySelectorAll('.row');
-                
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (rows && rows.length && searchSelectedIndex >= 0) {
-                        const value = rows[searchSelectedIndex].dataset.value;
-                        searchInput.value = value;
-                        hideDropdown();
-                        searchBtn.innerHTML = ICON_CLOSE;
-                        searchBtn.dataset.mode = 'clear';
-                        doSearch(value, 1);
-                    } else {
-                        doSearch(searchInput.value, 1);
-                    }
-                    return;
-                }
-
-                if (!rows || !rows.length) return;
-
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    searchSelectedIndex = (searchSelectedIndex + 1) % rows.length;
-                }
-                else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    searchSelectedIndex = (searchSelectedIndex - 1 + rows.length) % rows.length;
-                }
-                else if (e.key === 'Escape') {
-                    hideDropdown();
-                    return;
-                }
-
-                rows.forEach((row, i) => {
-                    row.classList.toggle('hover', i === searchSelectedIndex);
-                });
-            });
-            
-            // DROPDOWN CLICK HANDLER
-            // DROPDOWN INTERACTION (Fixed for Mouse & Touch)
-        if (searchDropdown) {
-            const handleInteraction = (e) => {
-                // 1. CRITICAL: Stop the search input from blurring (losing focus)
-                // This keeps the dropdown open so the click can register.
-                if (e.type === 'mousedown' || e.type === 'touchstart') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-
-                const removeBtn = e.target.closest('.remove');
-                const row = e.target.closest('.row');
-
-                // CASE A: Remove History Item ("X" Button)
-                if (removeBtn) {
-                    const value = removeBtn.dataset.remove;
-                    if (!value) return;
-
-                    const updated = loadRecent().filter(x => x !== value);
-                    saveRecent(updated);
-                    
-                    // Re-render immediately
-                    renderDropdown(searchInput.value || '');
-                    // Keep focus on input so keyboard stays up
-                    searchInput.focus();
-                    return;
-                }
-
-                // CASE B: Select Result (Clicking the row)
-                if (row) {
-                    const val = row.dataset.value;
-                    if (!val) return;
-                    
-                    searchInput.value = val;
-                    hideDropdown(); // Now we can hide it manually
-                    
-                    // Switch icon to "X"
-                    if (searchBtn) {
-                        searchBtn.innerHTML = ICON_CLOSE;
-                        searchBtn.dataset.mode = 'clear';
-                    }
-                    
-                    doSearch(val, 1);
-                    
-                    // On mobile, we might want to close the keyboard now
-                    searchInput.blur();
-                }
-            };
-
-            // Listen for BOTH Mouse and Touch events
-            // 'passive: false' is required to allow preventDefault() on touch events
-            searchDropdown.addEventListener('mousedown', handleInteraction);
-            searchDropdown.addEventListener('touchstart', handleInteraction, { passive: false });
-        }
-        }
-
-        // --- 4. Event delegation for share and "show more" (PRESERVED) ---
-        const handleGridClick = (e) => {
-            const shareButton = e.target.closest('.share-btn');
-            const showMoreButton = e.target.closest('.show-more-btn');
-
-            if (shareButton) {
-                e.preventDefault(); 
-                const { title, description, image } = shareButton.dataset;
-                const productId = createId(title);
-                const deepLink = `${window.location.origin}${window.location.pathname}#${productId}`;
-                handleShareClick(title, description, deepLink, image);
-
-            } else if (showMoreButton) {
-                e.preventDefault();
-                const card = showMoreButton.closest('.product-card');
-                if (!card) return; 
-                const p = card.querySelector('p');
-                const isExpanded = card.classList.toggle('is-expanded');
-                if (isExpanded) {
-                    p.innerHTML = p.dataset.fullText;
-                    showMoreButton.innerHTML = showMoreButton.dataset.lessText;
-                } else {
-                    p.innerHTML = p.dataset.shortText;
-                    showMoreButton.innerHTML = showMoreButton.dataset.moreText;
-                }
-            }
-        };
-
-        if (grid) grid.addEventListener('click', handleGridClick);
-        if (searchResults) searchResults.addEventListener('click', handleGridClick);
-        if (gallery) gallery.addEventListener('click', handleGridClick); 
-
-        // Data-dependent initialization.
-        try {
-            allProducts = await fetchProducts();
-            window.CLASSIT_PRODUCTS = allProducts; 
-
-            // --- NEW: Toolbar Initialization (Sort & Breadcrumbs) ---
-            renderBreadcrumbs();
-            setupCustomSort();
-            
-            const sortDropdown = document.getElementById('sortDropdown');
-            const sortWrapper = document.querySelector('.sort-wrapper');
-
-            // LOGIC: Hide Sort on Home Page initially, Show on Category Pages
-            if (isHomePage && sortWrapper) {
-                sortWrapper.classList.add('hidden');
-            } else if (sortWrapper) {
-                sortWrapper.classList.remove('hidden');
-            }
-
-            if (sortDropdown) {
-                sortDropdown.addEventListener('change', (e) => {
-                    sortProducts(e.target.value);
-                });
-            }
-            // --------------------------------------------------------
-
-           if (isCategoryPage) {
-                const allItems = allProducts.filter((p) => (p.category || '').toLowerCase() === (currentCategory || '').toLowerCase());
-                categoryItems = shuffleArray(allItems);
-
-                // Deep Link "VIP" Logic
-                const hash = window.location.hash.substring(1); 
-                if (hash) {
-                    const vipIndex = categoryItems.findIndex(p => createId(p.title) === hash);
-                    if (vipIndex > -1) {
-                        const [vipProduct] = categoryItems.splice(vipIndex, 1);
-                        categoryItems.unshift(vipProduct);
-                        setTimeout(() => {
-                            const targetCard = document.getElementById(hash);
-                            if (targetCard) {
-                                targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                targetCard.style.transition = "box-shadow 0.5s";
-                                targetCard.style.boxShadow = "0 0 0 4px #eab308"; 
-                                setTimeout(() => { targetCard.style.boxShadow = "none"; }, 2000);
-                            }
-                        }, 500); 
-                    }
-                }
-                renderCategoryGrid(1);
-            }
-            if (isHomePage) {
-                initGallery();
-                initAnimatedPlaceholder();
-                enforceHomeFooterLayout();
-            }
-        } catch (error) {
-            console.error("Error initializing page:", error);
-            if (grid) grid.style.display = 'none';
-            if (paginationContainer) paginationContainer.style.display = 'none';
-            if (errorMessage) errorMessage.classList.remove('hidden');
-        }
-    }
-
-const sidebarMenu = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('menuBtn');
-    
-    // 1. Highlight Current Page (Smart Match)
-    // This removes trailing slashes and 'index.html' to ensure it works everywhere
-    const currentPath = window.location.pathname.replace(/\/$/, "").replace("/index.html", "") || "/";
-    const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
-
-    sidebarLinks.forEach(link => {
-        try {
-            const url = new URL(link.href);
-            // Normalize the link path just like the current path
-            const linkPath = url.pathname.replace(/\/$/, "").replace("/index.html", "") || "/";
-            
-            if (linkPath === currentPath) {
-                link.classList.add('active');
-            }
-        } catch(e) { /* Ignore errors */ }
-    });
-
-    // 2. Close Sidebar on Outside Click
-    document.addEventListener('click', (event) => {
-        if (!sidebarMenu || !sidebarToggle) return;
-        const clickedInside = sidebarMenu.contains(event.target);
-        const clickedBtn = sidebarToggle.contains(event.target);
-
-        if (sidebarMenu.classList.contains('show') && !clickedInside && !clickedBtn) {
-            sidebarMenu.classList.remove('show');
-        }
-    });
-    window.addEventListener('resize', () => {
-        enforceHomeFooterLayout();
-        updateSearchFooterVisibility();
-    });
-    window.addEventListener('scroll', updateSearchFooterVisibility, { passive: true });
-    if (searchResults) {
-        searchResults.addEventListener('load', (e) => {
-            if (e.target && e.target.tagName === 'IMG') {
-                enforceHomeFooterLayout();
-                updateSearchFooterVisibility();
-            }
-        }, true);
-    }
-    setupHomeSearchFooterObserver();
-    enforceHomeFooterLayout();
-    updateSearchFooterVisibility();
-init();
-});
-
-/* =========================================
-   THEME SWITCHER LOGIC (Correct HREF Swap)
-   ========================================= */
-document.addEventListener('DOMContentLoaded', () => {
-    const themeToggle = document.getElementById('themeToggleInput');
-    const currentTheme = localStorage.getItem('theme') || 'light';
-
-   // Helper Function to Apply Theme
-    const applyTheme = (theme) => {
-        // 1. Set CSS Variable
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-        
-        // 2. Update Toggle Switch Visuals
-        if (themeToggle) themeToggle.checked = (theme === 'dark');
-        
-        // 3. SWAP FAVICON SOURCE
-        const favicon = document.getElementById('dynamic-favicon');
-        if (favicon) {
-            favicon.href = theme === 'dark' 
-                ? '/favicon-dark-sq-v2.png' 
-                : '/favicon-gold-sq-v2.png';
-        }
-
-        /* --- CORRECTED TRACKING LINE --- */
-        // We use 'theme' directly because it was passed into the function
-        gtag('event', 'theme_toggle', { 'theme_selected': theme });
+      }
+
+      if (deleting && characterIndex <= 0) {
+        deleting = false;
+        wordIndex = (wordIndex + 1) % names.length;
+        placeholderTimer = setTimeout(loop, 420);
+        return;
+      }
+
+      placeholderTimer = setTimeout(loop, deleting ? 55 : 85);
     };
 
-    // Apply on initial load
-    applyTheme(currentTheme);
+    loop();
+  }
 
-    // Listen for toggle clicks
-    if (themeToggle) {
-        themeToggle.addEventListener('change', function() {
-            const newTheme = this.checked ? 'dark' : 'light';
-            applyTheme(newTheme);
-        });
+  function updateSearchButtonMode() {
+    if (!ui.searchBtn || !ui.searchInput) return;
+    const hasText = ui.searchInput.value.trim().length > 0;
+    ui.searchBtn.dataset.mode = hasText ? 'clear' : 'search';
+    ui.searchBtn.innerHTML = hasText ? ICON_CLOSE : ICON_SEARCH;
+  }
+
+  function openSidebar() {
+    if (!ui.sidebar) return;
+    ui.sidebar.classList.add('show');
+    ui.sidebar.setAttribute('aria-hidden', 'false');
+
+    if (ui.overlay) {
+      ui.overlay.classList.remove('hidden');
+      ui.overlay.classList.add('show');
+      ui.overlay.setAttribute('aria-hidden', 'false');
     }
-});
-// Listen for any click on a "Buy Now" button
-document.addEventListener('click', function(e) {
-  if (e.target && (e.target.innerText === 'Buy Now' || e.target.closest('.buy-now-btn'))) {
-    const productCard = e.target.closest('article');
-    const productName = productCard ? productCard.querySelector('h2, h3').innerText : 'Unknown Product';
-    
-    gtag('event', 'affiliate_click', {
-      'event_category': 'Outbound',
-      'product_name': productName
+  }
+
+  function hideSidebar() {
+    if (!ui.sidebar) return;
+    ui.sidebar.classList.remove('show');
+    ui.sidebar.setAttribute('aria-hidden', 'true');
+
+    if (ui.overlay) {
+      ui.overlay.classList.remove('show');
+      ui.overlay.classList.add('hidden');
+      ui.overlay.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function closeSortMenu() {
+  if (!ui.customSortOptions || !ui.customSortTrigger) return;
+
+  ui.customSortOptions.classList.remove('show');
+  ui.customSortOptions.classList.add('hidden');  // IMPORTANT
+  ui.customSortTrigger.classList.remove('open');
+}
+
+
+  function getFooterAnchorElement() {
+    if (ui.homeBottomSentinel) return ui.homeBottomSentinel;
+
+    const hasPagination = ui.searchPagination
+      && !ui.searchPagination.classList.contains('hidden')
+      && ui.searchPagination.childElementCount > 0;
+    if (hasPagination) return ui.searchPagination;
+
+    if (ui.searchResults?.lastElementChild) return ui.searchResults.lastElementChild;
+    return ui.searchResults || null;
+  }
+
+  function updateSearchFooterVisibility() {
+    if (!isHomePage) return;
+
+    const searching = document.body.classList.contains('searching');
+    if (!searching) {
+      document.body.classList.remove('show-search-footer');
+      return;
+    }
+
+    const anchor = getFooterAnchorElement();
+    if (!anchor) {
+      document.body.classList.remove('show-search-footer');
+      return;
+    }
+
+    const anchorRect = anchor.getBoundingClientRect();
+    const reachedBottom = anchorRect.top <= window.innerHeight + 6;
+    document.body.classList.toggle('show-search-footer', reachedBottom);
+  }
+
+  function setupHomeSearchFooterObserver() {
+    if (!isHomePage || !ui.homeBottomSentinel) return;
+    if (!('IntersectionObserver' in window)) return;
+
+    if (homeFooterObserver) homeFooterObserver.disconnect();
+
+    homeFooterObserver = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      const searching = document.body.classList.contains('searching');
+      const shouldReveal = Boolean(searching && entry?.isIntersecting);
+      document.body.classList.toggle('show-search-footer', shouldReveal);
+    }, { root: null, threshold: 0, rootMargin: '0px' });
+
+    homeFooterObserver.observe(ui.homeBottomSentinel);
+  }
+
+  function highlightSidebarLink() {
+    const currentPath = window.location.pathname.replace(/\/$/, '').replace('/index.html', '') || '/';
+    const links = document.querySelectorAll('.sidebar-nav a');
+
+    links.forEach((link) => {
+      try {
+        const path = new URL(link.href).pathname.replace(/\/$/, '').replace('/index.html', '') || '/';
+        if (path === currentPath) link.classList.add('active');
+      } catch (error) {
+        // Ignore malformed links.
+      }
     });
   }
-});
-// Track Left Arrow clicks
-document.getElementById('prevBtn')?.addEventListener('click', () => {
-  gtag('event', 'gallery_navigation', { 'direction': 'left' });
+
+  function renderBreadcrumbs() {
+    if (!ui.breadcrumbs) return;
+
+    let html = '<a href="/">Home</a>';
+    const pageType = document.body.dataset.page;
+    const searching = document.body.classList.contains('searching');
+    const query = ui.searchInput?.value.trim() || '';
+
+    if (pageType === 'contact') {
+      html += ' <span>/</span> <span class="current">Contact</span>';
+    } else if (pageType === 'about') {
+      html += ' <span>/</span> <span class="current">About Us</span>';
+    } else if (searching && (query || state.activeFilters.size > 0)) {
+      html += ' <span>/</span> <span class="current">Search</span>';
+    } else if (isCategoryPage && currentCategory) {
+      const title = currentCategory[0].toUpperCase() + currentCategory.slice(1);
+      html += ` <span>/</span> <span class="current">${escapeHtml(title)}</span>`;
+    }
+
+    ui.breadcrumbs.innerHTML = html;
+  }
+
+  function renderPagination(container, totalPages, currentPage, onPageChange) {
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (totalPages <= 1) {
+      container.classList.add('hidden');
+      return;
+    }
+
+    container.classList.remove('hidden');
+
+    const addButton = (label, targetPage, disabled, active = false) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'pagination-btn';
+      if (active) button.classList.add('active');
+      button.textContent = label;
+      button.disabled = disabled;
+      button.addEventListener('click', () => {
+        if (disabled || active) return;
+
+        const section = ui.searchResults && !ui.searchResults.classList.contains('hidden')
+          ? ui.searchResults
+          : (ui.grid || ui.gallerySection);
+
+        if (section) {
+          const y = section.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+        }
+
+        onPageChange(targetPage);
+      });
+      container.appendChild(button);
+    };
+
+    addButton('<', currentPage - 1, currentPage === 1);
+    addButton(String(currentPage), currentPage, true, true);
+    addButton('>', currentPage + 1, currentPage === totalPages);
+  }
+
+  function renderFilterUI() {
+    if (!ui.filterContainer) return;
+
+    ui.filterContainer.innerHTML = SEARCH_FILTERS.map((filter) => {
+      const active = state.activeFilters.has(filter.key);
+      return `
+        <button
+          type="button"
+          class="filter-pill ${active ? 'active' : ''}"
+          data-cat="${filter.key}"
+        >
+          ${filter.label}
+        </button>
+      `;
+    }).join('');
+
+    ui.filterContainer.querySelectorAll('.filter-pill').forEach((button) => {
+      button.addEventListener('click', () => {
+        const categoryKey = button.dataset.cat;
+        if (!categoryKey) return;
+
+        if (state.activeFilters.has(categoryKey)) {
+          state.activeFilters.delete(categoryKey);
+        } else {
+          state.activeFilters.add(categoryKey);
+        }
+
+        renderFilterUI();
+        doSearch(ui.searchInput?.value || '', 1);
+      });
+    });
+  }
+
+  function hideDropdown() {
+    if (!ui.searchDropdown) return;
+    state.searchSelectedIndex = -1;
+    ui.searchDropdown.classList.add('hidden');
+  }
+
+  function renderDropdown(filter = '') {
+    if (!ui.searchDropdown) return;
+
+    const query = filter.trim();
+    const historyMatches = loadRecent()
+      .filter((item) => item.toLowerCase().includes(query.toLowerCase()));
+
+    let productMatches = [];
+    if (query.length >= 3) {
+      productMatches = state.allProducts
+        .filter((item) => fuzzyMatch(query, item.title))
+        .map((item) => item.title);
+    }
+
+    const displayItems = [];
+    const seen = new Set();
+
+    historyMatches.forEach((item) => {
+      const key = item.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        displayItems.push({ text: item, type: 'history' });
+      }
+    });
+
+    productMatches.forEach((item) => {
+      const key = item.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        displayItems.push({ text: item, type: 'product' });
+      }
+    });
+
+    const limitedItems = displayItems.slice(0, 6);
+    state.searchSelectedIndex = -1;
+
+    if (!limitedItems.length) {
+      hideDropdown();
+      return;
+    }
+
+    ui.searchDropdown.innerHTML = limitedItems.map((item) => `
+      <div class="row" data-value="${escapeHtml(item.text)}">
+        <span class="value">
+          <span class="label">${escapeHtml(item.text)}</span>
+          ${item.type === 'product' ? '<span class="badge">Product</span>' : ''}
+        </span>
+        ${item.type === 'history'
+    ? `<button type="button" class="remove" data-remove="${escapeHtml(item.text)}" aria-label="Remove search">x</button>`
+    : ''}
+      </div>
+    `).join('');
+
+    ui.searchDropdown.classList.remove('hidden');
+  }
+
+  function handleDropdownClick(event) {
+    const removeButton = event.target.closest('.remove');
+    if (removeButton) {
+      const valueToRemove = removeButton.dataset.remove;
+      if (!valueToRemove) return;
+
+      const updated = loadRecent().filter((item) => item !== valueToRemove);
+      saveRecent(updated);
+      renderDropdown(ui.searchInput?.value || '');
+      ui.searchInput?.focus();
+      return;
+    }
+
+    const row = event.target.closest('.row');
+    if (!row || !ui.searchInput) return;
+    const selectedValue = row.dataset.value;
+    if (!selectedValue) return;
+
+    ui.searchInput.value = selectedValue;
+    updateSearchButtonMode();
+    hideDropdown();
+    doSearch(selectedValue, 1);
+    ui.searchInput.blur();
+  }
+
+  async function handleShareClick({ title, description, link }) {
+    const shareUrl = link || window.location.href;
+    const shareTitle = title || 'Check this product';
+    const shareDescription = description || 'You may like this';
+    const shareText = `${shareTitle}\n\n${shareDescription}`;
+    const shareData = {
+      title: shareTitle,
+      text: shareText,
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        // User canceled share.
+      }
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+      alert('Share is not supported on this device. Product details were copied.');
+    } catch (error) {
+      alert('Share is not supported on this device.');
+    }
+  }
+
+  function highlightCard(card) {
+    if (!card) return;
+    card.classList.add('is-spotlight');
+    setTimeout(() => {
+      card.classList.remove('is-spotlight');
+    }, 2000);
+  }
+
+  function handleCardActionClick(event) {
+    const shareButton = event.target.closest('.share-btn');
+    if (shareButton) {
+      event.preventDefault();
+
+      const productTitle = shareButton.dataset.title || '';
+      const deepLink = `${window.location.origin}${window.location.pathname}#${createId(productTitle)}`;
+
+      handleShareClick({
+        title: productTitle,
+        description: shareButton.dataset.description || '',
+        link: deepLink,
+      });
+      return;
+    }
+
+    const toggleButton = event.target.closest('.show-more-btn');
+    if (!toggleButton) return;
+    event.preventDefault();
+
+    const card = toggleButton.closest('.product-card');
+    if (!card) return;
+
+    const paragraph = card.querySelector('p[data-full-text]');
+    if (!paragraph) return;
+
+    const expanded = card.classList.toggle('is-expanded');
+    paragraph.innerHTML = expanded
+      ? paragraph.dataset.fullText || ''
+      : paragraph.dataset.shortText || '';
+    toggleButton.textContent = expanded
+      ? (toggleButton.dataset.lessText || 'less')
+      : (toggleButton.dataset.moreText || '...more');
+  }
+
+  function updateGallery() {
+    if (!galleryCards.length) return;
+    galleryCards.forEach((card, index) => {
+      card.classList.remove('center', 'left', 'right', 'hidden');
+      if (index === activeGalleryIndex) card.classList.add('center');
+      else if (index === (activeGalleryIndex - 1 + galleryCards.length) % galleryCards.length) card.classList.add('left');
+      else if (index === (activeGalleryIndex + 1) % galleryCards.length) card.classList.add('right');
+      else card.classList.add('hidden');
+    });
+  }
+
+  function moveGallery(step) {
+    if (!galleryCards.length) return;
+    activeGalleryIndex = (activeGalleryIndex + step + galleryCards.length) % galleryCards.length;
+    updateGallery();
+  }
+
+  function stopGalleryAutoplay() {
+    clearInterval(galleryTimer);
+    galleryTimer = null;
+  }
+
+  function startGalleryAutoplay() {
+    if (!isHomePage || galleryCards.length <= 1) return;
+    stopGalleryAutoplay();
+    galleryTimer = setInterval(() => {
+      moveGallery(1);
+    }, 4200);
+  }
+
+  function initGallery() {
+    if (!isHomePage || !ui.gallery) return;
+
+    const categories = [...new Set(
+      state.allProducts
+        .map((product) => normalizeCategory(product.category))
+        .filter(Boolean),
+    )];
+
+    const topPicks = categories
+      .map((categoryKey) => {
+        const pool = state.allProducts.filter(
+          (product) => normalizeCategory(product.category) === categoryKey,
+        );
+        if (!pool.length) return null;
+        return pool[Math.floor(Math.random() * pool.length)];
+      })
+      .filter(Boolean);
+
+    if (!topPicks.length) {
+      ui.gallerySection?.classList.add('hidden');
+      return;
+    }
+
+    ui.gallery.innerHTML = topPicks.map((product) => renderGalleryCard(product)).join('');
+    galleryCards = Array.from(ui.gallery.querySelectorAll('.card'));
+    activeGalleryIndex = 0;
+    updateGallery();
+    startGalleryAutoplay();
+    ui.gallerySection?.classList.remove('is-loading');
+  }
+
+function renderCategoryGrid(page = 1) {
+  if (!isCategoryPage || !ui.grid) return;
+
+  // 🔥 STOP rendering grid if search input has text
+  if (ui.searchInput && ui.searchInput.value.trim() !== '') return;
+
+  const start = (page - 1) * ITEMS_PER_PAGE_CATEGORY;
+  const paginated = state.categoryItems.slice(start, start + ITEMS_PER_PAGE_CATEGORY);
+
+  ui.grid.innerHTML = paginated.map((product) => renderGridCard(product)).join('');
+  ui.grid.classList.remove('hidden');
+
+  const totalPages = Math.ceil(state.categoryItems.length / ITEMS_PER_PAGE_CATEGORY);
+  renderPagination(ui.paginationContainer, totalPages, page, renderCategoryGrid);
+
+  updateSearchFooterVisibility();
+}
+
+
+  function renderCategoryFallbackIntoSearchResults() {
+    if (!isCategoryPage || !ui.searchResults) return;
+
+    const defaultItems = state.categoryItems.slice(0, ITEMS_PER_PAGE_CATEGORY);
+    const fallbackGrid = document.createElement('div');
+    fallbackGrid.className = 'product-grid';
+    fallbackGrid.innerHTML = defaultItems.map((product) => renderGridCard(product)).join('');
+    ui.searchResults.appendChild(fallbackGrid);
+  }
+
+function renderSearchResults(results, page = 1, query = '') {
+  if (!ui.searchResults) return;
+
+  const start = (page - 1) * ITEMS_PER_PAGE_SEARCH;
+  const paginated = results.slice(start, start + ITEMS_PER_PAGE_SEARCH);
+  const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE_SEARCH);
+
+  document.body.classList.add('searching');
+  ui.searchResults.innerHTML = '';
+
+  const hasResults = paginated.length > 0;
+
+  // ---- BODY STATE CLASSES ----
+  document.body.classList.toggle('search-has-results', hasResults);
+  document.body.classList.toggle('search-no-results', !hasResults);
+
+  // ---- HOME PAGE BEHAVIOUR ----
+  if (isHomePage) {
+    ui.gallerySection?.classList.toggle('hidden', hasResults);
+    ui.mainTitle?.classList.toggle('hidden', hasResults);
+  }
+
+  // ---- CATEGORY PAGE BEHAVIOUR ----
+  if (isCategoryPage) {
+  if (hasResults) {
+    ui.grid.style.display = 'none';
+    ui.paginationContainer.style.display = 'none';
+  } else {
+    ui.grid.style.display = '';
+    ui.paginationContainer.style.display = '';
+  }
+}
+
+
+  if (!hasResults) {
+
+    safeTrack('search_no_results', { keyword: query });
+
+    ui.searchResults.innerHTML = `
+      <div class="no-results-wrapper">
+        <p class="no-results-message">
+          <span>No results found for </span><strong>"${escapeHtml(query)}"</strong>
+        </p>
+      </div>
+    `;
+
+    ui.searchResults.classList.remove('hidden');
+    ui.searchPagination?.classList.add('hidden');
+
+  } else {
+
+    const resultGrid = document.createElement('div');
+    resultGrid.className = 'product-grid';
+    resultGrid.innerHTML = paginated.map((product) => renderGridCard(product)).join('');
+    ui.searchResults.appendChild(resultGrid);
+
+    ui.searchResults.classList.remove('hidden');
+    ui.searchPagination?.classList.remove('hidden');
+
+    renderPagination(
+      ui.searchPagination,
+      totalPages,
+      page,
+      (newPage) => doSearch(query, newPage)
+    );
+  }
+
+  updateSearchFooterVisibility();
+}
+
+
+  function resetToDefaultView({ clearInput = true } = {}) {
+    document.body.classList.remove('searching', 'search-has-results', 'search-no-results', 'show-search-footer');
+
+    if (ui.searchResults) {
+      ui.searchResults.classList.add('hidden');
+      ui.searchResults.innerHTML = '';
+    }
+
+    if (ui.searchPagination) {
+      ui.searchPagination.innerHTML = '';
+      ui.searchPagination.classList.add('hidden');
+    }
+
+    if (ui.filterContainer) {
+      ui.filterContainer.classList.add('hidden');
+      ui.filterContainer.innerHTML = '';
+    }
+    state.activeFilters.clear();
+
+    if (clearInput && ui.searchInput) {
+      ui.searchInput.value = '';
+    }
+
+    if (isHomePage && ui.gallerySection) {
+      ui.gallerySection.classList.remove('hidden');
+    }
+
+    if (isCategoryPage) {
+      ui.grid?.classList.remove('hidden');
+      ui.paginationContainer?.classList.remove('hidden');
+      renderCategoryGrid(1);
+    }
+    ui.grid.style.display = '';
+ui.paginationContainer.style.display = '';
+
+
+    hideDropdown();
+    updateSearchButtonMode();
+    renderBreadcrumbs();
+    updateSearchFooterVisibility();
+
+    if (ui.searchInput && ui.searchInput.value.trim() === '') {
+      startPlaceholderAnimation();
+    }
+  }
+
+  function doSearch(rawQuery, page = 1) {
+    const query = String(rawQuery || '').trim();
+    const hasFilters = state.activeFilters.size > 0;
+
+    if (!query && !hasFilters) {
+      resetToDefaultView({ clearInput: false });
+      return;
+    }
+
+    document.body.classList.add('searching');
+    document.body.classList.remove('show-search-footer');
+
+    if (ui.filterContainer) {
+      ui.filterContainer.classList.remove('hidden');
+      if (!ui.filterContainer.childElementCount) {
+        renderFilterUI();
+      }
+    }
+
+    if (query) {
+      const recents = loadRecent();
+      if (!recents.some((item) => item.toLowerCase() === query.toLowerCase())) {
+        recents.unshift(query);
+        saveRecent(recents);
+      }
+    }
+
+    renderBreadcrumbs();
+    hideDropdown();
+
+    const source = isCategoryPage ? [...state.categoryItems] : [...state.allProducts];
+    const filteredByCategory = hasFilters
+      ? source.filter((item) => state.activeFilters.has(normalizeCategory(item.category)))
+      : source;
+
+    const matched = query
+      ? filteredByCategory.filter((item) => (
+        fuzzyMatch(query, item.title)
+        || fuzzyMatch(query, item.description || '')
+      ))
+      : filteredByCategory;
+
+    renderSearchResults(matched, page, query);
+  }
+
+  function getComparablePrice(value) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : 0;
+  }
+
+  function sortProducts(criteria) {
+    state.currentSort = criteria;
+    const list = isCategoryPage ? state.categoryItems : state.allProducts;
+    const getDate = (entry) => new Date(entry?._updatedAt || entry?._createdAt || 0).getTime();
+
+    switch (criteria) {
+      case 'oldest':
+        list.sort((a, b) => {
+          const diff = getDate(a) - getDate(b);
+          return diff !== 0 ? diff : b.title.localeCompare(a.title);
+        });
+        break;
+      case 'price-low':
+        list.sort((a, b) => getComparablePrice(a.price) - getComparablePrice(b.price));
+        break;
+      case 'price-high':
+        list.sort((a, b) => getComparablePrice(b.price) - getComparablePrice(a.price));
+        break;
+      case 'alpha-asc':
+        list.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'newest':
+      default:
+        list.sort((a, b) => {
+          const diff = getDate(b) - getDate(a);
+          return diff !== 0 ? diff : a.title.localeCompare(b.title);
+        });
+        break;
+    }
+
+    if (document.body.classList.contains('searching')) {
+      doSearch(ui.searchInput?.value || '', 1);
+      return;
+    }
+
+    if (isCategoryPage) {
+      renderCategoryGrid(1);
+    }
+  }
+
+function setupCustomSort() {
+  if (!ui.customSortTrigger || !ui.customSortOptions || !ui.sortLabel) return;
+
+  ui.customSortOptions.innerHTML = `
+    <div class="custom-option selected" data-value="newest">Sort by: Newest</div>
+    <div class="custom-option" data-value="oldest">Sort by: Oldest</div>
+    <div class="custom-option" data-value="price-low">Price: Low to High</div>
+    <div class="custom-option" data-value="price-high">Price: High to Low</div>
+    <div class="custom-option" data-value="alpha-asc">Name: A to Z</div>
+  `;
+
+  // Toggle dropdown
+  ui.customSortTrigger.addEventListener('click', (event) => {
+    event.stopPropagation();
+    ui.customSortTrigger.addEventListener('click', (event) => {
+  event.stopPropagation();
+
+  const isOpen = ui.customSortOptions.classList.contains('show');
+
+  if (isOpen) {
+    ui.customSortOptions.classList.remove('show');
+    ui.customSortOptions.classList.add('hidden');
+    ui.customSortTrigger.classList.remove('open');
+  } else {
+    ui.customSortOptions.classList.remove('hidden');   // IMPORTANT
+    ui.customSortOptions.classList.add('show');
+    ui.customSortTrigger.classList.add('open');
+  }
 });
 
-// Track Right Arrow clicks
-document.getElementById('nextBtn')?.addEventListener('click', () => {
-  gtag('event', 'gallery_navigation', { 'direction': 'right' });
+  });
+
+  // Option click
+  ui.customSortOptions.querySelectorAll('.custom-option').forEach((option) => {
+    option.addEventListener('click', (event) => {
+      event.stopPropagation();
+
+      ui.customSortOptions.querySelectorAll('.custom-option')
+        .forEach((item) => item.classList.remove('selected'));
+
+      option.classList.add('selected');
+      ui.sortLabel.textContent = option.textContent;
+
+      const nextSort = option.dataset.value || 'newest';
+      sortProducts(nextSort);
+
+      closeSortMenu();
+    });
+  });
+
+  // Close when clicking outside (ONLY ONCE)
+  document.addEventListener('click', (event) => {
+    if (!ui.customSortTrigger.contains(event.target)) {
+      closeSortMenu();
+    }
+  });
+}
+
+
+  async function fetchProducts() {
+    if (window.PRODUCTS && Array.isArray(window.PRODUCTS) && window.PRODUCTS.length) {
+      return window.PRODUCTS;
+    }
+
+    const projectId = window.SANITY_PROJECT_ID;
+    if (!projectId) return [];
+    const dataset = window.SANITY_DATASET || 'production';
+
+    const query = `
+      *[_type == "product"] | order(_updatedAt desc) {
+        title,
+        description,
+        price,
+        category,
+        link,
+        altText,
+        "imageUrl": image.asset->url,
+        "mobileImageUrl": mobileImage.asset->url,
+        "slug": slug.current,
+        _createdAt,
+        _updatedAt
+      }
+    `;
+
+    const endpoint = `https://${projectId}.api.sanity.io/v2024-11-08/data/query/${dataset}?query=${encodeURIComponent(query)}`;
+
+    try {
+      const response = await fetch(endpoint);
+      if (!response.ok) return [];
+      const payload = await response.json();
+      return payload.result || [];
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      return [];
+    }
+  }
+
+  function wireEvents() {
+    ui.menuBtn?.addEventListener('click', openSidebar);
+    ui.closeSidebar?.addEventListener('click', hideSidebar);
+    ui.overlay?.addEventListener('click', hideSidebar);
+
+    ui.searchBtn?.addEventListener('click', () => {
+      const mode = ui.searchBtn.dataset.mode || 'search';
+      if (mode === 'clear' && ui.searchInput) {
+        ui.searchInput.value = '';
+        updateSearchButtonMode();
+        resetToDefaultView({ clearInput: false });
+        ui.searchInput.focus();
+        return;
+      }
+
+      doSearch(ui.searchInput?.value || '', 1);
+    });
+
+    if (ui.searchInput) {
+      ui.searchInput.addEventListener('focus', () => {
+        stopPlaceholderAnimation();
+        ui.searchInput.setAttribute('placeholder', 'Search products...');
+        renderDropdown(ui.searchInput.value);
+      });
+
+      ui.searchInput.addEventListener('click', (event) => {
+        event.stopPropagation();
+        renderDropdown(ui.searchInput.value);
+      });
+
+      ui.searchInput.addEventListener('input', () => {
+        updateSearchButtonMode();
+      });
+
+      ui.searchInput.addEventListener('input', debounce((event) => {
+        const value = event.target.value || '';
+        renderDropdown(value);
+
+        if (!value.trim() && state.activeFilters.size === 0) {
+          resetToDefaultView({ clearInput: false });
+        }
+      }, 140));
+
+      ui.searchInput.addEventListener('keydown', (event) => {
+        const rows = ui.searchDropdown?.querySelectorAll('.row') || [];
+
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          if (rows.length && state.searchSelectedIndex >= 0) {
+            const selectedRow = rows[state.searchSelectedIndex];
+            const selectedValue = selectedRow?.dataset.value || '';
+            ui.searchInput.value = selectedValue;
+            updateSearchButtonMode();
+            hideDropdown();
+            doSearch(selectedValue, 1);
+            return;
+          }
+          doSearch(ui.searchInput.value, 1);
+          return;
+        }
+
+        if (!rows.length) return;
+
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          state.searchSelectedIndex = (state.searchSelectedIndex + 1) % rows.length;
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          state.searchSelectedIndex = (state.searchSelectedIndex - 1 + rows.length) % rows.length;
+        } else if (event.key === 'Escape') {
+          hideDropdown();
+          return;
+        } else {
+          return;
+        }
+
+        rows.forEach((row, index) => {
+          row.classList.toggle('hover', index === state.searchSelectedIndex);
+        });
+      });
+    }
+
+    ui.searchDropdown?.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+    });
+    ui.searchDropdown?.addEventListener('click', handleDropdownClick);
+
+    const delegatedTargets = [ui.grid, ui.searchResults, ui.gallery];
+    delegatedTargets.forEach((target) => {
+      target?.addEventListener('click', handleCardActionClick);
+    });
+
+    ui.prevBtn?.addEventListener('click', () => {
+      moveGallery(-1);
+      safeTrack('gallery_navigation', { direction: 'left' });
+    });
+
+    ui.nextBtn?.addEventListener('click', () => {
+      moveGallery(1);
+      safeTrack('gallery_navigation', { direction: 'right' });
+    });
+
+    ui.gallery?.addEventListener('mouseenter', stopGalleryAutoplay);
+    ui.gallery?.addEventListener('mouseleave', startGalleryAutoplay);
+
+    document.addEventListener('keydown', (event) => {
+      if (!isHomePage || document.activeElement === ui.searchInput) return;
+      if (event.key === 'ArrowLeft') moveGallery(-1);
+      if (event.key === 'ArrowRight') moveGallery(1);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (ui.searchWrap && !ui.searchWrap.contains(event.target)) {
+        hideDropdown();
+        if (isHomePage && ui.searchInput && ui.searchInput.value.trim() === '') {
+          startPlaceholderAnimation();
+        }
+      }
+
+      if (ui.sidebar?.classList.contains('show')) {
+        const clickedSidebar = ui.sidebar.contains(event.target);
+        const clickedToggle = ui.menuBtn?.contains(event.target);
+        if (!clickedSidebar && !clickedToggle) hideSidebar();
+      }
+
+      if (ui.customSortOptions && ui.customSortTrigger) {
+        const clickedSort = ui.customSortOptions.contains(event.target);
+        const clickedTrigger = ui.customSortTrigger.contains(event.target);
+        if (!clickedSort && !clickedTrigger) {
+          closeSortMenu();
+        }
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const buyLink = event.target.closest('a.buy');
+      if (!buyLink) return;
+
+      const card = buyLink.closest('article');
+      const productTitle = card?.querySelector('h2, h3')?.textContent?.trim() || 'Unknown Product';
+      safeTrack('affiliate_click', {
+        event_category: 'Outbound',
+        product_name: productTitle,
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      const chatLink = event.target.closest('a.chat-link[href*="#"]');
+      if (!chatLink) return;
+
+      let url;
+      try {
+        url = new URL(chatLink.href, window.location.href);
+      } catch (error) {
+        return;
+      }
+
+      if (url.pathname !== window.location.pathname) return;
+
+      const targetId = decodeURIComponent(url.hash.replace('#', ''));
+      if (!targetId) return;
+      const targetCard = document.getElementById(targetId);
+      if (!targetCard) return;
+
+      event.preventDefault();
+      targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlightCard(targetCard);
+    });
+
+    window.addEventListener('resize', updateSearchFooterVisibility);
+    window.addEventListener('scroll', updateSearchFooterVisibility, { passive: true });
+  }
+
+  async function initData() {
+    try {
+      state.allProducts = await fetchProducts();
+      window.CLASSIT_PRODUCTS = state.allProducts;
+
+      if (isCategoryPage) {
+        state.categoryItems = shuffleArray(
+          state.allProducts.filter((product) => normalizeCategory(product.category) === currentCategory),
+        );
+
+        const hash = decodeURIComponent(window.location.hash.replace('#', ''));
+        if (hash) {
+          const priorityIndex = state.categoryItems.findIndex((item) => createId(item.title) === hash);
+          if (priorityIndex > 0) {
+            const [priorityItem] = state.categoryItems.splice(priorityIndex, 1);
+            state.categoryItems.unshift(priorityItem);
+          }
+        }
+
+        renderCategoryGrid(1);
+
+        if (hash) {
+          requestAnimationFrame(() => {
+            const targetCard = document.getElementById(hash);
+            if (!targetCard) return;
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            highlightCard(targetCard);
+          });
+        }
+      }
+
+      if (isHomePage) {
+        initGallery();
+        startPlaceholderAnimation();
+      }
+    } catch (error) {
+      console.error('Error initializing page:', error);
+      ui.grid?.classList.add('hidden');
+      ui.paginationContainer?.classList.add('hidden');
+      ui.errorMessage?.classList.remove('hidden');
+    }
+  }
+
+  wireEvents();
+  renderBreadcrumbs();
+  setupCustomSort();
+  setupHomeSearchFooterObserver();
+  highlightSidebarLink();
+  updateSearchButtonMode();
+  await initData();
+  updateSearchFooterVisibility();
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  const themeToggle = document.getElementById('themeToggleInput');
+  const initialTheme = localStorage.getItem('theme')
+    || document.documentElement.getAttribute('data-theme')
+    || 'light';
+
+  applyTheme(initialTheme, themeToggle, false);
+
+  if (!themeToggle) return;
+  themeToggle.addEventListener('change', () => {
+    applyTheme(themeToggle.checked ? 'dark' : 'light', themeToggle, true);
+  });
+});

@@ -119,7 +119,7 @@
     <div id="searchFilterContainer" class="filter-container hidden"></div>
     <h1 id="mainTitle" class="title">Top Picks</h1>
 
-  
+  <section id="searchResults" class="search-results hidden"></section>
     
     <section id="gallerySection" class="gallery-section is-loading">
       <button id="prevBtn" class="gallery-arrow left" aria-label="Previous">‹</button>
@@ -143,7 +143,7 @@
       <button id="nextBtn" class="gallery-arrow right" aria-label="Next">›</button>
     </section>
 
-    <section id="searchResults" class="search-results hidden"></section>
+    
     
     <div id="searchPagination" class="pagination hidden"></div>
     <div id="homeSearchBottomSentinel" aria-hidden="true"></div>
@@ -204,17 +204,6 @@
 
 
   <script>
-    // Force cleanup when search is cleared to prevent "zombie" results
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-      if (!e.target.value.trim()) {
-        const searchResults = document.getElementById('searchResults');
-        searchResults.classList.add('hidden');
-        searchResults.innerHTML = ''; // Wipe content immediately
-        document.getElementById('gallerySection').classList.remove('hidden');
-        document.getElementById('searchPagination').classList.add('hidden');
-      }
-    });
-
     if (!localStorage.getItem('cookiesAccepted')) {
       document.getElementById('cookie-banner').classList.add('cookie-banner-visible');
     }

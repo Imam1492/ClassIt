@@ -4,12 +4,15 @@
 
 /* --- Header Adjustments --- */
 body[data-page="contact"] .topbar {
-  position: relative;
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
   background-color: var(--topbar-bg);
   
-  /* INCREASED HEIGHT */
-  height: 84px !important;      /* Default was around 84px */
-  min-height: 84px !important;  /* Forces it to stay tall */
+  /* Slimmer header for contact page */
+  height: 72px !important;
+  min-height: 72px !important;
   
   /* Optional: Ensure content stays centered if flexbox is used */
   display: flex;
@@ -19,7 +22,7 @@ body[data-page="contact"] .topbar {
 body[data-page="contact"] .topbar::after {
   content: 'Contact & Policies';
   font-family: 'Averia Libre', cursive;
-  font-size: 1.8rem;
+  font-size: 1.45rem;
   font-weight: 700;
   color: var(--text-color); /* CHANGED */
   position: absolute;
@@ -35,6 +38,17 @@ body[data-page="contact"] .site-logo {
     position: static;
     transform: none;
     margin-left: auto;
+}
+
+body[data-page="contact"] .main {
+  padding-top: 92px !important;
+  min-height: auto !important;
+}
+
+body[data-page="contact"] .toolbar-container {
+  margin-top: 4px !important;
+  margin-bottom: 6px !important;
+  padding: 0 5px !important;
 }
 
 /* --- Main Layout & Typography --- */
@@ -178,7 +192,7 @@ body[data-page="contact"] {
   align-items: center;
   text-align: center;
   /* CHANGED: reduced top margin from 2rem to 0.5rem */
-  margin: 0.5rem auto 3rem; 
+  margin: 0 auto 2.5rem;
   max-width: 900px;
   padding: 0 1rem;
   position: relative;
@@ -213,9 +227,23 @@ body[data-page="contact"] {
 }
 
 @media (max-width: 768px) {
-    body[data-page="contact"] .topbar::after {
-        font-size: 1.5rem;
+    body[data-page="contact"] .topbar {
+        height: 60px !important;
+        min-height: 64px !important;
     }
+
+    body[data-page="contact"] .main {
+        padding-top: 82px !important;
+    }
+
+    body[data-page="contact"] .topbar::after {
+        font-size: 1.2rem;
+    }
+
+    .page-header .subtitle {
+        margin-top: 16px;
+    }
+
     .contact-container {
         padding: 1rem 1.5rem;
     }
@@ -230,7 +258,7 @@ body[data-page="contact"] {
 @media (max-width: 520px) {
     body[data-page="contact"] .topbar::after {
         content: 'Contact';
-        font-size: 1.2rem;
+        font-size: 1.1rem;
     }
     .contact-container {
         padding: 1rem 1rem;
