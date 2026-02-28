@@ -659,3 +659,143 @@ html[data-theme="dark"] .favorite-btn.active svg {
 [data-theme="dark"] .pagination button.active:disabled {
   opacity: 1;
 }
+
+/* =====================================
+   DARK MODE — CUSTOM SORT
+===================================== */
+
+[data-theme="dark"] .custom-sort-trigger {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #e6e6e6;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+[data-theme="dark"] .custom-sort-trigger:hover {
+  background: #1f1f1f;
+  border-color: #333;
+}
+
+[data-theme="dark"] .custom-sort-trigger.open {
+  border-color: #3a3a3a;
+}
+
+[data-theme="dark"] .sort-icon {
+  color: #dcdcdc;
+}
+
+
+/* Dropdown */
+[data-theme="dark"] .custom-sort-options {
+  background: #121212;
+  border: 1px solid #2a2a2a;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.6);
+}
+
+/* Options */
+[data-theme="dark"] .custom-option {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .custom-option + .custom-option {
+  border-top: 1px solid #242424;
+}
+
+/* Dark Mode — Subtle Gray Hover for Sort Options */
+[data-theme="dark"] .custom-option:hover {
+  background: #262626;      /* soft gray lift */
+  color: #ffffff;
+}
+
+
+
+
+[data-theme="dark"] .custom-option.selected {
+  background: #0d15f7;   /* same vibrant blue as Buy Now */
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* =====================================
+   DARK MODE — FILTER PILLS
+===================================== */
+
+[data-theme="dark"] .filter-pill {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #dcdcdc;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+}
+
+[data-theme="dark"] .filter-pill:hover {
+  background: #1f1f1f;
+  border-color: #333;
+}
+
+[data-theme="dark"] .filter-pill.active {
+  background: #0d15f7;   /* same blue system */
+  border-color: #0d15f7;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(13, 21, 247, 0.45);
+}
+
+/* =========================
+   DARK — GALLERY ARROWS
+========================= */
+
+[data-theme="dark"] .gallery-arrow {
+  border: 1.5px solid rgba(11, 11, 11, 0.833);   /* thin light outline */
+  background: #363636;
+}
+
+[data-theme="dark"] .gallery-arrow:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* =========================
+   DARK — PAGINATION BUTTONS
+========================= */
+
+/* NORMAL — gray */
+[data-theme="dark"] .pagination button {
+  background: #4d4d4d;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #ffffff;
+  transition: all 0.25s ease;
+}
+
+/* HOVER — darker / black */
+[data-theme="dark"] .pagination button:hover {
+  background: #121212;
+  border-color: rgba(255,255,255,0.28);
+  transform: translateY(-2px);
+}
+
+
+/* Press effect only while clicking */
+[data-theme="dark"] .pagination-btn:active {
+  background: #121212;
+  transform: scale(0.96);
+}
+
+/* Remove any persistent focus glow */
+[data-theme="dark"] .pagination-btn:focus {
+  outline: none;
+}
+
+/* Disabled state */
+[data-theme="dark"] .pagination-btn:disabled {
+  background: #403f3f;
+  border-color: #242424;
+  color: #f1f1f1;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+/* Prevent hover effect on disabled */
+[data-theme="dark"] .pagination-btn:disabled:hover {
+  background: #454444;
+  border-color: #242424;
+  transform: none;
+}
