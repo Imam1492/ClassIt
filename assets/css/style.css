@@ -670,8 +670,9 @@ body:not([data-theme="dark"])
 
 /* Center card — warmest */
 .gallery .card.center {
-  background: #e6d5c6;   /* slightly warmer tone */
+  box-shadow: 0 20px 40px rgba(15, 23, 36, 0.25);
 }
+
 
 /* Side cards — slightly lighter */
 .gallery .card.left,
