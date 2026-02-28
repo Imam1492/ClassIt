@@ -640,7 +640,7 @@ z-index: 1;
   transform-origin: center 70%;
   border-radius: 1.15rem;
   border: 1px solid rgba(15, 23, 36, 0.08);
-  background: #F5F5DC;
+  background: var(--earth-2);
   box-shadow: var(--shadow-lg);
   padding: 1rem;
 
@@ -653,6 +653,12 @@ transition:
   backface-visibility: hidden;
 }
 
+/* LIGHT THEME — Category Page Cards Beige */
+body:not([data-theme="dark"]) .main[data-page="category"] .product-card {
+  background: #eae0d6;
+
+  border: 1px solid #e4d7ca;
+}
 
 
 
