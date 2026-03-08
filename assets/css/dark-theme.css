@@ -824,3 +824,29 @@ html[data-theme="dark"] .favorite-btn.active svg {
 }
 
 
+/* ===============================================
+   DARK THEME FIX FOR CATEGORY CARDS
+   =============================================== */
+
+/* Force the product cards and their text to swap colors in dark mode */
+html[data-theme="dark"] .product-card {
+    background-color: #1a1a1a !important; /* Or your preferred dark card color */
+    border-color: #333 !important;
+    color: #ffffff !important;
+}
+
+/* Ensure the description text inside category cards turns white/light gray */
+html[data-theme="dark"] .product-card h3,
+html[data-theme="dark"] .product-card p {
+    color: #e0e0e0 !important;
+}
+
+/* Ensure the share button icon is visible on the dark background */
+html[data-theme="dark"] .product-card .share-btn {
+    color: #a0a0a0 !important;
+}
+
+/* Make sure the image container background doesn't stay bright white if preferred */
+html[data-theme="dark"] .product-card .card-image-container {
+    background: #252525 !important;
+}
