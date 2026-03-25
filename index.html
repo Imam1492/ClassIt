@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-PQCZNXSW');</script>
-<!-- End Google Tag Manager -->
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   
@@ -20,13 +14,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="canonical" href="https://www.classit.co.in/" />
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
 
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RHLBMVEWF4"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-RHLBMVEWF4');
-  </script>
+  
 
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.classit.co.in/">
@@ -87,7 +75,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="stylesheet" href="./assets/css/chatbot.css">
   <link rel="stylesheet" href="./assets/css/theme-toggle.css">
   <link rel="stylesheet" href="./assets/css/dark-theme.css">
-  
+
+  <link rel="preconnect" href="https://fwafbt19.api.sanity.io" crossorigin>
+  <link rel="preconnect" href="https://cdn.sanity.io" crossorigin>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Averia+Libre:wght@400;700&family=Agbalumo&display=block" rel="stylesheet">
@@ -115,7 +106,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <header class="topbar">
     <button id="menuBtn" class="hamburger" aria-label="Open menu">☰</button>
     <div class="search-wrap">
-      <input id="searchInput" class="search-input" type="text" placeholder="Search products..." autocomplete="off"/>
+      <input id="searchInput" class="search-input" type="text" placeholder="Search products..." autocomplete="off" aria-label="Search for products in Livogue, Wellfit, and Tech" />
       <button id="searchBtn" class="search-action" aria-label="Search" type="button">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="7"></circle>
@@ -192,20 +183,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </main>
   
 
-  <div id="chatbotToggle" aria-label="Open Chatbot">
+<button id="chatbotToggle" aria-label="Open Chatbot">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="28" height="28">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h6m-6 8l-4-4V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H7z" />
     </svg>
-  </div>
-  <div id="chatbotWindow" class="hidden">
+  </button>
+  <div id="chatbotWindow" class="hidden" role="dialog" aria-label="Chat Assistant">
     <div id="chatbotHeader">
       <span>ClassIt’s Smart AI Assistant</span>
-      <button id="chatbotClose">&times;</button>
+      <button id="chatbotClose" aria-label="Close Chat">&times;</button>
     </div>
-    <div id="chatbotMessages"></div>
+    <div id="chatbotMessages" aria-live="polite"></div>
     <div id="chatbotInputArea">
-      <input id="chatbotInput" type="text" placeholder="Type your message..." />
-      <button id="chatbotSend">➤</button>
+      <input id="chatbotInput" type="text" placeholder="Type your message..." aria-label="Type your chat message" />
+      <button id="chatbotSend" aria-label="Send message">➤</button>
     </div>
   </div>
 
@@ -217,7 +208,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
  
   <script type="module" src="./assets/js/main.js" defer></script>
   <label class="switch">
-    <input id="themeToggleInput" type="checkbox" />
+   <input id="themeToggleInput" type="checkbox" aria-label="Toggle Dark Mode Theme" />
     <div class="slider round">
       <div class="sun-moon">
         <svg id="moon-dot-1" class="moon-dot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
@@ -266,6 +257,36 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </p>
 </footer>
 
+<script>
+  (function() {
+    var gtmLoaded = false;
+    
+    function loadGTM() {
+      if (gtmLoaded) return;
+      gtmLoaded = true;
+      
+      // Inject the GTM script
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-PQCZNXSW');
+      
+      // Remove the listeners since we loaded it
+      document.removeEventListener('scroll', loadGTM);
+      document.removeEventListener('mousemove', loadGTM);
+      document.removeEventListener('touchstart', loadGTM);
+    }
+
+    // Load GTM immediately if the user scrolls, moves mouse, or touches the screen
+    document.addEventListener('scroll', loadGTM, { passive: true });
+    document.addEventListener('mousemove', loadGTM, { passive: true });
+    document.addEventListener('touchstart', loadGTM, { passive: true });
+
+    // Fallback: If they do nothing, load it silently after 3.5 seconds
+    setTimeout(loadGTM, 3500);
+  })();
+</script>
 
 </body>
 </html>

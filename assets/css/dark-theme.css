@@ -124,9 +124,7 @@ body, .sidebar, .product-card, .card, .topbar, #chatbotWindow {
   color: #EAEAEA;            /* A light arrow color for contrast */
 }
 
- [data-theme="dark"] .gallery-arrow:hover {
-  background-color: #444444; /* Brighter background on hover */
-}
+
 
 /* FIX: Make "Buy Now" buttons blue in Dark Mode */
 [data-theme="dark"] .card .buy,
@@ -168,12 +166,7 @@ body, .sidebar, .product-card, .card, .topbar, #chatbotWindow {
   transition: all 0.2s ease-in-out;
 }
 
-[data-theme="dark"] #chatbotToggle:hover {
-  background-color: rgb(59, 130, 246); /* Brighter blue on hover */
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); /* Less intense hover glow */
-  transform: translateY(-2px);
-}
+
 [data-theme="dark"] #chatbotWindow {
   background-color: rgba(30, 30, 30, 0.9);
   backdrop-filter: blur(6px);
@@ -250,9 +243,7 @@ html[data-theme="dark"] #chatbotHeader {
   color: #9ca3af;
 }
 
-[data-theme="dark"] #chatbotHeader button:hover {
-  color: #EAEAEA;
-}
+
 
 [data-theme="dark"] #chatbotMessages {
   background-color: #1E1E1E; /* Matches the main window background */
@@ -545,12 +536,7 @@ html[data-theme="dark"] .favorite-btn.active svg {
     /* color: #eab308; */ 
 }
 
-[data-theme="dark"] .chat-link:hover {
-    color: #80c1ff; /* Even lighter blue on hover */
-    
-    /* If using Gold: */
-    /* color: #facc15; */
-}
+
 
 /* Cookie banner in dark theme */
 [data-theme="dark"] .cookie-banner.cookie-banner-visible {
@@ -600,6 +586,30 @@ html[data-theme="dark"] .favorite-btn.active svg {
 
 [data-theme="dark"] .site-footer strong{
   color: #fff;
+}
+
+/* =====================================
+   STAGE 3 FIX: CHATBOT DARK MODE HOVERS
+===================================== */
+@media (hover: hover) and (pointer: fine) {
+  
+  /* Chatbot Toggle Button Glow */
+  [data-theme="dark"] #chatbotToggle:hover {
+    background-color: rgb(59, 130, 246);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    transform: translateY(-2px);
+  }
+
+  /* Chatbot Header Close/Minimize Buttons */
+  [data-theme="dark"] #chatbotHeader button:hover {
+    color: #EAEAEA;
+  }
+
+  /* Inline Chat Links (Inside text) */
+  [data-theme="dark"] .chat-link:hover {
+    color: #80c1ff;
+  }
 }
 
 /* =========================
@@ -748,8 +758,61 @@ html[data-theme="dark"] .favorite-btn.active svg {
   background: #363636;
 }
 
-[data-theme="dark"] .gallery-arrow:hover {
-  border-color: rgba(255, 255, 255, 0.22);
+/* STAGE 3 FIX FOR DARK MODE: Shields your dark theme hovers from sticking on mobile */
+/* =====================================
+   STAGE 3 FIX: MOBILE HOVER SHIELD
+===================================== */
+@media (hover: hover) and (pointer: fine) {
+  
+  /* 1. Gallery Arrows */
+  [data-theme="dark"] .gallery-arrow:hover {
+    background: #4a5568; 
+  }
+
+  /* 2. Product Card Border Glow */
+  [data-theme="dark"] .product-card:hover {
+    border-color: var(--dark-accent);
+  }
+
+  /* 3. Buy Buttons */
+  [data-theme="dark"] .card .buy:hover,
+  [data-theme="dark"] .product-card .buy:hover,
+  [data-theme="dark"] .product-card .buy-btn:hover {
+    background-color: #3B82F6; 
+  }
+
+  /* 4. Show More Button */
+  [data-theme="dark"] button.show-more-btn:hover {
+    background: #303030 !important;
+    box-shadow: 0 0 8px rgba(180, 180, 180, 0.18);
+    transform: translateY(-1px);
+  }
+
+  /* 5. Share Button SVG Glow */
+  [data-theme="dark"] .share-btn:hover svg path {
+    fill: #ffffff !important;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
+  }
+
+  /* 6. Pagination & Filters */
+  [data-theme="dark"] .pagination button:hover,
+  [data-theme="dark"] .pagination button.prev:hover,
+  [data-theme="dark"] .pagination button.next:hover {
+    background: #121212;
+    border-color: rgba(255,255,255,0.28);
+    transform: translateY(-2px);
+  }
+  
+  [data-theme="dark"] .filter-pill:hover,
+  [data-theme="dark"] .custom-sort-trigger:hover {
+    background: #1f1f1f;
+    border-color: #333;
+  }
+  
+  [data-theme="dark"] .custom-option:hover {
+    background: #262626;
+    color: #ffffff;
+  }
 }
 
 /* =========================
@@ -849,4 +912,23 @@ html[data-theme="dark"] .product-card .share-btn {
 /* Make sure the image container background doesn't stay bright white if preferred */
 html[data-theme="dark"] .product-card .card-image-container {
     background: #252525 !important;
+}
+
+/* =====================================
+   DARK THEME MOBILE "TAP" FEEDBACK
+===================================== */
+[data-theme="dark"] .gallery-arrow:active {
+  background: #4a5568;
+}
+
+[data-theme="dark"] .card .buy:active,
+[data-theme="dark"] .product-card .buy:active,
+[data-theme="dark"] .product-card .buy-btn:active {
+  background-color: #3B82F6;
+  transform: scale(0.96);
+}
+
+[data-theme="dark"] #chatbotToggle:active {
+  background-color: rgb(59, 130, 246);
+  transform: scale(0.94);
 }

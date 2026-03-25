@@ -170,16 +170,24 @@ function applyTheme(theme, themeToggle, shouldTrack = false) {
   }
 }
 
-function buildImageMarkup(product) {
-  const desktopImage = escapeHtml(product.imageUrl || 'https://placehold.co/600x400?text=Image');
-  const mobileImage = escapeHtml(product.mobileImageUrl || product.imageUrl || '');
+function buildImageMarkup(product, isPriority = false) {
+  // Grab the raw URLs
+  const baseUrl = product.imageUrl || '';
+  const mobileBase = product.mobileImageUrl || baseUrl;
+
+  // THE FIX: Force Sanity to compress, resize, and convert to WebP format instantly
+  const desktopImage = baseUrl ? escapeHtml(`${baseUrl}?auto=format&w=800&q=75`) : 'https://placehold.co/600x400?text=Image';
+  const mobileImage = mobileBase ? escapeHtml(`${mobileBase}?auto=format&w=500&q=75`) : '';
   const altText = escapeHtml(product.altText || product.title || 'Product image');
 
+  const priorityAttr = isPriority ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"';
+
+  // THE BEST PRACTICES FIX: Added explicit width and height to prevent layout shifts
   return `
     <div class="card-image-container">
       <picture>
         ${mobileImage ? `<source media="(max-width: 768px)" srcset="${mobileImage}">` : ''}
-        <img src="${desktopImage}" alt="${altText}" onerror="this.src='https://placehold.co/600x400?text=Image'">
+        <img src="${desktopImage}" alt="${altText}" ${priorityAttr} width="600" height="800" onerror="this.src='https://placehold.co/600x400?text=Image'">
       </picture>
     </div>
   `;
@@ -230,8 +238,8 @@ function renderGridCard(product) {
 
   return `
     <article class="product-card" id="${createId(product.title)}">
-      ${buildImageMarkup(product)}
-      <h3>${escapeHtml(product.title)}</h3>
+      ${buildImageMarkup(product, false)}
+      <h2>${escapeHtml(product.title)}</h2>
       <p data-full-text="${parts.full}" data-short-text="${parts.shortWithEllipsis}">
         ${parts.shortWithEllipsis}
       </p>
@@ -247,8 +255,8 @@ function renderGridCard(product) {
 function renderGalleryCard(product) {
   return `
     <article class="card js-card-fix" id="${createId(product.title)}">
-      ${buildImageMarkup(product)}
-      <h3>${escapeHtml(product.title)}</h3>
+      ${buildImageMarkup(product, true)}
+      <h2>${escapeHtml(product.title)}</h2>
       <p>${escapeHtml(product.description || '')}</p>
       <div class="product-card-footer">
         ${buildShareButtonMarkup(product)}
@@ -1345,4 +1353,62 @@ document.addEventListener('DOMContentLoaded', () => {
   themeToggle.addEventListener('change', () => {
     applyTheme(themeToggle.checked ? 'dark' : 'light', themeToggle, true);
   });
+});
+
+
+/* ... [All your other code above] ... */
+
+document.addEventListener('DOMContentLoaded', () => {
+  const themeToggle = document.getElementById('themeToggleInput');
+  const initialTheme = localStorage.getItem('theme')
+    || document.documentElement.getAttribute('data-theme')
+    || 'light';
+
+  applyTheme(initialTheme, themeToggle, false);
+
+  if (!themeToggle) return;
+  themeToggle.addEventListener('change', () => {
+    applyTheme(themeToggle.checked ? 'dark' : 'light', themeToggle, true);
+  });
+});
+
+/* ====== PASTE THE NEW SWIPE CODE RIGHT HERE ====== */
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Grab the gallery and your existing buttons
+    const gallery = document.querySelector('.gallery');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    // Safety check: Only run if the gallery actually exists on the page
+    if (!gallery) return;
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // 2. Record where the user's finger first touches the screen
+    gallery.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true }); // passive: true keeps the page scrolling smoothly
+
+    // 3. Record where the finger lifts off, then calculate the swipe
+    gallery.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    // 4. The Math: Did they swipe far enough?
+    function handleSwipe() {
+        const swipeThreshold = 50; // The minimum pixel distance to count as a "swipe"
+        const swipeDistance = touchEndX - touchStartX;
+
+        if (swipeDistance < -swipeThreshold) {
+            // Swiped Left <-- (Move to Next Card)
+            if (nextBtn) nextBtn.click();
+        }
+        
+        if (swipeDistance > swipeThreshold) {
+            // Swiped Right --> (Move to Previous Card)
+            if (prevBtn) prevBtn.click();
+        }
+    }
 });

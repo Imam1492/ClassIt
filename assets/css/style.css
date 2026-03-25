@@ -166,13 +166,14 @@ input:focus-visible,
   position: fixed;
   inset-block: 0;
   inset-inline-start: 0;
-  inline-size: clamp(13rem, 65vw, 15rem);
-
+  /* FLUID FIX: Mobile stays exactly the same, but laptop/desktop can now grow to 21rem */
+  inline-size: clamp(13rem, 65vw, 21rem);
   padding: 1rem 1rem 1.25rem;
   background: #f8f3ed;
   box-shadow: 8px 0 26px rgba(15, 23, 36, 0.22);
   transform: translateX(-102%);
-  transition: transform 0.28s ease;
+  visibility: hidden; /* NEW: Removes it from keyboard focus */
+  transition: transform 0.28s ease, visibility 0s 0.28s; /* NEW: Delays hiding until animation ends */
   z-index: 70;
   display: flex;
   flex-direction: column;
@@ -181,6 +182,8 @@ input:focus-visible,
 
 .sidebar.show {
   transform: translateX(0);
+  visibility: visible; /* NEW: Brings it back for keyboards */
+  transition: transform 0.28s ease, visibility 0s; /* NEW */
 }
 
 .sidebar-header {
@@ -190,7 +193,7 @@ input:focus-visible,
 .sidebar-title {
   margin: 0;
   color: #5d4a39;
-  font-size: 1.1rem;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
   font-weight: 700;
 }
 
@@ -200,10 +203,26 @@ input:focus-visible,
   inset-inline-end: 0.6rem;
   border: 0;
   background: transparent;
-  font-size: 1.3rem;
+  font-size: clamp(1.3rem, 2.5vw, 1.6rem);
   line-height: 1;
   cursor: pointer;
   color: #5d4a39;
+}
+
+.sidebar-nav a {
+  display: block;
+  border-radius: var(--radius-pill);
+  padding: clamp(0.55rem, 1vw, 0.75rem) clamp(0.9rem, 1.5vw, 1.25rem);
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  color: #4b4b4b;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@media (max-width: 420px) {
+  .gallery-section {
+    /* FLUID FIX: Raised from 24rem to 26rem to fit the slightly taller cards safely */
+    min-block-size: 26rem;
+  }
 }
 
 .sidebar-nav {
@@ -213,13 +232,7 @@ input:focus-visible,
   margin-block-start: 1rem;
 }
 
-.sidebar-nav a {
-  display: block;
-  border-radius: var(--radius-pill);
-  padding: 0.55rem 0.9rem;
-  color: #4b4b4b;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
+
 
 .sidebar-nav a:hover {
   background: #dbcdb0;
@@ -237,14 +250,19 @@ input:focus-visible,
   inset-inline: 0;
   inset-block-start: 0;
   z-index: 50;
-
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
 
-  padding: 0.25rem 0.4rem; /* very small vertical padding */
   background: linear-gradient(180deg, #dbc6b3 0%, #c6a993 100%);
   border-bottom: 1px solid rgba(15, 23, 36, 0.12);
+
+  padding-block: 0.4rem;
+  /* THE GOLDILOCKS FIX: 
+     Mobile: 0.75rem (safe)
+     Tablet: 5vw (scales smoothly)
+     Desktop: Stops at 4rem (never gets crushed into the middle) */
+  padding-inline: clamp(0.75rem, 5vw, 4rem);
 }
 
 
@@ -254,45 +272,46 @@ input:focus-visible,
   border: 0;
   background: transparent;
   color: #141414;
-  
   line-height: 1;
   cursor: pointer;
-  block-size: 1.8rem;
-inline-size: 1.8rem;
-font-size: 1.8rem;
-width: 2.2rem;
-height: 2.2rem;
-
-
-
+  font-size: 1.8rem;
+  width: 2.2rem;
+  height: 2.2rem;
   display: grid;
   place-items: center;
 }
 
 .search-wrap {
   position: relative;
-  min-inline-size: 0;
-  inline-size: 100%;
+  /* 1. Take up all available space by default (for mobile) */
+  inline-size: 100%; 
+  /* 2. BUT physically stop growing once it hits 32rem (for desktop) */
+  max-inline-size: 44rem; 
+  margin-inline: auto; 
   display: flex;
   align-items: center;
 }
 
 .search-input {
   inline-size: 100%;
-  
-border-radius: 999px;
-padding-inline: 0.8rem 2.2rem;
-
-  border: 1px solid rgba(15, 23, 36, 0.12);
- 
-  padding-inline: 0.9rem 2.9rem;
   background: #fff;
   color: var(--text-color);
   box-shadow: var(--shadow-sm);
-  height: 3.2rem;
-font-size: 0.95rem;
-border-radius: 999px;
+  border: 1px solid rgba(15, 23, 36, 0.12);
+  border-radius: 999px;
+  
+  /* FLUID PROPORTIONS: Scales height and text so it never looks stretched/thin */
+  height: clamp(3rem, 4vw + 1rem, 3.6rem);
+  font-size: clamp(0.95rem, 1vw + 0.5rem, 1.1rem);
+  padding-inline: 1.2rem 3.5rem;
+  
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
 
+.search-input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(113, 67, 41, 0.15), var(--shadow-md);
 }
 
 .search-input::placeholder {
@@ -314,8 +333,6 @@ border-radius: 999px;
   cursor: pointer;
   width: 2rem;
 height: 2rem;
-
-
 }
 
 .search-action:hover {
@@ -402,11 +419,10 @@ height: 2rem;
 }
 
 .brand-logo img {
- height: 2.9rem;
-width: auto;
-object-fit: contain;
-
-
+  /* FLUID FIX: Starts at 2.6rem on mobile, grows to 3.4rem on desktop */
+  height: clamp(2.6rem, 3vw, 3.4rem);
+  width: auto;
+  object-fit: contain;
 }
 
 
@@ -588,33 +604,30 @@ html[data-theme="dark"] .logo-dark {
 #mainTitle {
   font-family: "Agbalumo", "Averia Libre", cursive;
   font-weight: 400;
-  font-size: clamp(2.2rem, 9vw, 3rem);
+  /* DIALED BACK: Max size lowered from 4.5rem to 3.8rem */
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
   line-height: 1;
-  margin: 0.3rem 0 0.6rem 0;   /* minimal default */
-
-
-
-position: relative;
-z-index: 10;
-
+  /* DIALED BACK: Tighter bottom margin so it doesn't push the cards down */
+  margin: clamp(0.3rem, 1.5vw, 0.8rem) 0 clamp(0.6rem, 2vw, 1.6rem) 0;
+  position: relative;
+  z-index: 10;
   text-align: center;
 }
 
 
 .gallery-section {
   position: relative;
-  inline-size: min(100%, 58rem);
+  inline-size: min(100%, 54rem);
   margin-inline: auto;
-  margin-block: 0.7rem 0.8rem;
-z-index: 1;
+  z-index: 1;
 
-  block-size: clamp(24rem, 68svh, 34rem);
+  /* THE FIX: Unified height that works for both phone and desktop */
+  block-size: clamp(26rem, 60svh, 36rem);
 
   display: grid;
   place-items: center;
   isolation: isolate;
   padding-inline: 0;
-
 }
 
 .gallery {
@@ -630,26 +643,22 @@ z-index: 1;
   position: absolute;
   left: 50%;
   top: 50%;
- overflow: hidden;
-  /* slightly reduced */
-  inline-size: clamp(15.5rem, 76vw, 18rem);
+  overflow: hidden;
+  inline-size: clamp(15.5rem, 28vw, 21rem);
   
-  aspect-ratio: 3 / 4.6;     
-
-
+  /* FLUID FIX: Slightly taller aspect ratio gives the button room to breathe */
+  aspect-ratio: 3 / 5; 
+  
   transform-origin: center 70%;
   border-radius: 1.15rem;
   border: 1px solid rgba(15, 23, 36, 0.08);
   background: var(--earth-2);
   box-shadow: var(--shadow-lg);
-  padding: 1rem;
-
+  padding: clamp(1rem, 2vw, 1.4rem);
   display: flex;
   flex-direction: column;
   gap: 0.58rem;
-transition:
-  transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-  opacity 0.3s ease;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
   backface-visibility: hidden;
 }
 
@@ -683,7 +692,8 @@ body:not([data-theme="dark"])
 
 .card .card-image-container {
   inline-size: 100%;
-  flex: 0 0 50%;      /* image takes 60% of card height */
+  /* THE FIX: Reduced from 50% to 42% so the text and button get more room */
+  flex: 0 0 42%;
   border-radius: 0.9rem;
   overflow: hidden;
   background: #fff;
@@ -720,13 +730,6 @@ body:not([data-theme="dark"])
   min-block-size: calc(1.35em * 4);
 }
 
-.card .product-card-footer {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;  /* keeps Buy Now centered */
-  position: relative;
-}
 
 /* Share button left */
 .card .product-card-footer .share-btn {
@@ -755,21 +758,14 @@ body:not([data-theme="dark"])
   z-index: 4;
 }
 
+/* FLUID FIX: Side cards spread out dynamically so the bigger center card doesn't hide them */
 .card.left {
-  transform: translate(calc(-50% - 2rem), -50%) rotate(-8deg) scale(0.9);
+  transform: translate(calc(-50% - clamp(2rem, 8vw, 6.5rem)), -50%) rotate(-8deg) scale(0.9);
 }
 
 .card.right {
-  transform: translate(calc(-50% + 2rem), -50%) rotate(8deg) scale(0.9);
+  transform: translate(calc(-50% + clamp(2rem, 8vw, 6.5rem)), -50%) rotate(8deg) scale(0.9);
 }
-
-
-
-
-
-
-
-
 
 
 .card.hidden {
@@ -800,8 +796,11 @@ body:not([data-theme="dark"])
 
 
 
-.gallery-arrow:hover {
-  background: #d9c4b4;
+/* STAGE 3 FIX: Prevents the gallery arrows from getting 'stuck' on hover on mobile devices */
+@media (hover: hover) and (pointer: fine) {
+  .gallery-arrow:hover {
+    background: #d9c4b4;
+  }
 }
 
 #prevBtn:active {
@@ -833,26 +832,20 @@ body:not([data-theme="dark"])
 
 
 
-/* 3 Columns for Tablets */
+/* =========================================
+   FLUID TABLET & DESKTOP SYSTEM
+   ========================================= */
 @media (min-width: 768px) {
-    #productGrid,
-    .product-grid,
-    .category-products,
-    #searchResults > .product-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1rem;
-    }
-}
-
-/* 4 Columns for Desktop */
-@media (min-width: 1024px) {
-    #productGrid,
-    .product-grid,
-    .category-products,
-    #searchResults > .product-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 1.2rem;
-    }
+  #productGrid,
+  .product-grid,
+  .category-products,
+  #searchResults > .product-grid {
+    /* The Magic Line: Creates columns automatically based on the available screen width */
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    
+    /* Fluid gap that grows slightly as the screen gets wider */
+    gap: clamp(1rem, 2vw, 1.5rem); 
+  }
 }
 
 .product-card {
@@ -872,9 +865,12 @@ body:not([data-theme="dark"])
 }
 
 
-.product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+/* STAGE 3 FIX: Only applies the lift effect on desktop computers */
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .product-card .card-image-container {
@@ -976,10 +972,13 @@ body:not([data-theme="dark"])
 }
 
 
-.buy:hover,
-.buy-btn:hover {
-  background: #8a5a3e;
-  transform: translateY(-1px);
+/* STAGE 3 FIX: Prevents the button from getting 'stuck' in the hover state on mobile taps */
+@media (hover: hover) and (pointer: fine) {
+  .buy:hover,
+  .buy-btn:hover {
+    background: #8a5a3e;
+    transform: translateY(-1px);
+  }
 }
 
 .favorite-btn {
@@ -1349,10 +1348,7 @@ body[data-home="true"].searching.search-has-results.show-search-footer > .main {
     gap: 1rem;
   }
 
-  .search-wrap {
-    max-inline-size: 40rem;
-    margin-inline: auto;
-  }
+
 
   .search-input {
     block-size: 2.7rem;
@@ -1414,13 +1410,7 @@ body[data-home="true"].searching.search-has-results.show-search-footer > .main {
     gap: 0.68rem;
   }
 
-  .product-card h3 {
-    font-size: 1.04rem;
-  }
 
-  .product-card > p {
-    font-size: 0.92rem;
-  }
 
   .site-footer {
     font-size: 0.82rem;
@@ -1435,23 +1425,25 @@ body[data-home="true"].searching.search-has-results.show-search-footer > .main {
     --footer-height: 5.45rem;
   }
 
-  .search-wrap {
-    max-inline-size: 43rem;
+  /* THE 1% FIX: Removed all bottom padding, and pulled the top up by 0.75rem */
+  .main {
+    padding-block-start: calc(var(--topbar-height) + 0.1rem);
+    padding-block-end: 0; 
   }
 
   .gallery-section {
-    min-block-size: clamp(23rem, 54svh, 35rem);
+    /* THE 1% FIX: Shaved a tiny bit more off the max height to kill the scrollbar */
+    min-block-size: clamp(23rem, 45svh, 34rem);
   }
 
- 
-
-
-
-
-
-
-
-
+  /* Re-balances the card specifically for wide screens to kill the massive text gap */
+  .card {
+    aspect-ratio: 3 / 4.5;
+  }
+  
+  .card .card-image-container {
+    flex: 0 0 50%;
+  }
 
   #gallery.is-loading .skeleton-gallery-card:nth-child(1) {
     transform: translateX(-42%) rotate(-11deg) scale(0.9);
@@ -1469,140 +1461,38 @@ body[data-home="true"].searching.search-has-results.show-search-footer > .main {
     inset-inline-end: max(1rem, 6%);
   }
 
-
-
-
   .toolbar-container {
     margin-block-end: 1.2rem;
   }
 }
-le, .skeleton-btn {
+
+/* ===============================================
+   SKELETON & DARK MODE 
+   =============================================== */
+.skeleton-btn {
     background: linear-gradient(90deg, #E0E0E0 0%, #F5F5F5 50%, #E0E0E0 100%);
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.5s infinite linear;
 }
 
-@keyframes skeleton-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-
-/* ===============================================
-   DARK MODE OVERRIDES (Silver Card Style)
-   =============================================== */
 [data-theme="dark"] .skeleton-card {
-    /* Silver Card Background */
     background-color: #D6D6D6 !important; 
     border-color: #555 !important;
 }
 
-/* Make inner elements DARKER GREY for contrast */
 [data-theme="dark"] .skeleton-image, 
 [data-theme="dark"] .skeleton-title,
 [data-theme="dark"] .skeleton-text,
 [data-theme="dark"] .skeleton-circle,
 [data-theme="dark"] .skeleton-btn {
-    /* Darker Grey so they pop against the Silver card */
     background-color: #999999 !important; 
-    
-    /* Subtle Dark Shimmer */
     background: linear-gradient(90deg, #999999 0%, #B3B3B3 50%, #999999 100%) !important;
     background-size: 200% 100%;
 }
-
-
-
-.site-footer-text {
-    margin: 0;
-    line-height: 1.5;
-}
-
-.site-footer-link {
-    color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-}
-
-.site-footer-link:hover {
-    opacity: 1;
-}
-
-
-
-
-
-/* Keep category-page affiliate footer at the true page bottom */
-body[data-category] {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-body[data-category] > main.main {
-    flex: 1 0 auto;
-}
-
-body[data-category] > footer {
-    margin-top: auto !important;
-    flex-shrink: 0;
-    width: 100%;
-}
-
-/* Keep homepage affiliate footer at the true page bottom (including search state) */
-body[data-home="true"] {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-body[data-home="true"] > main.main {
-    flex: 1 0 auto;
-}
-
-body[data-home="true"] > footer {
-    margin-top: auto !important;
-    flex-shrink: 0;
-    width: 100%;
-}
-
-
-le, .skeleton-btn {
-    background: linear-gradient(90deg, #E0E0E0 0%, #F5F5F5 50%, #E0E0E0 100%);
-    background-size: 200% 100%;
-    animation: skeleton-shimmer 1.5s infinite linear;
-}
-
-@keyframes skeleton-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
 
 /* ===============================================
-   DARK MODE OVERRIDES (Silver Card Style)
+   SITE FOOTER & LAYOUT PLACEMENT
    =============================================== */
-[data-theme="dark"] .skeleton-card {
-    /* Silver Card Background */
-    background-color: #D6D6D6 !important; 
-    border-color: #555 !important;
-}
-
-/* Make inner elements DARKER GREY for contrast */
-[data-theme="dark"] .skeleton-image, 
-[data-theme="dark"] .skeleton-title,
-[data-theme="dark"] .skeleton-text,
-[data-theme="dark"] .skeleton-circle,
-[data-theme="dark"] .skeleton-btn {
-    /* Darker Grey so they pop against the Silver card */
-    background-color: #999999 !important; 
-    
-    /* Subtle Dark Shimmer */
-    background: linear-gradient(90deg, #999999 0%, #B3B3B3 50%, #999999 100%) !important;
-    background-size: 200% 100%;
-}
-
-/* Shared affiliate footer */
 .site-footer {
     background: var(--bg-color, var(--bg));
     border-top: 1px solid rgba(0, 0, 0, 0.08);
@@ -1611,12 +1501,20 @@ le, .skeleton-btn {
     font-size: 0.75rem;
     opacity: 0.85;
     width: 100%;
-     margin-top: 1.2rem;
+    margin-top: 1.2rem;
 }
 
 .site-footer-text {
-    margin: 0;
+    /* Centers the text box */
+    margin: 0 auto;
+    
+    /* Widens the cap from 54rem to 82rem so it has plenty of room for one line on desktop, 
+       but still uses 100% on mobile so it doesn't break */
+    max-inline-size: min(100%, 82rem); 
+    
     line-height: 1.5;
+    
+    /* (Removed text-wrap: balance so it stops forcing multi-lines) */
 }
 
 .site-footer-link {
@@ -1629,97 +1527,56 @@ le, .skeleton-btn {
     opacity: 1;
 }
 
-
-
-
-
-/* Keep category-page affiliate footer at the true page bottom */
-body[data-category] {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-body[data-category] > main.main {
-    flex: 1 0 auto;
-}
-
-body[data-category] > footer {
-    margin-top: auto !important;
-    flex-shrink: 0;
-    width: 100%;
-}
-
-/* Keep homepage affiliate footer at the true page bottom (including search state) */
+body[data-category],
 body[data-home="true"] {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
+body[data-category] > main.main,
 body[data-home="true"] > main.main {
     flex: 1 0 auto;
 }
 
+body[data-category] > footer,
 body[data-home="true"] > footer {
     margin-top: auto !important;
     flex-shrink: 0;
     width: 100%;
 }
 
+/* ===============================================
+   SEARCH STATES
+   =============================================== */
 body.search-has-results #gallerySection,
 body.search-has-results #mainTitle {
   display: none;
 }
 
-
-
-
-/* Increase title → gallery gap only when no results */
 body.search-no-results #mainTitle {
   margin-bottom: 1.2rem;
 }
 
-/* Default hide sort & filters */
 .sort-wrapper,
 .filter-container {
   display: none !important;
 }
 
-/* Show ONLY when search results section has actual cards */
 body.search-has-results .sort-wrapper,
 body.search-has-results .filter-container {
   display: flex !important;
 }
 
-/* Force hide when no results */
-body.search-no-results .sort-wrapper,
-body.search-no-results .filter-container {
-  display: none !important;
-}
-
-
-
-
-/* 1. Grid Container: Enforce top alignment */
+/* =========================================
+   PRODUCT GRID & CARDS
+   ========================================= */
 .product-grid {
     align-items: start; 
 }
 
 
 
-
-@media (max-width: 420px) {
-  .gallery-section {
-    min-block-size: 24rem;
-  }
-}
-
-/* =========================================
-   PRODUCT GRID – CLEAN RESPONSIVE SYSTEM
-   ========================================= */
-
-/* MOBILE FIRST (2 columns) */
 #productGrid,
 .product-grid,
 .category-products,
@@ -1730,56 +1587,25 @@ body.search-no-results .filter-container {
   align-items: start;
 }
 
-/* Tablet */
-@media (min-width: 768px) {
-  #productGrid,
-  .product-grid,
-  .category-products,
-  #searchResults > .product-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
-  }
-}
-
-/* Desktop */
-@media (min-width: 1024px) {
-  #productGrid,
-  .product-grid,
-  .category-products,
-  #searchResults > .product-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.2rem;
-  }
-}
-
-/* =========================================
-   PRODUCT CARD – STABLE FLEX STRUCTURE
-   ========================================= */
-
 .product-card {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-
   border: 1px solid var(--border-color);
   border-radius: var(--radius-card);
   background: var(--card-bg);
   box-shadow: var(--shadow-sm);
-
   padding: 0.75rem;
-
   height: auto;
   min-height: 0;
 }
 
-/* Image */
 .product-card .card-image-container {
   width: 100%;
   aspect-ratio: 3 / 3.25;
   border-radius: 0.75rem;
   overflow: hidden;
   background: #fff;
-  
 }
 
 .product-card img {
@@ -1788,36 +1614,31 @@ body.search-no-results .filter-container {
   object-fit: cover;
 }
 
-/* Title */
-.product-card h3 {
+.product-card h2, 
+.product-card h3,
+.card h2,
+.card h3 {
   margin: 0;
-  font-size: 0.95rem;
+  font-weight: bold;
+  font-size: clamp(0.95rem, 1.2vw + 0.6rem, 1.15rem); 
   line-height: 1.25;
   text-align: center;
-
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-
-  min-block-size: calc(1.25em * 3);   /* 🔥 locks height to 3 lines */
+  min-block-size: calc(1.25em * 3);
 }
 
-
-
-/* Description (scrollable inside fixed area – your current architecture) */
 .product-card > p {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: clamp(0.88rem, 1vw + 0.5rem, 0.98rem);
   line-height: 1.35;
   text-align: center;
-
-  height: 5.4em;            /* 4 lines fixed height */
+  height: 5.4em;
   overflow: hidden;
   display: block;
 }
-
-
 
 .product-card.is-expanded > p {
   display: block;
@@ -1826,29 +1647,24 @@ body.search-no-results .filter-container {
   padding-right: 0.25rem;
 }
 
-/* Footer */
 .product-card-footer {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.75rem;
-
   margin-top: 0.5rem;
 }
 
 /* =========================
-   LIGHT THEME PAGINATION
-   Earth Palette Version
+   PAGINATION
 ========================= */
-
-/* Base button */
 .pagination button {
   min-width: 2.6rem;
   height: 2.6rem;
   padding: 0;
-  border-radius: 0.7rem;          /* rounded square */
+  border-radius: 0.7rem;          
   border: 1px solid #c9b8a7;
-  background: #efe6dc;            /* soft beige */
+  background: #efe6dc;            
   color: #5b4636;
   font-weight: 600;
   font-size: 0.95rem;
@@ -1858,7 +1674,6 @@ body.search-no-results .filter-container {
   transition: all 0.25s ease;
 }
 
-/* Hover */
 .pagination button:hover {
   background: #e4d7ca;
   border-color: #bfa894;
@@ -1866,16 +1681,14 @@ body.search-no-results .filter-container {
   box-shadow: 0 4px 8px rgba(113, 67, 41, 0.12);
 }
 
-/* Active page — deeper earthy tone */
 .pagination button.active {
-  background: #d4b093;        /* richer warm tone */
+  background: #d4b093;        
   border-color: #a89787;
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(113, 67, 41, 0.25);
   pointer-events: none;
 }
 
-/* Arrow buttons — slightly different surface */
 .pagination button.prev,
 .pagination button.next {
   background: #f1ddc8;
@@ -1883,7 +1696,6 @@ body.search-no-results .filter-container {
   color: #714329;
 }
 
-/* Arrow hover */
 .pagination button.prev:hover,
 .pagination button.next:hover {
   background: #d9c9bb;
@@ -1899,41 +1711,23 @@ body.search-no-results .filter-container {
 /* =========================
    CATEGORY PAGE CARD SURFACE
 ========================= */
-
-/* Disable interaction for side cards */
 .card.left,
 .card.right {
   pointer-events: none;
 }
 
-/* Hide footer by default for ALL cards */
 .card .product-card-footer {
   opacity: 0;
   transition: opacity 0.2s ease;
-}
-
-/* Show footer ONLY for center card */
-.card.center .product-card-footer {
-  opacity: 1;
-}
-
-
-/* Disable interaction for side cards */
-.card.left,
-.card.right {
-  pointer-events: none;
-}
-
-/* Hide footer by default for ALL cards */
-.card .product-card-footer {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-   position: relative;
+  position: relative;
   z-index: 2;
-
+  margin-top: auto;
+  margin-bottom: 0.5rem; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Show footer ONLY for center card */
 .card.center .product-card-footer {
   opacity: 1;
 }
@@ -1943,34 +1737,42 @@ body.search-no-results .filter-container {
   box-shadow: 0 0 0 1.5px rgba(113, 67, 41, 0.35);
 }
 
-/* MOBILE LANDSCAPE — Fix footer alignment */
+/* =========================================
+   MOBILE LANDSCAPE FIXES
+   ========================================= */
 @media (orientation: landscape) and (max-width: 900px) {
-
   .card .product-card-footer {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-
-  /* Share pinned left */
   .card .product-card-footer .share-btn {
     position: absolute;
     left: 0.6rem;
   }
-
-  /* Buy stays centered */
   .card .product-card-footer .buy-btn {
     margin: 0 auto;
   }
-
+  .gallery-section {
+    padding-top: 2rem;
+  }
 }
 
-/* MOBILE LANDSCAPE ONLY — Add space below Top Picks */
-@media (orientation: landscape) and (max-width: 900px) {
+/* =====================================
+   MOBILE "TAP" FEEDBACK (ACTIVE STATES)
+===================================== */
+.gallery-arrow:active {
+  background: #d9c4b4;
+}
 
-  .gallery-section {
-    padding-top: 2rem;   /* adjust if needed */
-  }
+.buy:active,
+.buy-btn:active {
+  background: #8a5a3e;
+  transform: scale(0.96);
+}
 
+#chatbotToggle:active {
+  transform: scale(0.94);
+  box-shadow: 0 2px 8px rgba(113, 67, 41, 0.2);
 }

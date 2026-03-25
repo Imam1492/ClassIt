@@ -13,15 +13,22 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  /* box-shadow: 0 4px 10px rgba(0,0,0,0.15); */
   transition: transform 0.2s ease, background 0.3s ease;
   z-index: 9999;
+  /* THE FIX: Forces a clean, single-color base state */
+  border: 1px solid var(--accent); 
+  box-shadow: 0 4px 12px rgba(113, 67, 41, 0.15); 
+  
+  /* Kills default mobile browser 3D borders and tap flashes */
+  outline: none;
+  -webkit-appearance: none; 
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  
 }
 
-#chatbotToggle:hover {
-  transform: scale(1.05);
-  background: rgb(114, 69, 63);
-}
+
 
 /* --- Chatbot Window --- */
 #chatbotWindow {
@@ -249,9 +256,7 @@
   z-index: 2;
 }
 
-#chatbotHeader button:hover {
-    color: #000;
-}
+
 
 .msg.fade-out {
   opacity: 0;
@@ -270,7 +275,23 @@
     font-weight: 600;
     cursor: pointer;
 }
-.chat-link:hover {
-    color: #0056b3;
-    text-decoration: none;
+
+/* =====================================
+   STAGE 3 FIX: CHATBOT LIGHT MODE HOVERS
+===================================== */
+@media (hover: hover) and (pointer: fine) {
+  
+  #chatbotToggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(113, 67, 41, 0.25); /* Shadow gets slightly deeper on hover */}
+
+  #chatbotHeader button:hover {
+    /* Leave your existing light mode styling here! */
+    color: #ffffff;
+  }
+
+  .chat-link:hover {
+    /* Leave your existing light mode styling here! */
+    color: #8a5a3e;
+  }
 }
