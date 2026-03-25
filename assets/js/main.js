@@ -175,19 +175,19 @@ function buildImageMarkup(product, isPriority = false) {
   const baseUrl = product.imageUrl || '';
   const mobileBase = product.mobileImageUrl || baseUrl;
 
-  // THE FIX: Force Sanity to compress, resize, and convert to WebP format instantly
-  const desktopImage = baseUrl ? escapeHtml(`${baseUrl}?auto=format&w=800&q=75`) : 'https://placehold.co/600x400?text=Image';
-  const mobileImage = mobileBase ? escapeHtml(`${mobileBase}?auto=format&w=500&q=75`) : '';
+  // THE FIX: Force explicit WebP format, and reduce fetched sizes to match actual card widths
+  const desktopImage = baseUrl ? escapeHtml(`${baseUrl}?auto=format&fm=webp&w=600&q=75`) : 'https://placehold.co/300x400.webp?text=Image';
+  const mobileImage = mobileBase ? escapeHtml(`${mobileBase}?auto=format&fm=webp&w=400&q=75`) : '';
   const altText = escapeHtml(product.altText || product.title || 'Product image');
 
   const priorityAttr = isPriority ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"';
 
-  // THE BEST PRACTICES FIX: Added explicit width and height to prevent layout shifts
+  // THE FIX: Updated hardcoded width/height to match a standard 3:4 ratio at a smaller scale
   return `
     <div class="card-image-container">
       <picture>
         ${mobileImage ? `<source media="(max-width: 768px)" srcset="${mobileImage}">` : ''}
-        <img src="${desktopImage}" alt="${altText}" ${priorityAttr} width="600" height="800" onerror="this.src='https://placehold.co/600x400?text=Image'">
+        <img src="${desktopImage}" alt="${altText}" ${priorityAttr} width="300" height="400" onerror="this.src='https://placehold.co/300x400.webp?text=Image'">
       </picture>
     </div>
   `;
